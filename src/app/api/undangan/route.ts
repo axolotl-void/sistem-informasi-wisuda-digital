@@ -1,0 +1,54 @@
+import { NextRequest } from "next/server";
+import { z } from "zod";
+import { UndanganService } from "@/services/undangan.service";
+import { getTokenFromRequest, unauthorizedResponse, forbiddenResponse } from "@/lib/auth";
+import { apiSuccess, apiError } from "@/lib/utils";
+
+const generateSchema = z.object({
+  mahasiswaId: z.string().uuid(),
+  tanggalWisuda: z.string().datetime(),
+  tempatWisuda: z.string().min(2),
+  kuotaTamu: z.number().int().min(1).max(10),
+});
+
+export async function GET(request: NextRequest) {
+  const payload = getTokenFromRequest(request);
+  if (!payload) return unauthorizedResponse();
+
+  const { searchParams } = request.nextUrl;
+  const page = Number(searchParams.get("page") ?? 1);
+  const limit = Number(searchParams.get("limit") ?? 10);
+  const search = searchParams.get("search") ?? undefined;
+  const mahasiswaId = searchParams.get("mahasiswaId") ?? undefined;
+
+  try {
+    const result = await UndanganService.getAll({ search, mahasiswaId }, page, limit);
+    return apiSuccess(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Gagal mengambil data";
+    return apiError(message, 500);
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const payload = getTokenFromRequest(request);
+  if (!payload) return unauthorizedResponse();
+  if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
+    return forbiddenResponse();
+  }
+
+  try {
+    const body = await request.json();
+    const parsed = generateSchema.safeParse(body);
+    if (!parsed.success) return apiError("Validasi gagal", 422, parsed.error.flatten());
+
+    const undangan = await UndanganService.generate({
+      ...parsed.data,
+      tanggalWisuda: new Date(parsed.data.tanggalWisuda),
+    });
+    return apiSuccess(undangan, "Undangan berhasil digenerate", 201);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Gagal generate undangan";
+    return apiError(message, 400);
+  }
+}

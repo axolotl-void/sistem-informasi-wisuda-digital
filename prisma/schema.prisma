@@ -1,0 +1,134 @@
+// Prisma Schema — Sistem Informasi Wisuda Digital
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN_FAKULTAS
+  PETUGAS_SCAN
+  MAHASISWA
+}
+
+enum StatusMahasiswa {
+  AKTIF
+  LULUS
+  CUTI
+  DROPOUT
+}
+
+enum StatusUndangan {
+  AKTIF
+  DIGUNAKAN
+  KADALUARSA
+  DIBATALKAN
+}
+
+enum StatusKehadiran {
+  HADIR
+  TIDAK_HADIR
+  TERLAMBAT
+}
+
+// ─────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(MAHASISWA)
+  fakultas  String?
+
+  mahasiswa Mahasiswa?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Mahasiswa {
+  id       String          @id @default(cuid())
+  nim      String          @unique
+  nama     String
+  email    String          @unique
+  fakultas String
+  prodi    String
+  angkatan Int
+  status   StatusMahasiswa @default(AKTIF)
+  foto     String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  undangan  Undangan[]
+  kehadiran Kehadiran[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([nim])
+  @@index([fakultas])
+  @@index([status])
+  @@map("mahasiswa")
+}
+
+model Undangan {
+  id             String         @id @default(cuid())
+  kode           String         @unique
+  qrToken        String         @unique
+  qrImageUrl     String?
+  statusUndangan StatusUndangan @default(AKTIF)
+  tanggalWisuda  DateTime
+  tempatWisuda   String
+  kuotaTamu      Int            @default(2)
+  pdfUrl         String?
+
+  mahasiswaId String
+  mahasiswa   Mahasiswa @relation(fields: [mahasiswaId], references: [id], onDelete: Cascade)
+
+  kehadiran Kehadiran?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([mahasiswaId])
+  @@index([qrToken])
+  @@index([statusUndangan])
+  @@map("undangan")
+}
+
+model Kehadiran {
+  id              String          @id @default(cuid())
+  statusKehadiran StatusKehadiran @default(HADIR)
+  waktuScan       DateTime        @default(now())
+  catatan         String?
+
+  undanganId String   @unique
+  undangan   Undangan @relation(fields: [undanganId], references: [id])
+
+  mahasiswaId String
+  mahasiswa   Mahasiswa @relation(fields: [mahasiswaId], references: [id])
+
+  petugasId String
+
+  createdAt DateTime @default(now())
+
+  @@index([mahasiswaId])
+  @@index([statusKehadiran])
+  @@index([waktuScan])
+  @@map("kehadiran")
+}
