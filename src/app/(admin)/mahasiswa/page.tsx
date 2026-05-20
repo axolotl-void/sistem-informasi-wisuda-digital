@@ -127,7 +127,8 @@ export default function MahasiswaPage() {
         student={editTarget}
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        onSuccess={() => { setEditTarget(null); load(); }}
+        onUpdated={(updated) => setEditTarget(updated)}
+        onSuccess={() => { load(); }}
       />
 
       <CreateAccountModal

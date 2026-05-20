@@ -34,7 +34,10 @@ export class UndanganService {
     const [data, total] = await Promise.all([
       prisma.undangan.findMany({
         where,
-        include: { mahasiswa: true },
+        include: { 
+          mahasiswa: true,
+          kehadiran: true,
+        },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
@@ -160,5 +163,22 @@ export class UndanganService {
     }
 
     return { generated, skipped };
+  }
+
+  /**
+   * Delete undangan by ID
+   */
+  static async delete(id: string): Promise<void> {
+    await prisma.undangan.delete({
+      where: { id },
+    });
+  }
+
+  /**
+   * Delete all undangan
+   */
+  static async deleteAll(): Promise<number> {
+    const result = await prisma.undangan.deleteMany({});
+    return result.count;
   }
 }

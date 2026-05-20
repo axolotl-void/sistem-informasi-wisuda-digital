@@ -3,7 +3,7 @@ import { KehadiranService } from "@/services/kehadiran.service";
 import { apiError } from "@/lib/utils";
 
 export async function GET(request: Request) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
   if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
     return forbiddenResponse();

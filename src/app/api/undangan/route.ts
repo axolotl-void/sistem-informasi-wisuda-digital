@@ -5,14 +5,14 @@ import { getTokenFromRequest, unauthorizedResponse, forbiddenResponse } from "@/
 import { apiSuccess, apiError } from "@/lib/utils";
 
 const generateSchema = z.object({
-  mahasiswaId: z.string().uuid(),
+  mahasiswaId: z.string().min(1),
   tanggalWisuda: z.string().datetime(),
   tempatWisuda: z.string().min(2),
   kuotaTamu: z.number().int().min(1).max(10),
 });
 
 export async function GET(request: NextRequest) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
 
   const { searchParams } = request.nextUrl;
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
   if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
     return forbiddenResponse();
@@ -39,8 +39,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    console.log("Generate undangan request body:", body);
+    
     const parsed = generateSchema.safeParse(body);
-    if (!parsed.success) return apiError("Validasi gagal", 422, parsed.error.flatten());
+    if (!parsed.success) {
+      console.error("Validation error:", parsed.error.flatten());
+      return apiError("Validasi gagal", 422, parsed.error.flatten());
+    }
 
     const undangan = await UndanganService.generate({
       ...parsed.data,
@@ -48,6 +53,7 @@ export async function POST(request: NextRequest) {
     });
     return apiSuccess(undangan, "Undangan berhasil digenerate", 201);
   } catch (error) {
+    console.error("Generate undangan error:", error);
     const message = error instanceof Error ? error.message : "Gagal generate undangan";
     return apiError(message, 400);
   }

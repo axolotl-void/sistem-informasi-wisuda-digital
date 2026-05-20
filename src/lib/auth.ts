@@ -41,14 +41,25 @@ export async function requireRole(allowedRoles: UserRole[]): Promise<JwtPayload>
 }
 
 /**
- * Ambil token dari request header (API Route)
+ * Ambil token dari request header atau cookie (API Route)
  */
-export function getTokenFromRequest(request: Request): JwtPayload | null {
+export async function getTokenFromRequest(request: Request): Promise<JwtPayload | null> {
   try {
+    // Try to get from Authorization header first
     const authHeader = request.headers.get("Authorization");
-    const token = extractBearerToken(authHeader);
-    if (!token) return null;
-    return verifyToken(token);
+    const bearerToken = extractBearerToken(authHeader);
+    if (bearerToken) {
+      return verifyToken(bearerToken);
+    }
+
+    // Fallback to cookie
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+    if (cookieToken) {
+      return verifyToken(cookieToken);
+    }
+
+    return null;
   } catch {
     return null;
   }

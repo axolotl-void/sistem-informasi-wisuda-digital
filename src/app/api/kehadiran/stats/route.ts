@@ -3,7 +3,7 @@ import { KehadiranService } from "@/services/kehadiran.service";
 import { apiSuccess, apiError } from "@/lib/utils";
 
 export async function GET(request: Request) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
 
   try {

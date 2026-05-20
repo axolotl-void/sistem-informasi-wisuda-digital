@@ -3,7 +3,7 @@ import { AuthService } from "@/services/auth.service";
 import { apiSuccess, apiError } from "@/lib/utils";
 
 export async function GET(request: Request) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
 
   try {

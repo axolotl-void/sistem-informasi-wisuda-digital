@@ -12,7 +12,7 @@ import { apiSuccess, apiError } from "@/lib/utils";
  * GET /api/wisudawan — List with search, filter, pagination
  */
 export async function GET(request: NextRequest) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
 
   const sp = request.nextUrl.searchParams;
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
  * POST /api/wisudawan — Create account
  */
 export async function POST(request: NextRequest) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
   if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
     return forbiddenResponse();

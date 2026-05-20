@@ -15,7 +15,7 @@ const createSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
 
   const { searchParams } = request.nextUrl;
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
   if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
     return forbiddenResponse();

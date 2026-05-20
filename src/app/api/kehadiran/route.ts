@@ -4,7 +4,7 @@ import { getTokenFromRequest, unauthorizedResponse } from "@/lib/auth";
 import { apiSuccess, apiError } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
 
   const { searchParams } = request.nextUrl;

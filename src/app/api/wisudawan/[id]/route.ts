@@ -14,7 +14,7 @@ type Params = { params: Promise<{ id: string }> };
  * GET /api/wisudawan/:id — Get single account
  */
 export async function GET(request: NextRequest, { params }: Params) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
 
   const { id } = await params;
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: Params) {
  * PATCH /api/wisudawan/:id — Update account
  */
 export async function PATCH(request: NextRequest, { params }: Params) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
   if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
     return forbiddenResponse();
@@ -60,7 +60,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
  * DELETE /api/wisudawan/:id — Delete account
  */
 export async function DELETE(request: NextRequest, { params }: Params) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
   if (payload.role !== "SUPER_ADMIN") return forbiddenResponse();
 

@@ -28,7 +28,7 @@ type ImportRow = z.infer<typeof rowSchema>;
  * - Baris invalid → dikumpulkan di `errors`, tidak menghentikan proses
  */
 export async function POST(request: NextRequest) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
   if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
     return forbiddenResponse();

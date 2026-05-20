@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, QrCode, MoreHorizontal, RefreshCw, Download, Share2, Mail } from "lucide-react";
+import { Eye, QrCode, RefreshCw, Download, Trash2 } from "lucide-react";
 import { useUndanganStore, useFilteredInvitations } from "../store";
 import { StatusBadge, AttendanceBadge } from "./status-badge";
 import { QrCell } from "./qr-cell";
@@ -9,48 +10,147 @@ import { EmptyState } from "./empty-state";
 import { LoadingSkeleton } from "./loading-skeleton";
 import type { Invitation } from "../types";
 
-function ActionMenu({ inv }: { inv: Invitation }) {
-  const { openPreview, openDrawer, generateInvitation } = useUndanganStore();
+// ─── Delete Row Confirmation ──────────────────────────────────────────────────
 
+function DeleteRowDialog({
+  open,
+  nama,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  nama: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  if (!open) return null;
   return (
-    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-      <button
-        type="button"
-        onClick={() => openPreview(inv)}
-        className="flex size-7 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white/70 cursor-pointer"
-        title="Preview Undangan"
-      >
-        <Eye className="size-3.5" />
-      </button>
-      <button
-        type="button"
-        onClick={() => openDrawer(inv)}
-        className="flex size-7 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white/70 cursor-pointer"
-        title="Detail QR"
-      >
-        <QrCode className="size-3.5" />
-      </button>
-      {inv.status === "belum_generate" && (
-        <button
-          type="button"
-          onClick={() => generateInvitation(inv.id)}
-          className="flex size-7 items-center justify-center rounded-lg text-blue-400/50 transition-colors hover:bg-blue-500/10 hover:text-blue-400 cursor-pointer"
-          title="Generate QR"
-        >
-          <RefreshCw className="size-3.5" />
-        </button>
-      )}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
+      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-white/[0.08] bg-[#0F172A] p-6 shadow-2xl">
+        <div className="mb-4 flex size-10 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10">
+          <Trash2 className="size-4 text-red-400" />
+        </div>
+        <h2 className="text-sm font-bold text-white/90">Hapus Undangan?</h2>
+        <p className="mt-1.5 text-[0.78rem] leading-relaxed text-white/40">
+          Undangan milik <span className="font-semibold text-white/70">{nama}</span> akan dihapus permanen.
+        </p>
+        <div className="mt-5 flex gap-2.5">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] text-[0.78rem] font-semibold text-white/60 transition-all hover:bg-white/[0.07] active:scale-[0.98]"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 h-9 rounded-xl border border-red-500/30 bg-red-500/15 text-[0.78rem] font-bold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.98]"
+          >
+            Hapus
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
+// ─── Action Menu ─────────────────────────────────────────────────────────────
+
+function ActionMenu({ inv }: { inv: Invitation }) {
+  const { openPreview, openDrawer, generateInvitation, markDownloaded, deleteInvitation } = useUndanganStore();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  function handleDownload(id: string) {
+    markDownloaded(id);
+    // Placeholder: di production ini akan trigger download PDF
+    console.log("Download undangan:", id);
+  }
+
+  function handleDeleteConfirm() {
+    deleteInvitation(inv.id);
+    setConfirmDelete(false);
+  }
+
+  return (
+    <>
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        {/* Preview */}
+        <button
+          type="button"
+          onClick={() => openPreview(inv)}
+          className="flex size-7 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white/70 cursor-pointer"
+          title="Preview Undangan"
+        >
+          <Eye className="size-3.5" />
+        </button>
+
+        {/* QR Detail */}
+        <button
+          type="button"
+          onClick={() => openDrawer(inv)}
+          className="flex size-7 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white/70 cursor-pointer"
+          title="Detail QR"
+        >
+          <QrCode className="size-3.5" />
+        </button>
+
+        {/* Generate (hanya jika belum generate) */}
+        {inv.status === "belum_generate" && (
+          <button
+            type="button"
+            onClick={() => generateInvitation(inv.id)}
+            className="flex size-7 items-center justify-center rounded-lg text-blue-400/50 transition-colors hover:bg-blue-500/10 hover:text-blue-400 cursor-pointer"
+            title="Generate QR"
+          >
+            <RefreshCw className="size-3.5" />
+          </button>
+        )}
+
+        {/* Download (hanya jika sudah generate) */}
+        {inv.status !== "belum_generate" && (
+          <button
+            type="button"
+            onClick={() => handleDownload(inv.id)}
+            className="flex size-7 items-center justify-center rounded-lg text-emerald-400/50 transition-colors hover:bg-emerald-500/10 hover:text-emerald-400 cursor-pointer"
+            title="Download Undangan"
+          >
+            <Download className="size-3.5" />
+          </button>
+        )}
+
+        {/* Hapus */}
+        <button
+          type="button"
+          onClick={() => setConfirmDelete(true)}
+          className="flex size-7 items-center justify-center rounded-lg text-red-400/40 transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+          title="Hapus Undangan"
+        >
+          <Trash2 className="size-3.5" />
+        </button>
+      </div>
+
+      <DeleteRowDialog
+        open={confirmDelete}
+        nama={inv.mahasiswaNama}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDelete(false)}
+      />
+    </>
+  );
+}
+
+// ─── Table Row ────────────────────────────────────────────────────────────────
+
 function TableRow({ inv, index }: { inv: Invitation; index: number }) {
-  const { openPreview, openDrawer } = useUndanganStore();
+  const { openDrawer } = useUndanganStore();
 
   return (
     <motion.tr
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -10 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
       className="group border-b border-white/[0.04] transition-colors duration-150 hover:bg-white/[0.025]"
     >
@@ -131,6 +231,8 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
   );
 }
 
+// ─── Main Table ───────────────────────────────────────────────────────────────
+
 export function InvitationTable() {
   const { isLoading } = useUndanganStore();
   const filtered = useFilteredInvitations();
@@ -139,7 +241,6 @@ export function InvitationTable() {
 
   return (
     <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden">
-      {/* Sticky header */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px]">
           <thead>
@@ -154,7 +255,7 @@ export function InvitationTable() {
                 { label: "Tamu", cls: "pr-4 hidden xl:table-cell" },
                 { label: "Status QR", cls: "pr-4" },
                 { label: "Kehadiran", cls: "pr-4 hidden sm:table-cell" },
-                { label: "", cls: "pr-4 w-24" },
+                { label: "", cls: "pr-4 w-28" },
               ].map((h) => (
                 <th
                   key={h.label}

@@ -28,6 +28,7 @@ interface EditModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  onUpdated?: (updated: WisudawanRow) => void;
 }
 
 interface EditFormData {
@@ -632,7 +633,7 @@ function TabEdit({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function EditModal({ student, open, onClose, onSuccess }: EditModalProps) {
+export function EditModal({ student, open, onClose, onSuccess, onUpdated }: EditModalProps) {
   const { update, verify } = useWisudawan();
   const [isLoading,   setIsLoading]   = useState(false);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
@@ -693,9 +694,12 @@ export function EditModal({ student, open, onClose, onSuccess }: EditModalProps)
       };
       if (form.password.trim()) payload.password = form.password;
 
-      await update(student.id, payload);
+      const updated = await update(student.id, payload);
+      // Kirim data terbaru ke parent agar editTarget langsung diperbarui
+      onUpdated?.(updated);
       onSuccess?.();
-      onClose();
+      // Pindah ke tab detail agar perubahan langsung terlihat
+      setActiveTab("detail");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Gagal memperbarui data");
     } finally {

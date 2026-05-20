@@ -1,17 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2, CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useUndanganStore } from "../store";
 
+interface Mahasiswa {
+  id: string;
+  nim: string;
+  nama: string;
+  fakultas: string;
+  prodi: string;
+  status: string;
+  sesiWisuda: string | null;
+}
+
 export function GenerateInvitationModal() {
-  const { isGenerateModalOpen, closeGenerateModal, generateInvitation, invitations } = useUndanganStore();
+  const { isGenerateModalOpen, closeGenerateModal, init } = useUndanganStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [mahasiswaList, setMahasiswaList] = useState<Mahasiswa[]>([]);
+  const [loadingMahasiswa, setLoadingMahasiswa] = useState(false);
   const [form, setForm] = useState({
     mahasiswaId: "",
-    sesi: "Sesi Pagi",
+    sesi: "",
     tanggalWisuda: "2026-05-19",
     waktuMulai: "08:00",
     waktuSelesai: "12:00",
@@ -20,7 +32,35 @@ export function GenerateInvitationModal() {
     kuotaTamu: 2,
   });
 
-  const ungenerated = invitations.filter((i) => i.status === "belum_generate");
+  // Mahasiswa yang dipilih
+  const selectedMahasiswa = mahasiswaList.find(m => m.id === form.mahasiswaId);
+
+  // Fetch mahasiswa yang belum punya undangan
+  useEffect(() => {
+    if (isGenerateModalOpen) {
+      fetchMahasiswa();
+    }
+  }, [isGenerateModalOpen]);
+
+  async function fetchMahasiswa() {
+    setLoadingMahasiswa(true);
+    try {
+      const response = await fetch("/api/mahasiswa?page=1&limit=1000", {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch");
+      const result = await response.json();
+      
+      // Ambil semua mahasiswa (tidak filter berdasarkan status dulu untuk debugging)
+      // Nanti bisa di-filter lagi jika perlu
+      setMahasiswaList(result.data.data);
+    } catch (error) {
+      console.error("Failed to fetch mahasiswa:", error);
+      toast.error("Gagal memuat data mahasiswa");
+    } finally {
+      setLoadingMahasiswa(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,12 +68,47 @@ export function GenerateInvitationModal() {
       toast.error("Pilih mahasiswa terlebih dahulu");
       return;
     }
+
+    // Validasi sesi wisuda
+    if (!selectedMahasiswa?.sesiWisuda) {
+      toast.error("Mahasiswa belum memiliki sesi wisuda. Silakan set sesi di fitur Akun Wisudawan terlebih dahulu.");
+      return;
+    }
+    
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    generateInvitation(form.mahasiswaId);
-    toast.success("Undangan berhasil digenerate");
-    setIsLoading(false);
-    closeGenerateModal();
+    try {
+      const response = await fetch("/api/undangan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          mahasiswaId: form.mahasiswaId,
+          tanggalWisuda: new Date(form.tanggalWisuda).toISOString(),
+          tempatWisuda: form.gedung,
+          kuotaTamu: form.kuotaTamu,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Tampilkan error detail dari server
+        console.error("Generate error:", result);
+        throw new Error(result.message || "Gagal generate undangan");
+      }
+
+      toast.success("Undangan berhasil digenerate");
+      closeGenerateModal();
+      
+      // Refresh data undangan
+      await init();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Gagal generate undangan";
+      console.error("Generate undangan error:", error);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -88,30 +163,42 @@ export function GenerateInvitationModal() {
                   <select
                     value={form.mahasiswaId}
                     onChange={(e) => setForm((f) => ({ ...f, mahasiswaId: e.target.value }))}
-                    className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none transition-all hover:border-white/[0.12] focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 cursor-pointer"
+                    disabled={loadingMahasiswa}
+                    className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none transition-all hover:border-white/[0.12] focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 cursor-pointer disabled:opacity-50"
                   >
-                    <option value="" className="bg-[#0F172A]">Pilih mahasiswa...</option>
-                    {ungenerated.map((inv) => (
-                      <option key={inv.id} value={inv.id} className="bg-[#0F172A]">
-                        {inv.mahasiswaNama} — {inv.nim}
+                    <option value="" className="bg-[#0F172A]">
+                      {loadingMahasiswa ? "Memuat..." : "Pilih mahasiswa..."}
+                    </option>
+                    {mahasiswaList.map((mhs) => (
+                      <option key={mhs.id} value={mhs.id} className="bg-[#0F172A]">
+                        {mhs.nama} — {mhs.nim} — {mhs.status} {mhs.sesiWisuda ? `— ${mhs.sesiWisuda}` : '— Belum ada sesi'}
                       </option>
                     ))}
                   </select>
+                  {!loadingMahasiswa && mahasiswaList.length === 0 && (
+                    <p className="text-[0.7rem] text-white/30 mt-1">
+                      Tidak ada data mahasiswa
+                    </p>
+                  )}
                 </div>
 
                 {/* Sesi */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">Sesi</label>
-                    <select
-                      value={form.sesi}
-                      onChange={(e) => setForm((f) => ({ ...f, sesi: e.target.value }))}
-                      className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none focus:border-blue-500/40 cursor-pointer"
-                    >
-                      {["Sesi Pagi", "Sesi Siang", "Sesi Sore"].map((s) => (
-                        <option key={s} value={s} className="bg-[#0F172A]">{s}</option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={selectedMahasiswa?.sesiWisuda || "Belum ditentukan"}
+                        disabled
+                        className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 text-[0.82rem] text-white/50 outline-none cursor-not-allowed"
+                      />
+                      {!selectedMahasiswa?.sesiWisuda && (
+                        <p className="text-[0.65rem] text-amber-400/70 mt-1">
+                          ⚠️ Set sesi di Akun Wisudawan
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">Kuota Tamu</label>

@@ -14,7 +14,7 @@ type Params = { params: Promise<{ id: string }> };
  * POST /api/wisudawan/:id/reset-password
  */
 export async function POST(request: NextRequest, { params }: Params) {
-  const payload = getTokenFromRequest(request);
+  const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
   if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
     return forbiddenResponse();
