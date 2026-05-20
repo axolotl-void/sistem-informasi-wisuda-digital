@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { WisudawanRow } from "@/services/wisudawan.service";
-import { ChevronLeft, ChevronRight, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, Pencil, Trash2 } from "lucide-react";
 
 // ─── Status badge ────────────────────────────────────────────────────────────
 
@@ -87,7 +87,10 @@ interface StudentTableProps {
   totalPages: number;
   total: number;
   onPageChange: (page: number) => void;
-  onSelect: (student: WisudawanRow) => void;
+  /** @deprecated — gunakan onEdit. Tetap ada untuk backward-compat. */
+  onSelect?: (student: WisudawanRow) => void;
+  onEdit?: (student: WisudawanRow) => void;
+  onDelete?: (student: WisudawanRow) => void;
 }
 
 export function StudentTable({
@@ -97,12 +100,13 @@ export function StudentTable({
   totalPages,
   total,
   onPageChange,
-  onSelect,
+  onEdit,
+  onDelete,
 }: StudentTableProps) {
   if (isLoading) return <TableSkeleton />;
   if (data.length === 0 && !isLoading) return <EmptyState />;
 
-  const headers = ["Nama", "NIM", "Fakultas", "Prodi", "Status", "Undangan", "Kehadiran"];
+  const headers = ["Nama", "NIM", "Fakultas", "Prodi", "Status", "Undangan", "Kehadiran", "Aksi"];
 
   return (
     <motion.div
@@ -145,9 +149,7 @@ export function StudentTable({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.2, delay: i * 0.015 }}
-                onClick={() => onSelect(s)}
                 style={{
-                  cursor: "pointer",
                   borderBottom: i < data.length - 1 ? "1px solid rgba(255,255,255,0.03)" : "none",
                   transition: "background 0.15s",
                 }}
@@ -203,6 +205,76 @@ export function StudentTable({
                   ) : (
                     <span style={{ fontSize: 11, color: "rgba(255,255,255,0.12)" }}>—</span>
                   )}
+                </td>
+                <td style={{ padding: "10px 16px", border: "none" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit?.(s);
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 28,
+                        height: 28,
+                        borderRadius: 6,
+                        background: "rgba(59,130,246,0.08)",
+                        border: "1px solid rgba(59,130,246,0.15)",
+                        color: "rgba(96,165,250,0.8)",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "rgba(59,130,246,0.15)";
+                        e.currentTarget.style.borderColor = "rgba(59,130,246,0.3)";
+                        e.currentTarget.style.color = "rgb(96,165,250)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "rgba(59,130,246,0.08)";
+                        e.currentTarget.style.borderColor = "rgba(59,130,246,0.15)";
+                        e.currentTarget.style.color = "rgba(96,165,250,0.8)";
+                      }}
+                      title="Edit"
+                    >
+                      <Pencil style={{ width: 12, height: 12 }} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete?.(s);
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 28,
+                        height: 28,
+                        borderRadius: 6,
+                        background: "rgba(239,68,68,0.08)",
+                        border: "1px solid rgba(239,68,68,0.15)",
+                        color: "rgba(248,113,113,0.8)",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "rgba(239,68,68,0.15)";
+                        e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
+                        e.currentTarget.style.color = "rgb(248,113,113)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "rgba(239,68,68,0.08)";
+                        e.currentTarget.style.borderColor = "rgba(239,68,68,0.15)";
+                        e.currentTarget.style.color = "rgba(248,113,113,0.8)";
+                      }}
+                      title="Hapus"
+                    >
+                      <Trash2 style={{ width: 12, height: 12 }} />
+                    </button>
+                  </div>
                 </td>
               </motion.tr>
             ))}

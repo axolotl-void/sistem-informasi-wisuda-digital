@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Users, GraduationCap, TrendingUp, Upload, Download, Plus } from "lucide-react";
+import { Users, Plus } from "lucide-react";
 import { AccountStats } from "@/features/mahasiswa/components/account-stats";
 import { AccountToolbar } from "@/features/mahasiswa/components/account-toolbar";
 import { StudentTable } from "@/features/mahasiswa/components/student-table";
-import { StudentDrawer } from "@/features/mahasiswa/components/student-drawer";
+import { EditModal } from "@/features/mahasiswa/components/edit-modal";
 import { CreateAccountModal } from "@/features/mahasiswa/components/create-modal";
 import { DeleteConfirmModal } from "@/features/mahasiswa/components/delete-modal";
 import { ResetPasswordModal } from "@/features/mahasiswa/components/reset-password-modal";
+import { ImportExportButtons } from "@/features/mahasiswa/components/import-export-buttons";
 import { useWisudawan } from "@/hooks/use-wisudawan";
 import type { WisudawanRow } from "@/services/wisudawan.service";
 
@@ -21,7 +22,7 @@ export default function MahasiswaPage() {
   const [statusFilter, setStatusFilter]   = useState("");
   const [fakultasFilter, setFakultasFilter] = useState("");
 
-  const [selectedStudent, setSelectedStudent] = useState<WisudawanRow | null>(null);
+  const [editTarget, setEditTarget]           = useState<WisudawanRow | null>(null);
   const [deleteTarget, setDeleteTarget]       = useState<WisudawanRow | null>(null);
   const [resetTarget, setResetTarget]         = useState<WisudawanRow | null>(null);
   const [createOpen, setCreateOpen]           = useState(false);
@@ -64,20 +65,7 @@ export default function MahasiswaPage() {
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            type="button"
-            className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-white/[0.07] bg-transparent px-2.5 text-[0.68rem] font-medium text-white/38 transition-all duration-150 hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white/60 active:scale-[0.97] cursor-pointer"
-          >
-            <Upload className="size-3" />
-            <span className="hidden sm:inline">Import CSV</span>
-          </button>
-          <button
-            type="button"
-            className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-white/[0.07] bg-transparent px-2.5 text-[0.68rem] font-medium text-white/38 transition-all duration-150 hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white/60 active:scale-[0.97] cursor-pointer"
-          >
-            <Download className="size-3" />
-            <span className="hidden sm:inline">Export</span>
-          </button>
+          <ImportExportButtons onImportSuccess={load} />
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
@@ -128,16 +116,18 @@ export default function MahasiswaPage() {
           totalPages={totalPages}
           total={total}
           onPageChange={setPage}
-          onSelect={setSelectedStudent}
+          onSelect={(s) => setEditTarget(s)}
+          onEdit={(s) => setEditTarget(s)}
+          onDelete={(s) => setDeleteTarget(s)}
         />
       </motion.div>
 
       {/* ── Overlays ────────────────────────────────────────────────── */}
-      <StudentDrawer
-        student={selectedStudent}
-        onClose={() => setSelectedStudent(null)}
-        onDeleteClick={(s) => { setSelectedStudent(null); setDeleteTarget(s); }}
-        onResetClick={(s) => { setSelectedStudent(null); setResetTarget(s); }}
+      <EditModal
+        student={editTarget}
+        open={!!editTarget}
+        onClose={() => setEditTarget(null)}
+        onSuccess={() => { setEditTarget(null); load(); }}
       />
 
       <CreateAccountModal

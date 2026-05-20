@@ -41,7 +41,10 @@ export function useWisudawan() {
   const update = useCallback(async (id: string, input: Record<string, unknown>) => {
     const res = await api.patch(`${BASE}/${id}`, input);
     toast.success("Data berhasil diperbarui");
-    return res.data.data as WisudawanRow;
+    const updated = res.data.data as WisudawanRow;
+    // Perbarui data lokal agar tabel langsung reflect perubahan
+    setData((prev) => prev.map((s) => s.id === id ? { ...s, ...updated } : s));
+    return updated;
   }, []);
 
   const remove = useCallback(async (id: string) => {

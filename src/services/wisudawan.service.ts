@@ -25,8 +25,10 @@ export interface WisudawanRow {
   userName: string;
   isFirstLogin: boolean;
   hasUndangan: boolean;
+  undanganId: string | null;
   undanganKode: string | null;
   undanganStatus: string | null;
+  sesiWisuda: string | null;
   kehadiranStatus: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -78,7 +80,7 @@ export class WisudawanService {
           undangan: {
             take: 1,
             orderBy: { createdAt: "desc" },
-            select: { kode: true, statusUndangan: true },
+            select: { id: true, kode: true, statusUndangan: true, tempatWisuda: true },
           },
           kehadiran: {
             take: 1,
@@ -107,8 +109,10 @@ export class WisudawanService {
       userName: m.user.name,
       isFirstLogin: true, // determined by checking login history in production
       hasUndangan: m.undangan.length > 0,
+      undanganId: m.undangan[0]?.id ?? null,
       undanganKode: m.undangan[0]?.kode ?? null,
       undanganStatus: m.undangan[0]?.statusUndangan ?? null,
+      sesiWisuda: m.undangan[0]?.tempatWisuda ?? null,
       kehadiranStatus: m.kehadiran[0]?.statusKehadiran ?? null,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
@@ -134,7 +138,7 @@ export class WisudawanService {
         undangan: {
           take: 1,
           orderBy: { createdAt: "desc" },
-          select: { kode: true, statusUndangan: true },
+          select: { id: true, kode: true, statusUndangan: true, tempatWisuda: true },
         },
         kehadiran: {
           take: 1,
@@ -159,8 +163,10 @@ export class WisudawanService {
       userName: m.user.name,
       isFirstLogin: true,
       hasUndangan: m.undangan.length > 0,
+      undanganId: m.undangan[0]?.id ?? null,
       undanganKode: m.undangan[0]?.kode ?? null,
       undanganStatus: m.undangan[0]?.statusUndangan ?? null,
+      sesiWisuda: m.undangan[0]?.tempatWisuda ?? null,
       kehadiranStatus: m.kehadiran[0]?.statusKehadiran ?? null,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
@@ -227,8 +233,10 @@ export class WisudawanService {
       userName: result.user.name,
       isFirstLogin: true,
       hasUndangan: false,
+      undanganId: null,
       undanganKode: null,
       undanganStatus: null,
+      sesiWisuda: null,
       kehadiranStatus: null,
       createdAt: result.mahasiswa.createdAt,
       updatedAt: result.mahasiswa.updatedAt,
@@ -239,15 +247,48 @@ export class WisudawanService {
    * Update wisudawan
    */
   static async update(id: string, input: UpdateWisudawanInput): Promise<WisudawanRow> {
+    const m = await prisma.mahasiswa.findUnique({ where: { id } });
+    if (!m) throw new Error("Wisudawan tidak ditemukan");
+
+    // Cek duplikat NIM jika berubah
+    if (input.nim && input.nim !== m.nim) {
+      const nimTaken = await prisma.mahasiswa.findFirst({
+        where: { nim: input.nim, NOT: { id } },
+      });
+      if (nimTaken) throw new Error(`NIM ${input.nim} sudah digunakan`);
+    }
+
+    // Hash password jika disertakan
+    if (input.password) {
+      const hashed = await bcrypt.hash(input.password, 12);
+      await prisma.user.update({
+        where: { id: m.userId },
+        data: { password: hashed },
+      });
+    }
+
+    // Update email di User juga jika berubah
+    if (input.email && input.email !== m.email) {
+      const emailTaken = await prisma.user.findFirst({
+        where: { email: input.email, NOT: { id: m.userId } },
+      });
+      if (emailTaken) throw new Error(`Email ${input.email} sudah digunakan`);
+      await prisma.user.update({
+        where: { id: m.userId },
+        data: { email: input.email },
+      });
+    }
+
     const mahasiswa = await prisma.mahasiswa.update({
       where: { id },
       data: {
-        ...(input.nama && { nama: input.nama }),
-        ...(input.email && { email: input.email }),
+        ...(input.nim     && { nim:     input.nim }),
+        ...(input.nama    && { nama:    input.nama }),
+        ...(input.email   && { email:   input.email }),
         ...(input.fakultas && { fakultas: input.fakultas }),
-        ...(input.prodi && { prodi: input.prodi }),
+        ...(input.prodi   && { prodi:   input.prodi }),
         ...(input.angkatan && { angkatan: input.angkatan }),
-        ...(input.status && { status: input.status }),
+        ...(input.status  && { status:  input.status }),
         ...(input.foto !== undefined && { foto: input.foto }),
       },
       include: {
@@ -255,7 +296,7 @@ export class WisudawanService {
         undangan: {
           take: 1,
           orderBy: { createdAt: "desc" },
-          select: { kode: true, statusUndangan: true },
+          select: { id: true, kode: true, statusUndangan: true, tempatWisuda: true },
         },
         kehadiran: {
           take: 1,
@@ -264,6 +305,14 @@ export class WisudawanService {
         },
       },
     });
+
+    // Update sesi wisuda di undangan jika ada
+    if (input.sesiWisuda && mahasiswa.undangan[0]?.id) {
+      await prisma.undangan.update({
+        where: { id: mahasiswa.undangan[0].id },
+        data: { tempatWisuda: input.sesiWisuda },
+      });
+    }
 
     return {
       id: mahasiswa.id,
@@ -279,8 +328,10 @@ export class WisudawanService {
       userName: mahasiswa.user.name,
       isFirstLogin: true,
       hasUndangan: mahasiswa.undangan.length > 0,
+      undanganId: mahasiswa.undangan[0]?.id ?? null,
       undanganKode: mahasiswa.undangan[0]?.kode ?? null,
       undanganStatus: mahasiswa.undangan[0]?.statusUndangan ?? null,
+      sesiWisuda: input.sesiWisuda ?? mahasiswa.undangan[0]?.tempatWisuda ?? null,
       kehadiranStatus: mahasiswa.kehadiran[0]?.statusKehadiran ?? null,
       createdAt: mahasiswa.createdAt,
       updatedAt: mahasiswa.updatedAt,

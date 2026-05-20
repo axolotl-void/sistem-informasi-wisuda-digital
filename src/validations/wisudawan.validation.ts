@@ -30,13 +30,16 @@ export type CreateWisudawanInput = z.infer<typeof createWisudawanSchema>;
 // ─── Update Account ──────────────────────────────────────────────────────────
 
 export const updateWisudawanSchema = z.object({
+  nim: z.string().min(8, "NIM minimal 8 karakter").max(20, "NIM maksimal 20 karakter").optional(),
   nama: z.string().min(2).max(100).optional(),
   email: z.string().email().optional(),
+  password: z.string().min(8).max(64).optional(), // kosong = tidak diubah
   fakultas: z.string().min(2).optional(),
   prodi: z.string().min(2).optional(),
   angkatan: z.number().int().min(2000).max(2100).optional(),
   status: z.enum(["AKTIF", "LULUS", "CUTI", "DROPOUT"]).optional(),
   foto: z.string().url().optional().nullable(),
+  sesiWisuda: z.string().optional().nullable(),
 });
 
 export type UpdateWisudawanInput = z.infer<typeof updateWisudawanSchema>;
