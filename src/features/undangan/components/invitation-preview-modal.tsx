@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Download, Share2, Copy, RefreshCw, Printer, Check, Loader2 } from "lucide-react";
+import { X, Download, Share2, Copy, Printer, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import { useUndanganStore } from "../store";
@@ -76,7 +76,7 @@ export function InvitationPreviewModal() {
       errorCorrectionLevel: "H",
       color: { dark: "#1e293b", light: "#ffffff" },
     }).then(setQrDataUrl).catch(() => {});
-  }, [inv?.qrToken]);
+  }, [inv]);
 
   const handleDownloadPDF = useCallback(async () => {
     if (!printRef.current || !inv) return;

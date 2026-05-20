@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, QrCode, RefreshCw, Download, Trash2 } from "lucide-react";
-import { useUndanganStore, useFilteredInvitations } from "../store";
+import { QrCode, RefreshCw, Download, Trash2 } from "lucide-react";
+import { useUndanganStore } from "../store";
 import { StatusBadge, AttendanceBadge } from "./status-badge";
 import { QrCell } from "./qr-cell";
 import { EmptyState } from "./empty-state";
@@ -59,7 +59,7 @@ function DeleteRowDialog({
 // ─── Action Menu ─────────────────────────────────────────────────────────────
 
 function ActionMenu({ inv }: { inv: Invitation }) {
-  const { openPreview, openDrawer, generateInvitation, markDownloaded, deleteInvitation } = useUndanganStore();
+  const { openDrawer, generateInvitation, markDownloaded, deleteInvitation } = useUndanganStore();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   function handleDownload(id: string) {
@@ -76,16 +76,6 @@ function ActionMenu({ inv }: { inv: Invitation }) {
   return (
     <>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-        {/* Preview */}
-        <button
-          type="button"
-          onClick={() => openPreview(inv)}
-          className="flex size-7 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white/70 cursor-pointer"
-          title="Preview Undangan"
-        >
-          <Eye className="size-3.5" />
-        </button>
-
         {/* QR Detail */}
         <button
           type="button"
@@ -144,7 +134,7 @@ function ActionMenu({ inv }: { inv: Invitation }) {
 // ─── Table Row ────────────────────────────────────────────────────────────────
 
 function TableRow({ inv, index }: { inv: Invitation; index: number }) {
-  const { openDrawer } = useUndanganStore();
+  const { openDrawer, openPreview } = useUndanganStore();
 
   return (
     <motion.tr
@@ -152,11 +142,18 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -10 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
-      className="group border-b border-white/[0.04] transition-colors duration-150 hover:bg-white/[0.025]"
+      onClick={() => openPreview(inv)}
+      className="group border-b border-white/[0.04] transition-colors duration-150 hover:bg-white/[0.025] cursor-pointer"
     >
       {/* QR Preview */}
       <td className="py-3 pl-4 pr-3">
-        <div onClick={() => openDrawer(inv)} className="cursor-pointer">
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            openDrawer(inv);
+          }} 
+          className="cursor-pointer"
+        >
           {inv.status !== "belum_generate" ? (
             <QrCell token={inv.qrToken} size={36} />
           ) : (
@@ -224,7 +221,7 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
       </td>
 
       {/* Actions */}
-      <td className="py-3 pr-4">
+      <td className="py-3 pr-4" onClick={(e) => e.stopPropagation()}>
         <ActionMenu inv={inv} />
       </td>
     </motion.tr>
@@ -234,13 +231,46 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
 // ─── Main Table ───────────────────────────────────────────────────────────────
 
 export function InvitationTable() {
-  const { isLoading } = useUndanganStore();
-  const filtered = useFilteredInvitations();
+  const {
+    invitations,
+    isLoading,
+    searchQuery,
+    filterStatus,
+    filterSesi,
+    filterAttendance,
+  } = useUndanganStore();
+
+  const filtered = (invitations || []).filter((inv) => {
+    // 1. Search Query
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchNama = inv.mahasiswaNama?.toLowerCase().includes(q);
+      const matchNim = inv.nim?.includes(q);
+      const matchKode = inv.kode?.toLowerCase().includes(q);
+      if (!matchNama && !matchNim && !matchKode) return false;
+    }
+    // 2. Filter Status
+    if (filterStatus && filterStatus !== "all") {
+      if (inv.status !== filterStatus) return false;
+    }
+    // 3. Filter Sesi
+    if (filterSesi && filterSesi !== "all") {
+      const sessionKeyword = filterSesi.replace("Sesi ", "");
+      if (!inv.sesi || !inv.sesi.toLowerCase().includes(sessionKeyword.toLowerCase())) {
+        return false;
+      }
+    }
+    // 4. Filter Attendance
+    if (filterAttendance && filterAttendance !== "all") {
+      if (inv.attendance !== filterAttendance) return false;
+    }
+    return true;
+  });
 
   if (isLoading) return <LoadingSkeleton />;
 
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] overflow-hidden">
+    <div id="invitation-table-print" className="rounded-2xl border border-white/[0.07] bg-[#080f1e] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px]">
           <thead>

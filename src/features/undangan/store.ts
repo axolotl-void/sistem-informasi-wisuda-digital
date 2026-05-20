@@ -65,25 +65,52 @@ export const useUndanganStore = create<UndanganState & UndanganActions>((set, ge
       const result = await response.json();
       
       // Transform API data to match Invitation type
-      const invitations: Invitation[] = result.data.data.map((item: any) => ({
-        id: item.id,
-        kode: item.kode,
-        qrToken: item.qrToken || item.kode,
-        mahasiswaNama: item.mahasiswa?.nama || "Unknown",
-        nim: item.mahasiswa?.nim || "-",
-        fakultas: item.mahasiswa?.fakultas || "-",
-        prodi: item.mahasiswa?.prodi || "-",
-        sesi: item.mahasiswa?.sesiWisuda || "-",
-        nomorKursi: "-", // Not in schema yet
-        kuotaTamu: item.kuotaTamu || 0,
-        tamuHadir: 0, // Not in schema yet
-        status: item.statusUndangan === "AKTIF" ? "qr_aktif" : 
-                item.statusUndangan === "DIGUNAKAN" ? "sudah_download" : "belum_generate",
-        attendance: item.kehadiran?.statusKehadiran === "HADIR" ? "hadir" :
-                   item.kehadiran?.statusKehadiran === "TIDAK_HADIR" ? "tidak_hadir" : "belum_hadir",
-        generatedAt: item.createdAt,
-        downloadedAt: item.updatedAt,
-      }));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const invitations: Invitation[] = result.data.data.map((item: any) => {
+        const scanHistory = item.kehadiran ? [
+          {
+            id: item.kehadiran.id,
+            timestamp: item.kehadiran.waktuScan || item.kehadiran.createdAt || new Date().toISOString(),
+            gate: item.kehadiran.catatan || "Gate Utama",
+            type: "masuk" as const,
+            petugasName: "Petugas Scan",
+          }
+        ] : [];
+
+        return {
+          id: item.id,
+          kode: item.kode,
+          qrToken: item.qrToken || item.kode,
+          qrImageUrl: item.qrImageUrl || "",
+          status: item.kehadiran?.statusKehadiran === "HADIR" ? "sudah_hadir" :
+                  item.statusUndangan === "AKTIF" ? "qr_aktif" : 
+                  item.statusUndangan === "DIGUNAKAN" ? "sudah_download" :
+                  item.statusUndangan === "KADALUARSA" ? "expired" : "belum_generate",
+          attendance: item.kehadiran?.statusKehadiran === "HADIR" ? "hadir" :
+                     item.kehadiran?.statusKehadiran === "TIDAK_HADIR" ? "tidak_hadir" : "belum_hadir",
+          mahasiswaId: item.mahasiswaId || "",
+          mahasiswaNama: item.mahasiswa?.nama || "Unknown",
+          nim: item.mahasiswa?.nim || "-",
+          fakultas: item.mahasiswa?.fakultas || "-",
+          prodi: item.mahasiswa?.prodi || "-",
+          sesi: item.mahasiswa?.sesiWisuda || "-",
+          tanggalWisuda: item.tanggalWisuda || "-",
+          waktuMulai: "-",
+          waktuSelesai: "-",
+          gedung: item.tempatWisuda || "-",
+          ruangan: "-",
+          nomorKursi: "-", // Not in schema yet
+          kuotaTamu: item.kuotaTamu || 0,
+          tamuHadir: item.kehadiran ? 1 : 0,
+          generatedAt: item.createdAt,
+          downloadedAt: item.updatedAt,
+          firstScanAt: item.kehadiran?.waktuScan || undefined,
+          lastScanAt: item.kehadiran?.waktuScan || undefined,
+          scanCount: scanHistory.length,
+          scanHistory,
+          gate: item.kehadiran?.catatan || (item.kehadiran ? "Gate Utama" : undefined),
+        };
+      });
       
       set({ invitations, stats: computeStats(invitations), isLoading: false });
     } catch (error) {
@@ -172,19 +199,28 @@ export const useUndanganStore = create<UndanganState & UndanganActions>((set, ge
 // Selector for filtered invitations
 export function useFilteredInvitations() {
   return useUndanganStore((s) => {
-    let list = s.invitations;
-    const q = s.searchQuery.toLowerCase();
+    let list = s.invitations || [];
+    const q = s.searchQuery ? s.searchQuery.toLowerCase().trim() : "";
     if (q) {
       list = list.filter(
         (i) =>
-          i.mahasiswaNama.toLowerCase().includes(q) ||
-          i.nim.includes(q) ||
-          i.kode.toLowerCase().includes(q)
+          (i.mahasiswaNama && i.mahasiswaNama.toLowerCase().includes(q)) ||
+          (i.nim && i.nim.includes(q)) ||
+          (i.kode && i.kode.toLowerCase().includes(q))
       );
     }
-    if (s.filterStatus !== "all") list = list.filter((i) => i.status === s.filterStatus);
-    if (s.filterSesi !== "all") list = list.filter((i) => i.sesi === s.filterSesi);
-    if (s.filterAttendance !== "all") list = list.filter((i) => i.attendance === s.filterAttendance);
+    if (s.filterStatus && s.filterStatus !== "all") {
+      list = list.filter((i) => i.status === s.filterStatus);
+    }
+    if (s.filterSesi && s.filterSesi !== "all") {
+      const sessionKeyword = s.filterSesi.replace("Sesi ", "");
+      list = list.filter(
+        (i) => i.sesi && i.sesi.toLowerCase().includes(sessionKeyword.toLowerCase())
+      );
+    }
+    if (s.filterAttendance && s.filterAttendance !== "all") {
+      list = list.filter((i) => i.attendance === s.filterAttendance);
+    }
     return list;
   });
 }

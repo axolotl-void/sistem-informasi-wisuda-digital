@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useScannerStore } from "@/store/scanner.store";
 import { useDashboardStore } from "@/store/dashboard.store";
@@ -10,6 +10,7 @@ import type { KehadiranStats } from "@/types/kehadiran.type";
 
 export function useSocket(room?: string) {
   const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const { setScanResult, setConnected } = useScannerStore();
   const { setStats } = useDashboardStore();
 
@@ -23,6 +24,7 @@ export function useSocket(room?: string) {
 
     socketRef.current.on("connect", () => {
       setConnected(true);
+      setSocket(socketRef.current);
       if (room) {
         socketRef.current?.emit("join:room", room);
       }
@@ -30,6 +32,7 @@ export function useSocket(room?: string) {
 
     socketRef.current.on("disconnect", () => {
       setConnected(false);
+      setSocket(null);
     });
 
     socketRef.current.on(SOCKET_EVENTS.SCAN_SUCCESS, (result: ScanResult) => {
@@ -39,11 +42,14 @@ export function useSocket(room?: string) {
     socketRef.current.on(SOCKET_EVENTS.STATS_UPDATE, (stats: KehadiranStats) => {
       setStats(stats);
     });
+
+    setSocket(socketRef.current);
   }, [room, setConnected, setScanResult, setStats]);
 
   const disconnect = useCallback(() => {
     socketRef.current?.disconnect();
     socketRef.current = null;
+    setSocket(null);
     setConnected(false);
   }, [setConnected]);
 
@@ -53,7 +59,7 @@ export function useSocket(room?: string) {
   }, [connect, disconnect]);
 
   return {
-    socket: socketRef.current,
+    socket,
     connect,
     disconnect,
   };

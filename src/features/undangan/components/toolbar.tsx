@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { Search, ChevronDown, Plus, Zap, FileSpreadsheet, FileDown, Trash2 } from "lucide-react";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { toast } from "sonner";
 import { useUndanganStore } from "../store";
 
 const statusOptions = [
@@ -158,11 +162,119 @@ export function InvitationToolbar() {
     invitations, deleteAll,
   } = useUndanganStore();
 
+  const filtered = (invitations || []).filter((inv) => {
+    // 1. Search Query
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchNama = inv.mahasiswaNama?.toLowerCase().includes(q);
+      const matchNim = inv.nim?.includes(q);
+      const matchKode = inv.kode?.toLowerCase().includes(q);
+      if (!matchNama && !matchNim && !matchKode) return false;
+    }
+    // 2. Filter Status
+    if (filterStatus && filterStatus !== "all") {
+      if (inv.status !== filterStatus) return false;
+    }
+    // 3. Filter Sesi
+    if (filterSesi && filterSesi !== "all") {
+      const sessionKeyword = filterSesi.replace("Sesi ", "");
+      if (!inv.sesi || !inv.sesi.toLowerCase().includes(sessionKeyword.toLowerCase())) {
+        return false;
+      }
+    }
+    // 4. Filter Attendance
+    if (filterAttendance && filterAttendance !== "all") {
+      if (inv.attendance !== filterAttendance) return false;
+    }
+    return true;
+  });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   function handleDeleteAllConfirm() {
     deleteAll();
     setShowDeleteDialog(false);
+  }
+
+  function handleExportExcel() {
+    if (filtered.length === 0) {
+      toast.error("Tidak ada data untuk diekspor");
+      return;
+    }
+
+    try {
+      const dataToExport = filtered.map((inv) => ({
+        "Kode Undangan": inv.kode,
+        "NIM": inv.nim,
+        "Nama Mahasiswa": inv.mahasiswaNama,
+        "Fakultas": inv.fakultas,
+        "Prodi": inv.prodi,
+        "Sesi Wisuda": inv.sesi,
+        "Tempat/Gedung": inv.gedung,
+        "Nomor Kursi": inv.nomorKursi,
+        "Kuota Tamu": inv.kuotaTamu,
+        "Tamu Hadir": inv.tamuHadir,
+        "Status Undangan": inv.status === "qr_aktif" ? "QR Aktif" :
+                           inv.status === "sudah_download" ? "Sudah Download" :
+                           inv.status === "sudah_hadir" ? "Sudah Hadir" :
+                           inv.status === "expired" ? "Expired" : "Belum Generate",
+        "Status Kehadiran": inv.attendance === "hadir" ? "Hadir" :
+                            inv.attendance === "terlambat" ? "Terlambat" :
+                            inv.attendance === "tidak_hadir" ? "Tidak Hadir" : "Belum Hadir",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Daftar Undangan");
+      XLSX.writeFile(workbook, `Daftar_Undangan_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      toast.success("Data berhasil diekspor ke Excel");
+    } catch (error) {
+      console.error("Export Excel error:", error);
+      toast.error("Gagal mengekspor data ke Excel");
+    }
+  }
+
+  async function handleExportPDF() {
+    const input = document.getElementById("invitation-table-print");
+    if (!input) {
+      toast.error("Tabel tidak ditemukan untuk diekspor");
+      return;
+    }
+
+    const toastId = toast.loading("Sedang menyiapkan dokumen PDF...");
+
+    try {
+      const canvas = await html2canvas(input, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#080f1e",
+      } as any);
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 190; // margin left/right 10mm
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 10; // margin top 10mm
+
+      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`Daftar_Undangan_${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.dismiss(toastId);
+      toast.success("Dokumen PDF berhasil diunduh");
+    } catch (error) {
+      console.error("Export PDF error:", error);
+      toast.dismiss(toastId);
+      toast.error("Gagal mengekspor data ke PDF");
+    }
   }
 
   return (
@@ -189,8 +301,8 @@ export function InvitationToolbar() {
 
         {/* Right — Actions */}
         <div className="flex items-center gap-2">
-          <GlassButton icon={FileSpreadsheet} label="Export Excel" />
-          <GlassButton icon={FileDown} label="Export PDF" />
+          <GlassButton icon={FileSpreadsheet} label="Export Excel" onClick={handleExportExcel} />
+          <GlassButton icon={FileDown} label="Export PDF" onClick={handleExportPDF} />
           <GlassButton icon={Zap} label="Generate Massal" onClick={openMassGenerate} />
           <GlassButton icon={Plus} label="Generate Undangan" variant="primary" onClick={openGenerateModal} />
           {invitations.length > 0 && (

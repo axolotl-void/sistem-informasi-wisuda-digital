@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
 import axios from "axios";
-import { Camera, CameraOff, Loader2 } from "lucide-react";
+import { Camera, CameraOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQrScanner } from "@/hooks/use-qr-scanner";

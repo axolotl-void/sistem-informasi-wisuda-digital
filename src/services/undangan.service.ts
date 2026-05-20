@@ -138,10 +138,20 @@ export class UndanganService {
   static async bulkGenerate(
     tanggalWisuda: Date,
     tempatWisuda: string,
-    kuotaTamu: number
+    kuotaTamu: number,
+    sesi?: string
   ): Promise<{ generated: number; skipped: number }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = { status: "LULUS" };
+    if (sesi && sesi !== "all") {
+      const sessionKeyword = sesi.replace("Sesi ", "");
+      whereClause.sesiWisuda = {
+        contains: sessionKeyword,
+        mode: "insensitive",
+      };
+    }
     const mahasiswaList = await prisma.mahasiswa.findMany({
-      where: { status: "LULUS" },
+      where: whereClause,
     });
 
     let generated = 0;

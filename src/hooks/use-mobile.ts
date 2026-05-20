@@ -11,7 +11,8 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    // Use the matchMedia result instead of calling setState directly
+    onChange()
     return () => mql.removeEventListener("change", onChange)
   }, [])
 

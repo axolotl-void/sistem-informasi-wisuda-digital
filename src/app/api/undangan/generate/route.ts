@@ -8,6 +8,7 @@ const bulkSchema = z.object({
   tanggalWisuda: z.string().datetime(),
   tempatWisuda: z.string().min(2),
   kuotaTamu: z.number().int().min(1).max(10),
+  sesi: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -25,7 +26,8 @@ export async function POST(request: NextRequest) {
     const result = await UndanganService.bulkGenerate(
       new Date(parsed.data.tanggalWisuda),
       parsed.data.tempatWisuda,
-      parsed.data.kuotaTamu
+      parsed.data.kuotaTamu,
+      parsed.data.sesi
     );
 
     return apiSuccess(

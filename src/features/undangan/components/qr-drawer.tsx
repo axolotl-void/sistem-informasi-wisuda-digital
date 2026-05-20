@@ -21,7 +21,9 @@ function ScanHistoryItem({ scan }: { scan: ScanHistory }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span className="text-[0.75rem] font-semibold text-white/70 capitalize">{scan.type}</span>
-          <span className="font-mono text-[0.65rem] text-white/30">{scan.timestamp.split("T")[1]?.slice(0, 8)}</span>
+          <span className="font-mono text-[0.65rem] text-white/30">
+            {scan.timestamp?.includes("T") ? scan.timestamp.split("T")[1]?.slice(0, 8) : scan.timestamp || "—"}
+          </span>
         </div>
         <p className="text-[0.68rem] text-white/30 mt-0.5">{scan.gate} · {scan.petugasName}</p>
       </div>
@@ -112,8 +114,8 @@ export function QRDrawer() {
               {/* Scan stats */}
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { icon: ScanLine, label: "Total Scan", value: String(inv.scanCount) },
-                  { icon: Clock, label: "Pertama Scan", value: inv.firstScanAt ? inv.firstScanAt.split("T")[1]?.slice(0, 5) : "—" },
+                  { icon: ScanLine, label: "Total Scan", value: String(inv.scanCount ?? 0) },
+                  { icon: Clock, label: "Pertama Scan", value: inv.firstScanAt ? (inv.firstScanAt.includes("T") ? inv.firstScanAt.split("T")[1]?.slice(0, 5) : inv.firstScanAt) : "—" },
                   { icon: DoorOpen, label: "Gate Masuk", value: inv.gate ?? "—" },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-center">
@@ -129,7 +131,7 @@ export function QRDrawer() {
                 <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-white/25">
                   Riwayat Scan
                 </p>
-                {inv.scanHistory.length === 0 ? (
+                {!inv.scanHistory || inv.scanHistory.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-white/[0.06] py-6 text-center">
                     <ScanLine className="mx-auto size-5 text-white/15 mb-2" />
                     <p className="text-xs text-white/20">Belum ada riwayat scan</p>

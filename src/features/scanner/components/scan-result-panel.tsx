@@ -2,9 +2,7 @@
 
 import { CheckCircle2, XCircle, Clock, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useScannerStore } from "@/store/scanner.store";
-import { formatDateTime } from "@/utils/format";
 
 export function ScanResultPanel() {
   const { lastResult, status, totalScanned, scanHistory } = useScannerStore();

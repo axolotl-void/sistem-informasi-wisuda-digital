@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import { X, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useUndanganStore } from "../store";
 
@@ -35,14 +35,7 @@ export function GenerateInvitationModal() {
   // Mahasiswa yang dipilih
   const selectedMahasiswa = mahasiswaList.find(m => m.id === form.mahasiswaId);
 
-  // Fetch mahasiswa yang belum punya undangan
-  useEffect(() => {
-    if (isGenerateModalOpen) {
-      fetchMahasiswa();
-    }
-  }, [isGenerateModalOpen]);
-
-  async function fetchMahasiswa() {
+  const fetchMahasiswa = useCallback(async () => {
     setLoadingMahasiswa(true);
     try {
       const response = await fetch("/api/mahasiswa?page=1&limit=1000", {
@@ -60,7 +53,14 @@ export function GenerateInvitationModal() {
     } finally {
       setLoadingMahasiswa(false);
     }
-  }
+  }, []);
+
+  // Fetch mahasiswa yang belum punya undangan
+  useEffect(() => {
+    if (isGenerateModalOpen) {
+      void fetchMahasiswa();
+    }
+  }, [isGenerateModalOpen, fetchMahasiswa]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
