@@ -61,15 +61,16 @@ model User {
 }
 
 model Mahasiswa {
-  id       String          @id @default(cuid())
-  nim      String          @unique
-  nama     String
-  email    String          @unique
-  fakultas String
-  prodi    String
-  angkatan Int
-  status   StatusMahasiswa @default(AKTIF)
-  foto     String?
+  id         String          @id @default(cuid())
+  nim        String          @unique
+  nama       String
+  email      String          @unique
+  fakultas   String
+  prodi      String
+  angkatan   Int
+  status     StatusMahasiswa @default(AKTIF)
+  sesiWisuda String?
+  foto       String?
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

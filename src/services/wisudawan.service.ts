@@ -279,18 +279,22 @@ export class WisudawanService {
       });
     }
 
+    // Bangun data update — gunakan !== undefined agar nilai falsy tetap tersimpan
+    const updateData: Record<string, unknown> = {};
+    if (input.nim      !== undefined) updateData.nim      = input.nim;
+    if (input.nama     !== undefined) updateData.nama     = input.nama;
+    if (input.email    !== undefined) updateData.email    = input.email;
+    if (input.fakultas !== undefined) updateData.fakultas = input.fakultas;
+    if (input.prodi    !== undefined) updateData.prodi    = input.prodi;
+    if (input.angkatan !== undefined) updateData.angkatan = input.angkatan;
+    if (input.status   !== undefined) updateData.status   = input.status;
+    if (input.foto     !== undefined) updateData.foto     = input.foto;
+    // sesiWisuda disimpan langsung di tabel mahasiswa
+    if (input.sesiWisuda !== undefined) updateData.sesiWisuda = input.sesiWisuda;
+
     const mahasiswa = await prisma.mahasiswa.update({
       where: { id },
-      data: {
-        ...(input.nim     && { nim:     input.nim }),
-        ...(input.nama    && { nama:    input.nama }),
-        ...(input.email   && { email:   input.email }),
-        ...(input.fakultas && { fakultas: input.fakultas }),
-        ...(input.prodi   && { prodi:   input.prodi }),
-        ...(input.angkatan && { angkatan: input.angkatan }),
-        ...(input.status  && { status:  input.status }),
-        ...(input.foto !== undefined && { foto: input.foto }),
-      },
+      data: updateData,
       include: {
         user: { select: { name: true, id: true } },
         undangan: {
@@ -305,14 +309,6 @@ export class WisudawanService {
         },
       },
     });
-
-    // Update sesi wisuda di undangan jika ada
-    if (input.sesiWisuda && mahasiswa.undangan[0]?.id) {
-      await prisma.undangan.update({
-        where: { id: mahasiswa.undangan[0].id },
-        data: { tempatWisuda: input.sesiWisuda },
-      });
-    }
 
     return {
       id: mahasiswa.id,
@@ -331,7 +327,7 @@ export class WisudawanService {
       undanganId: mahasiswa.undangan[0]?.id ?? null,
       undanganKode: mahasiswa.undangan[0]?.kode ?? null,
       undanganStatus: mahasiswa.undangan[0]?.statusUndangan ?? null,
-      sesiWisuda: input.sesiWisuda ?? mahasiswa.undangan[0]?.tempatWisuda ?? null,
+      sesiWisuda: mahasiswa.sesiWisuda ?? null,
       kehadiranStatus: mahasiswa.kehadiran[0]?.statusKehadiran ?? null,
       createdAt: mahasiswa.createdAt,
       updatedAt: mahasiswa.updatedAt,
