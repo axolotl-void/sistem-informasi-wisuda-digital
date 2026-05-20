@@ -9,6 +9,8 @@ export const ROUTES = {
     MAHASISWA: "/mahasiswa",
     UNDANGAN: "/undangan",
     KEHADIRAN: "/kehadiran",
+    SEAT_MONITORING: "/seat-monitoring",
+    LAPORAN: "/laporan",
   },
   SCANNER: {
     SCAN: "/scan",

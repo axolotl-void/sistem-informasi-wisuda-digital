@@ -5,7 +5,7 @@ import {
   Armchair, Crown,
 } from "lucide-react";
 import { StatCard } from "@/features/dashboard/components/stat-card";
-import { SeatMonitor } from "@/features/dashboard/components/seat-monitor";
+import { SeatPreview } from "@/features/dashboard/components/seat-preview";
 import { QrPanel } from "@/features/dashboard/components/qr-panel";
 import { ActivityTable } from "@/features/dashboard/components/activity-table";
 
@@ -40,12 +40,12 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Seat monitoring — full width */}
-      <SeatMonitor />
+      {/* Seat monitoring preview — links to /seat-monitoring */}
+      <SeatPreview />
 
       {/* QR Panel + Activity Table — side by side */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <div className="lg:col-span-2">
+        <div id="scanner" className="lg:col-span-2 scroll-mt-6">
           <QrPanel />
         </div>
         <div className="lg:col-span-3">
@@ -55,3 +55,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

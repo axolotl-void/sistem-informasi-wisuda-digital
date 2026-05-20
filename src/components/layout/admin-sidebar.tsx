@@ -14,10 +14,10 @@ const navItems = [
   { label: "Dashboard", href: ROUTES.ADMIN.DASHBOARD, icon: LayoutDashboard },
   { label: "Akun Wisudawan", href: ROUTES.ADMIN.MAHASISWA, icon: Users },
   { label: "Undangan Digital", href: ROUTES.ADMIN.UNDANGAN, icon: Mail },
-  { label: "Seat Monitoring", href: "#seats", icon: Armchair },
+  { label: "Seat Monitoring", href: ROUTES.ADMIN.SEAT_MONITORING, icon: Armchair },
   { label: "Scanner Gate", href: "#scanner", icon: ScanLine },
   { label: "Kehadiran", href: ROUTES.ADMIN.KEHADIRAN, icon: ClipboardList },
-  { label: "Laporan", href: "#reports", icon: BarChart3 },
+  { label: "Laporan", href: ROUTES.ADMIN.LAPORAN, icon: BarChart3 },
   { label: "Pengaturan", href: "#settings", icon: Settings },
 ];
 
@@ -27,7 +27,20 @@ export function AdminSidebar() {
   const [isPending, startTransition] = useTransition();
 
   function handleNav(href: string) {
-    if (href.startsWith("#") || href === pathname) return;
+    if (href.startsWith("#")) {
+      const targetId = href.replace("#", "");
+      if (pathname === ROUTES.ADMIN.DASHBOARD) {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        router.push(`${ROUTES.ADMIN.DASHBOARD}${href}`);
+      }
+      return;
+    }
+
+    if (href === pathname) return;
     startTransition(() => {
       router.push(href);
     });
@@ -84,7 +97,7 @@ export function AdminSidebar() {
                 background: isActive ? "rgba(59,130,246,0.12)" : "transparent",
                 color: isActive ? "rgb(96,165,250)" : "rgba(255,255,255,0.4)",
                 border: "none",
-                cursor: isHashLink ? "default" : "pointer",
+                cursor: "pointer",
                 transition: "background 0.1s, color 0.1s",
                 textAlign: "left",
                 width: "100%",
