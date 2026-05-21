@@ -1,23 +1,20 @@
 import type { Invitation, InvitationStats } from "./types";
 
 const faculties = [
-  "Fakultas Teknik",
-  "Fakultas Ekonomi",
-  "Fakultas Hukum",
-  "Fakultas Kedokteran",
-  "Fakultas MIPA",
-  "Fakultas Ilmu Sosial",
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)",
 ];
 
 const prodis = [
-  "Teknik Informatika",
-  "Sistem Informasi",
-  "Manajemen",
-  "Akuntansi",
-  "Hukum Perdata",
-  "Kedokteran Umum",
-  "Matematika",
-  "Sosiologi",
+  "S1 Pendidikan Bahasa dan Sastra Aceh",
+  "S1 Pendidikan Bahasa Indonesia",
+  "S1 Pendidikan Bahasa Inggris",
+  "S1 Pendidikan Matematika",
+  "S1 Pendidikan Jasmani",
+  "S1 Pendidikan Guru Sekolah Dasar (PGSD)",
+  "S1 Ilmu Komputer",
+  "S1 Keperawatan",
+  "S1 Kebidanan"
 ];
 
 const statuses = [

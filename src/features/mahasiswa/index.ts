@@ -27,25 +27,30 @@ export interface Student {
 // ─── Dummy data ───────────────────────────────────────────────────────────────
 
 const faculties = [
-  "Fakultas Teknik",
-  "Fakultas Ekonomi & Bisnis",
-  "Fakultas Hukum",
-  "Fakultas Kedokteran",
-  "Fakultas MIPA",
-  "Fakultas Ilmu Sosial & Politik",
-  "Fakultas Pertanian",
-  "Fakultas Keguruan & Ilmu Pendidikan",
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)",
 ];
 
 const majors: Record<string, string[]> = {
-  "Fakultas Teknik": ["Teknik Informatika", "Teknik Sipil", "Teknik Mesin", "Teknik Elektro"],
-  "Fakultas Ekonomi & Bisnis": ["Manajemen", "Akuntansi", "Ekonomi Pembangunan"],
-  "Fakultas Hukum": ["Ilmu Hukum"],
-  "Fakultas Kedokteran": ["Kedokteran", "Keperawatan", "Farmasi"],
-  "Fakultas MIPA": ["Matematika", "Fisika", "Kimia", "Biologi"],
-  "Fakultas Ilmu Sosial & Politik": ["Ilmu Komunikasi", "Administrasi Publik", "Sosiologi"],
-  "Fakultas Pertanian": ["Agroteknologi", "Agribisnis"],
-  "Fakultas Keguruan & Ilmu Pendidikan": ["Pendidikan Matematika", "Pendidikan Bahasa Inggris"],
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)": [
+    "S1 Pendidikan Bahasa dan Sastra Aceh",
+    "S1 Pendidikan Bahasa Indonesia",
+    "S1 Pendidikan Bahasa Inggris",
+    "S1 Pendidikan Matematika",
+    "S1 Pendidikan Jasmani",
+    "S1 Pendidikan Guru Sekolah Dasar (PGSD)",
+    "S1 Pendidikan Guru Pendidikan Anak Usia Dini (PG PAUD)",
+    "S1 Pendidikan Ilmu Pengetahuan Alam (Pendidikan IPA)",
+    "S1 Pendidikan Seni Pertunjukan",
+    "S2 Penjaminan Mutu Pendidikan",
+    "S2 Pendidikan Dasar",
+    "Pendidikan Profesi Guru (PPG)"
+  ],
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)": [
+    "S1 Ilmu Komputer",
+    "S1 Keperawatan",
+    "S1 Kebidanan"
+  ],
 };
 
 const firstNames = [

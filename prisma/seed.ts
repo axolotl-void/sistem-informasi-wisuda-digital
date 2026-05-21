@@ -27,14 +27,14 @@ async function main() {
 
   // ── Admin Fakultas ───────────────────────────
   const adminFakultas = await prisma.user.upsert({
-    where: { email: "admin.teknik@wisuda.ac.id" },
+    where: { email: "admin.fkip@wisuda.ac.id" },
     update: {},
     create: {
-      name: "Admin Fakultas Teknik",
-      email: "admin.teknik@wisuda.ac.id",
+      name: "Admin FKIP",
+      email: "admin.fkip@wisuda.ac.id",
       password: hashedPassword,
       role: "ADMIN_FAKULTAS",
-      fakultas: "Fakultas Teknik",
+      fakultas: "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
     },
   });
   console.log("✅ Admin Fakultas:", adminFakultas.email);
@@ -71,8 +71,8 @@ async function main() {
       nim: "12345678",
       nama: "Budi Santoso",
       email: "mahasiswa@wisuda.ac.id",
-      fakultas: "Fakultas Teknik",
-      prodi: "Teknik Informatika",
+      fakultas: "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
+      prodi: "S1 Pendidikan Matematika",
       angkatan: 2020,
       status: "LULUS",
       userId: mahasiswaUser.id,
@@ -83,7 +83,7 @@ async function main() {
   console.log("\n🎉 Seeding selesai!");
   console.log("\n📋 Akun untuk testing:");
   console.log("   Super Admin  : superadmin@wisuda.ac.id / password123");
-  console.log("   Admin Fakultas: admin.teknik@wisuda.ac.id / password123");
+  console.log("   Admin Fakultas: admin.fkip@wisuda.ac.id / password123");
   console.log("   Petugas Scan : petugas@wisuda.ac.id / password123");
   console.log("   Mahasiswa    : mahasiswa@wisuda.ac.id / password123");
 }

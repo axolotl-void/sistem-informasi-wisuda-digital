@@ -9,6 +9,7 @@ export interface Mahasiswa {
   prodi: string;
   angkatan: number;
   status: StatusMahasiswa;
+  sesiWisuda?: string | null;
   foto?: string;
   userId: string;
   createdAt: Date;

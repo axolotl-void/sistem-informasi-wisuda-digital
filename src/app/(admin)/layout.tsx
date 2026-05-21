@@ -7,7 +7,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole(["SUPER_ADMIN", "ADMIN_FAKULTAS"]);
+  await requireRole(["SUPER_ADMIN", "ADMIN_FAKULTAS", "PETUGAS_SCAN"]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#07111F]">

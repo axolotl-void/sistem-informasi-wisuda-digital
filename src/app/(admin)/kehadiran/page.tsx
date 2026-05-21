@@ -28,7 +28,10 @@ interface KehadiranRecord {
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const NAMES = ["Ahmad Pratama", "Siti Lestari", "Budi Hidayat", "Rina Wati", "Dimas Nugroho", "Putri Sari", "Rizky Ramadhan", "Ayu Utami", "Fajar Santoso", "Dewi Kurniawan"];
-const FACULTIES = ["Fakultas Teknik", "Fakultas Ekonomi", "Fakultas Hukum", "Fakultas MIPA"];
+const FACULTIES = [
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)"
+];
 const STATUSES: AttendanceStatus[] = ["HADIR", "HADIR", "HADIR", "TERLAMBAT", "TIDAK_HADIR"];
 const GATES = ["Gate 1", "Gate 2", "Gate 3", "Gate 4"];
 
@@ -42,7 +45,7 @@ function generateKehadiran(count = 80): KehadiranRecord[] {
       nim: `2022${String(i + 1).padStart(4, "0")}`,
       nama: NAMES[i % NAMES.length],
       fakultas: FACULTIES[i % FACULTIES.length],
-      prodi: "Teknik Informatika",
+      prodi: i % 2 === 0 ? "S1 Pendidikan Matematika" : "S1 Ilmu Komputer",
       nomorKursi: `${String.fromCharCode(65 + (i % 8))}-${(i % 25) + 1}`,
       gate: status === "TIDAK_HADIR" ? "—" : GATES[i % 4],
       status,

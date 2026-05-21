@@ -21,14 +21,8 @@ const statusOptions = [
 ];
 
 const fakultasOptions = [
-  "Fakultas Teknik",
-  "Fakultas Ekonomi",
-  "Fakultas Hukum",
-  "Fakultas Kedokteran",
-  "Fakultas MIPA",
-  "Fakultas Ilmu Sosial",
-  "Fakultas Pertanian",
-  "Fakultas Keguruan",
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)",
 ];
 
 export function AccountToolbar({

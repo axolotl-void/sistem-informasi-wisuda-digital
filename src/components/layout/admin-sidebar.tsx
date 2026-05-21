@@ -15,7 +15,7 @@ const navItems = [
   { label: "Akun Wisudawan", href: ROUTES.ADMIN.MAHASISWA, icon: Users },
   { label: "Undangan Digital", href: ROUTES.ADMIN.UNDANGAN, icon: Mail },
   { label: "Seat Monitoring", href: ROUTES.ADMIN.SEAT_MONITORING, icon: Armchair },
-  { label: "Scanner Gate", href: "#scanner", icon: ScanLine },
+  { label: "Scanner Gate", href: ROUTES.SCANNER.SCAN, icon: ScanLine },
   { label: "Kehadiran", href: ROUTES.ADMIN.KEHADIRAN, icon: ClipboardList },
   { label: "Laporan", href: ROUTES.ADMIN.LAPORAN, icon: BarChart3 },
   { label: "Pengaturan", href: "#settings", icon: Settings },

@@ -11,7 +11,7 @@ const scanResults = {
   valid: {
     name: "Ayu Lestari",
     nim: "20240042",
-    faculty: "Fakultas Teknik",
+    faculty: "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
     seat: "C-12",
     gate: "Gate 2",
   },

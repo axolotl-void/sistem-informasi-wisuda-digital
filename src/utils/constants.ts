@@ -67,12 +67,6 @@ export const SOCKET_EVENTS = {
 } as const;
 
 export const FAKULTAS_LIST = [
-  "Fakultas Teknik",
-  "Fakultas Ekonomi",
-  "Fakultas Hukum",
-  "Fakultas Kedokteran",
-  "Fakultas MIPA",
-  "Fakultas Ilmu Sosial",
-  "Fakultas Pertanian",
-  "Fakultas Keguruan",
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)",
 ] as const;

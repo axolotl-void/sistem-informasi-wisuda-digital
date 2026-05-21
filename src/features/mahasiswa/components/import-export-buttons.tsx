@@ -40,7 +40,7 @@ interface ImportExportButtonsProps {
 function downloadTemplate() {
   const ws = XLSX.utils.aoa_to_sheet([
     ["NIM", "Nama", "Email", "Fakultas", "Prodi", "Angkatan"],
-    ["23210001", "Contoh Mahasiswa", "contoh@email.com", "Fakultas Teknik", "Teknik Informatika", 2023],
+    ["23210001", "Contoh Mahasiswa", "contoh@email.com", "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)", "S1 Pendidikan Matematika", 2023],
   ]);
 
   // Set lebar kolom

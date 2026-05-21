@@ -24,15 +24,9 @@ interface BlockSummary {
 }
 
 const FACULTY_COLORS: Record<string, { color: string; dotColor: string }> = {
-  "Blok VIP":              { color: "text-amber-400",   dotColor: "bg-amber-400" },
-  "Fakultas Teknik":       { color: "text-blue-400",    dotColor: "bg-blue-400" },
-  "Fakultas Ekonomi":      { color: "text-emerald-400", dotColor: "bg-emerald-400" },
-  "Fakultas Hukum":        { color: "text-purple-400",  dotColor: "bg-purple-400" },
-  "Fakultas Kedokteran":   { color: "text-rose-400",    dotColor: "bg-rose-400" },
-  "Fakultas MIPA":         { color: "text-sky-400",     dotColor: "bg-sky-400" },
-  "Fakultas Ilmu Sosial":  { color: "text-orange-400",  dotColor: "bg-orange-400" },
-  "Fakultas Pertanian":    { color: "text-green-400",   dotColor: "bg-green-400" },
-  "Fakultas Keguruan":     { color: "text-violet-400",  dotColor: "bg-violet-400" },
+  "Blok VIP":                                              { color: "text-amber-400",   dotColor: "bg-amber-400" },
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)":          { color: "text-violet-400",  dotColor: "bg-violet-400" },
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)": { color: "text-blue-400",    dotColor: "bg-blue-400" },
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -88,9 +82,8 @@ export function SeatPreview() {
 
         // Faculty blocks
         const faculties = [
-          "Fakultas Teknik", "Fakultas Ekonomi", "Fakultas Hukum",
-          "Fakultas Kedokteran", "Fakultas MIPA", "Fakultas Ilmu Sosial",
-          "Fakultas Pertanian", "Fakultas Keguruan",
+          "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
+          "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)",
         ];
         faculties.forEach((fac) => {
           const list = facultyGroups[fac] || [];
