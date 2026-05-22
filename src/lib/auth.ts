@@ -42,17 +42,19 @@ export async function requireRole(allowedRoles: UserRole[]): Promise<JwtPayload>
 
 /**
  * Ambil token dari request header atau cookie (API Route)
+ * Mendukung dua cara: Authorization Bearer header (untuk mobile/IP access)
+ * dan HTTP-only cookie (untuk desktop/localhost)
  */
 export async function getTokenFromRequest(request: Request): Promise<JwtPayload | null> {
   try {
-    // Try to get from Authorization header first
+    // 1. Coba dari Authorization header dulu (mobile via IP, atau explicit token)
     const authHeader = request.headers.get("Authorization");
     const bearerToken = extractBearerToken(authHeader);
     if (bearerToken) {
       return verifyToken(bearerToken);
     }
 
-    // Fallback to cookie
+    // 2. Fallback ke cookie (desktop/localhost)
     const cookieStore = await cookies();
     const cookieToken = cookieStore.get(AUTH_COOKIE_NAME)?.value;
     if (cookieToken) {

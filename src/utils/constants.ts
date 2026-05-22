@@ -20,6 +20,11 @@ export const ROUTES = {
     DASHBOARD: "/mahasiswa/dashboard",
     UNDANGAN: "/mahasiswa/undangan",
   },
+  PORTAL: {
+    HOME: "/portal",
+    TAMU: "/portal/tamu",
+    TIKET: "/portal/tiket",
+  },
 } as const;
 
 export const API_ROUTES = {

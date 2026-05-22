@@ -22,11 +22,12 @@ export async function POST(request: NextRequest) {
 
     const response = apiSuccess(result, "Login berhasil");
 
-    // Set HTTP-only cookie
+    // Set HTTP-only cookie — SameSite=None agar kompatibel dengan akses via IP/network
     const cookieResponse = new Response(response.body, response);
+    const isProduction = process.env.NODE_ENV === "production";
     cookieResponse.headers.set(
       "Set-Cookie",
-      `${AUTH_COOKIE_NAME}=${result.token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}${process.env.NODE_ENV === "production" ? "; Secure" : ""}`
+      `${AUTH_COOKIE_NAME}=${result.token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}${isProduction ? "; Secure" : ""}`
     );
 
     return cookieResponse;

@@ -1,14 +1,12 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useAuthStore } from "@/store/auth.store";
 import { API_ROUTES, ROUTES } from "@/utils/constants";
 import type { LoginCredentials } from "@/types/auth.type";
 
 export function useAuth() {
-  const router = useRouter();
   const { user, token, isAuthenticated, isLoading, setAuth, clearAuth, setLoading } =
     useAuthStore();
 
@@ -16,36 +14,41 @@ export function useAuth() {
     async (credentials: LoginCredentials) => {
       setLoading(true);
       try {
-        const { data } = await axios.post(API_ROUTES.AUTH.LOGIN, credentials);
+        const { data } = await axios.post(API_ROUTES.AUTH.LOGIN, credentials, {
+          withCredentials: true,
+        });
         setAuth(data.data.user, data.data.token);
 
-        // Redirect berdasarkan role
+        // Beri waktu Zustand persist untuk menyimpan ke localStorage
+        // sebelum navigasi — PortalAuthWrapper membaca dari localStorage
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
         const role = data.data.user.role;
         if (role === "SUPER_ADMIN" || role === "ADMIN_FAKULTAS") {
-          router.push(ROUTES.ADMIN.DASHBOARD);
+          window.location.replace(ROUTES.ADMIN.DASHBOARD);
         } else if (role === "PETUGAS_SCAN") {
-          router.push(ROUTES.SCANNER.SCAN);
+          window.location.replace(ROUTES.SCANNER.SCAN);
         } else {
-          router.push(ROUTES.MAHASISWA.DASHBOARD);
+          window.location.replace(ROUTES.PORTAL.HOME);
         }
       } catch (error) {
         setLoading(false);
         throw error;
       }
     },
-    [router, setAuth, setLoading]
+    [setAuth, setLoading]
   );
 
   const logout = useCallback(async () => {
     try {
-      await axios.post(API_ROUTES.AUTH.LOGOUT);
+      await axios.post(API_ROUTES.AUTH.LOGOUT, {}, { withCredentials: true });
     } catch {
-      // ignore error
+      // ignore
     } finally {
       clearAuth();
-      router.push(ROUTES.LOGIN);
+      window.location.replace(ROUTES.LOGIN);
     }
-  }, [router, clearAuth]);
+  }, [clearAuth]);
 
   return {
     user,

@@ -16,7 +16,7 @@ export default async function HomePage() {
     case "PETUGAS_SCAN":
       redirect("/scan");
     case "MAHASISWA":
-      redirect("/mahasiswa/dashboard");
+      redirect("/portal");
     default:
       redirect("/login");
   }

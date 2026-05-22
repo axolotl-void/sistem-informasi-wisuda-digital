@@ -7,6 +7,7 @@ import axios from "axios";
 export const api = axios.create({
   baseURL: "/",
   headers: { "Content-Type": "application/json" },
+  withCredentials: true, // Selalu kirim cookie di setiap request
 });
 
 // Request interceptor — attach token dari Zustand persist storage
