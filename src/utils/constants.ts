@@ -11,6 +11,7 @@ export const ROUTES = {
     KEHADIRAN: "/kehadiran",
     SEAT_MONITORING: "/seat-monitoring",
     LAPORAN: "/laporan",
+    PENGATURAN: "/pengaturan",
   },
   SCANNER: {
     SCAN: "/scan",

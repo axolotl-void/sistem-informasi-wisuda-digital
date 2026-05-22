@@ -96,53 +96,62 @@ function DeleteAllDialog({
   onConfirm,
   onCancel,
   count,
+  isDeleting,
 }: {
   open: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   count: number;
+  isDeleting: boolean;
 }) {
   if (!open) return null;
 
   return (
-    /* Backdrop */
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onCancel}
+        onClick={!isDeleting ? onCancel : undefined}
       />
-      {/* Dialog */}
       <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#0F172A] p-6 shadow-2xl">
-        {/* Icon */}
         <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10">
           <Trash2 className="size-5 text-red-400" />
         </div>
 
-        {/* Title */}
         <h2 className="text-base font-bold text-white/90">
           Hapus Semua Undangan?
         </h2>
         <p className="mt-2 text-[0.82rem] leading-relaxed text-white/40">
           Anda akan menghapus{" "}
           <span className="font-semibold text-red-400">{count} undangan</span>.
-          Tindakan ini tidak dapat dibatalkan dan semua data QR code akan hilang permanen.
+          Tindakan ini tidak dapat dibatalkan dan semua data QR code akan hilang permanen dari database.
         </p>
 
-        {/* Actions */}
         <div className="mt-6 flex gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] text-[0.82rem] font-semibold text-white/60 transition-all hover:bg-white/[0.07] hover:text-white/80 active:scale-[0.98]"
+            disabled={isDeleting}
+            className="flex-1 h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] text-[0.82rem] font-semibold text-white/60 transition-all hover:bg-white/[0.07] hover:text-white/80 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Batal
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 h-10 rounded-xl border border-red-500/30 bg-red-500/15 text-[0.82rem] font-bold text-red-400 transition-all hover:border-red-500/50 hover:bg-red-500/25 active:scale-[0.98]"
+            disabled={isDeleting}
+            className="flex-1 h-10 rounded-xl border border-red-500/30 bg-red-500/15 text-[0.82rem] font-bold text-red-400 transition-all hover:border-red-500/50 hover:bg-red-500/25 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Ya, Hapus Semua
+            {isDeleting ? (
+              <>
+                <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Menghapus...
+              </>
+            ) : (
+              "Ya, Hapus Semua"
+            )}
           </button>
         </div>
       </div>
@@ -189,10 +198,20 @@ export function InvitationToolbar() {
     return true;
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  function handleDeleteAllConfirm() {
-    deleteAll();
-    setShowDeleteDialog(false);
+  async function handleDeleteAllConfirm() {
+    setIsDeleting(true);
+    try {
+      await deleteAll();
+      setShowDeleteDialog(false);
+      toast.success(`Semua undangan berhasil dihapus dari database`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Gagal menghapus semua undangan";
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   function handleExportExcel() {
@@ -322,6 +341,7 @@ export function InvitationToolbar() {
         count={invitations.length}
         onConfirm={handleDeleteAllConfirm}
         onCancel={() => setShowDeleteDialog(false)}
+        isDeleting={isDeleting}
       />
     </>
   );

@@ -18,7 +18,7 @@ const navItems = [
   { label: "Scanner Gate", href: ROUTES.SCANNER.SCAN, icon: ScanLine },
   { label: "Kehadiran", href: ROUTES.ADMIN.KEHADIRAN, icon: ClipboardList },
   { label: "Laporan", href: ROUTES.ADMIN.LAPORAN, icon: BarChart3 },
-  { label: "Pengaturan", href: "#settings", icon: Settings },
+  { label: "Pengaturan", href: ROUTES.ADMIN.PENGATURAN, icon: Settings },
 ];
 
 export function AdminSidebar() {

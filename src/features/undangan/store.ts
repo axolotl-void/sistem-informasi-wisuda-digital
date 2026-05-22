@@ -36,8 +36,8 @@ interface UndanganActions {
   setFilterAttendance: (s: string) => void;
   generateInvitation: (id: string) => void;
   markDownloaded: (id: string) => void;
-  deleteInvitation: (id: string) => void;
-  deleteAll: () => void;
+  deleteInvitation: (id: string) => Promise<void>;
+  deleteAll: () => Promise<void>;
 }
 
 export const useUndanganStore = create<UndanganState & UndanganActions>((set, get) => ({
@@ -166,33 +166,26 @@ export const useUndanganStore = create<UndanganState & UndanganActions>((set, ge
         credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to delete");
-      
-      // Update local state after successful delete
+      // Update local state hanya jika API sukses
       const invitations = get().invitations.filter((inv) => inv.id !== id);
       set({ invitations, stats: computeStats(invitations) });
     } catch (error) {
       console.error("Failed to delete invitation:", error);
-      // Still remove from local state even if API fails
-      const invitations = get().invitations.filter((inv) => inv.id !== id);
-      set({ invitations, stats: computeStats(invitations) });
+      throw error; // Re-throw agar caller bisa handle
     }
   },
 
   deleteAll: async () => {
-    try {
-      const response = await fetch("/api/undangan/delete-all", {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to delete all");
-      
-      // Update local state after successful delete
-      set({ invitations: [], stats: computeStats([]) });
-    } catch (error) {
-      console.error("Failed to delete all invitations:", error);
-      // Still clear local state even if API fails
-      set({ invitations: [], stats: computeStats([]) });
+    const response = await fetch("/api/undangan/delete-all", {
+      method: "DELETE",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      throw new Error(result.message || "Gagal menghapus semua undangan");
     }
+    // Update local state hanya setelah API sukses
+    set({ invitations: [], stats: computeStats([]) });
   },
 }));
 

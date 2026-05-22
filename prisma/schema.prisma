@@ -119,7 +119,7 @@ model Kehadiran {
   catatan         String?
 
   undanganId String   @unique
-  undangan   Undangan @relation(fields: [undanganId], references: [id])
+  undangan   Undangan @relation(fields: [undanganId], references: [id], onDelete: Cascade)
 
   mahasiswaId String
   mahasiswa   Mahasiswa @relation(fields: [mahasiswaId], references: [id])

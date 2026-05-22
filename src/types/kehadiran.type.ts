@@ -30,6 +30,7 @@ export interface KehadiranFilter {
   tanggalWisuda?: Date;
   fakultas?: string;
   search?: string;
+  sesiWisuda?: string;
 }
 
 export interface KehadiranStats {

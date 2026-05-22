@@ -176,18 +176,22 @@ export class UndanganService {
   }
 
   /**
-   * Delete undangan by ID
+   * Delete undangan by ID (hapus kehadiran terkait dulu karena ada FK constraint)
    */
   static async delete(id: string): Promise<void> {
-    await prisma.undangan.delete({
-      where: { id },
-    });
+    // Hapus kehadiran yang terkait dengan undangan ini terlebih dahulu
+    await prisma.kehadiran.deleteMany({ where: { undanganId: id } });
+    // Baru hapus undangan
+    await prisma.undangan.delete({ where: { id } });
   }
 
   /**
-   * Delete all undangan
+   * Delete all undangan (hapus kehadiran terkait dulu karena ada FK constraint)
    */
   static async deleteAll(): Promise<number> {
+    // Hapus semua kehadiran yang terkait dengan undangan terlebih dahulu
+    await prisma.kehadiran.deleteMany({});
+    // Baru hapus semua undangan
     const result = await prisma.undangan.deleteMany({});
     return result.count;
   }
