@@ -35,7 +35,20 @@ export class UndanganService {
       prisma.undangan.findMany({
         where,
         include: { 
-          mahasiswa: true,
+          mahasiswa: {
+            select: {
+              id: true,
+              nim: true,
+              nama: true,
+              email: true,
+              fakultas: true,
+              prodi: true,
+              angkatan: true,
+              status: true,
+              sesiWisuda: true,
+              foto: true,   // ← include foto
+            },
+          },
           kehadiran: true,
         },
         skip: (page - 1) * limit,

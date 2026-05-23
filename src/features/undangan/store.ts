@@ -93,6 +93,7 @@ export const useUndanganStore = create<UndanganState & UndanganActions>((set, ge
           nim: item.mahasiswa?.nim || "-",
           fakultas: item.mahasiswa?.fakultas || "-",
           prodi: item.mahasiswa?.prodi || "-",
+          foto: item.mahasiswa?.foto || "",
           sesi: item.mahasiswa?.sesiWisuda || "-",
           tanggalWisuda: item.tanggalWisuda || "-",
           waktuMulai: "-",

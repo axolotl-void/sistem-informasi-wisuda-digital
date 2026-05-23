@@ -11,6 +11,7 @@ import { InvitationPreviewModal } from "@/features/undangan/components/invitatio
 import { QRDrawer } from "@/features/undangan/components/qr-drawer";
 import { GenerateInvitationModal } from "@/features/undangan/components/generate-modal";
 import { MassGenerateModal } from "@/features/undangan/components/mass-generate-modal";
+import { TamuRequestsPanel } from "@/features/undangan/components/tamu-requests-panel";
 
 export default function UndanganPage() {
   const { init, stats } = useUndanganStore();
@@ -18,7 +19,6 @@ export default function UndanganPage() {
   useEffect(() => {
     init();
   }, [init]);
-
   return (
     <>
       {/* Ambient background glow */}
@@ -77,6 +77,15 @@ export default function UndanganPage() {
           transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
         >
           <InvitationToolbar />
+        </motion.div>
+
+        {/* ── Request Tamu Panel ───────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
+        >
+          <TamuRequestsPanel onRefreshUndangan={() => init()} />
         </motion.div>
 
         {/* ── Table ───────────────────────────────────────────────────── */}

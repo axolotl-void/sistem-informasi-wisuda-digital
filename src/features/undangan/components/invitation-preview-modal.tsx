@@ -6,7 +6,6 @@ import { X, Download, Share2, Copy, Printer, Check, Loader2 } from "lucide-react
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import { useUndanganStore } from "../store";
-import { QrLarge } from "./qr-cell";
 import { StatusBadge, AttendanceBadge } from "./status-badge";
 import { InvitationCardPrint } from "./invitation-card-print";
 
@@ -193,12 +192,21 @@ export function InvitationPreviewModal() {
 
                 {/* Right — Details + Actions */}
                 <div className="space-y-4">
-                  {/* QR Code */}
+                  {/* QR Code untuk referensi cepat */}
                   <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5">
-                    <QrLarge token={inv.qrToken} size={160} />
+                    <div className="relative">
+                      <div className="absolute inset-0 rounded-2xl bg-blue-500/10 blur-xl" />
+                      <div className="relative rounded-2xl bg-white p-3 shadow-2xl">
+                        {qrDataUrl ? (
+                          <img src={qrDataUrl} alt="QR Code" width={140} height={140} />
+                        ) : (
+                          <div className="size-[140px] bg-gray-100 rounded-lg animate-pulse" />
+                        )}
+                      </div>
+                    </div>
                     <div className="text-center">
-                      <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-white/25">Token</p>
-                      <p className="mt-0.5 font-mono text-[0.7rem] text-white/50">{inv.qrToken}</p>
+                      <p className="text-[0.62rem] font-semibold uppercase tracking-wider text-white/25">Token Kehadiran</p>
+                      <p className="mt-0.5 font-mono text-[0.65rem] text-white/40 break-all">{inv.qrToken}</p>
                     </div>
                   </div>
 

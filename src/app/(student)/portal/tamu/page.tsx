@@ -1,324 +1,377 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Users, Plus, Trash2, Lock, AlertTriangle,
-  UserCheck, Phone, Loader2, CheckCircle2,
+  Users, Clock, CheckCircle2, XCircle,
+  AlertTriangle, Loader2, Send, X,
+  Ticket, RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-const MOCK_PROFILE_COMPLETE = true; // Ganti ke false untuk test locked state
-const KUOTA_TAMU = 3;
+type StatusPengajuan = "NONE" | "PENDING" | "APPROVED" | "REJECTED";
 
-interface Tamu {
-  id: string;
-  nama: string;
-  hubungan: string;
-  noHp: string;
+interface TamuData {
+  requestedTamu: number;
+  statusPengajuan: StatusPengajuan;
+  sesiWisuda: string | null;
+  undangan: {
+    id: string;
+    kode: string;
+    statusUndangan: string;
+    kuotaTamu: number;
+  } | null;
 }
 
-const MOCK_TAMU_AWAL: Tamu[] = [
-  { id: "1", nama: "Siti Rahayu", hubungan: "Ibu", noHp: "081234567890" },
-];
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const HUBUNGAN_OPTIONS = ["Ayah", "Ibu", "Kakak", "Adik", "Suami/Istri", "Lainnya"];
+function getToken(): string | null {
+  try {
+    const raw = localStorage.getItem("wisuda-auth");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { state?: { token?: string } };
+    return parsed?.state?.token ?? null;
+  } catch { return null; }
+}
+
+function authHeaders() {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+// ─── Status UI configs ────────────────────────────────────────────────────────
+
+const STATUS_CFG = {
+  NONE: null,
+  PENDING: {
+    icon: Clock,
+    title: "Menunggu Persetujuan Admin",
+    desc: "Pengajuan Anda sedang ditinjau. Anda akan mendapat notifikasi setelah admin memproses.",
+    color: "text-amber-400",
+    bg: "bg-amber-500/[0.07]",
+    border: "border-amber-500/20",
+    iconBg: "bg-amber-500/10",
+    dot: "bg-amber-400 animate-pulse",
+  },
+  APPROVED: {
+    icon: CheckCircle2,
+    title: "Pengajuan Disetujui!",
+    desc: "Admin telah menyetujui pengajuan tamu Anda. Undangan Anda sudah aktif.",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/[0.07]",
+    border: "border-emerald-500/20",
+    iconBg: "bg-emerald-500/10",
+    dot: "bg-emerald-400",
+  },
+  REJECTED: {
+    icon: XCircle,
+    title: "Pengajuan Ditolak",
+    desc: "Pengajuan tamu Anda ditolak oleh admin. Anda dapat mengajukan kembali.",
+    color: "text-red-400",
+    bg: "bg-red-500/[0.07]",
+    border: "border-red-500/20",
+    iconBg: "bg-red-500/10",
+    dot: "bg-red-400",
+  },
+};
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
-function LockedState() {
+function StatusCard({ status, requestedTamu, undangan }: {
+  status: StatusPengajuan;
+  requestedTamu: number;
+  undangan: TamuData["undangan"];
+}) {
+  const cfg = STATUS_CFG[status];
+  if (!cfg) return null;
+  const Icon = cfg.icon;
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] py-12 px-6 text-center"
+      className={`rounded-2xl border ${cfg.border} ${cfg.bg} p-5 space-y-3`}
     >
-      <div className="flex size-14 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 mb-4">
-        <Lock className="size-6 text-amber-400" />
-      </div>
-      <h3 className="text-sm font-bold text-white/70 mb-1">Profil Belum Lengkap</h3>
-      <p className="text-xs text-white/35 leading-relaxed max-w-xs">
-        Lengkapi profil Anda terlebih dahulu sebelum mendaftarkan tamu pendamping.
-      </p>
-      <a
-        href="/portal"
-        className="mt-4 inline-flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-400 hover:bg-amber-500/15 transition-colors"
-      >
-        <AlertTriangle className="size-3.5" />
-        Lengkapi Profil
-      </a>
-    </motion.div>
-  );
-}
-
-function KuotaBar({ used, max }: { used: number; max: number }) {
-  const pct = Math.round((used / max) * 100);
-  const color = used >= max ? "from-red-500 to-rose-500" : used >= max - 1 ? "from-amber-500 to-yellow-400" : "from-blue-500 to-indigo-500";
-  return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 space-y-2.5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Users className="size-4 text-white/30" />
-          <span className="text-xs font-semibold text-white/50">Kuota Tamu</span>
+      <div className="flex items-start gap-3">
+        <div className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${cfg.iconBg}`}>
+          <Icon className={`size-5 ${cfg.color}`} />
         </div>
-        <span className={`text-xs font-bold ${used >= max ? "text-red-400" : "text-white/70"}`}>
-          {used} / {max} orang
-        </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className={`size-1.5 rounded-full ${cfg.dot}`} />
+            <p className={`text-sm font-bold ${cfg.color}`}>{cfg.title}</p>
+          </div>
+          <p className="text-xs text-white/35 mt-1 leading-relaxed">{cfg.desc}</p>
+        </div>
       </div>
-      <div className="h-2 w-full rounded-full bg-white/[0.06] overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className={`h-full rounded-full bg-gradient-to-r ${color}`}
-        />
-      </div>
-      {used >= max && (
-        <p className="text-[0.68rem] text-red-400/80 flex items-center gap-1">
-          <AlertTriangle className="size-3" />
-          Kuota tamu sudah penuh
-        </p>
+
+      {/* Detail */}
+      {requestedTamu > 0 && (
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="size-3.5 text-white/25" />
+            <span className="text-xs text-white/40">Jumlah tamu diajukan</span>
+          </div>
+          <span className={`text-sm font-bold ${cfg.color}`}>{requestedTamu} orang</span>
+        </div>
       )}
-    </div>
-  );
-}
 
-function TamuCard({
-  tamu, index, onDelete,
-}: {
-  tamu: Tamu;
-  index: number;
-  onDelete: (id: string) => void;
-}) {
-  const [deleting, setDeleting] = useState(false);
-
-  async function handleDelete() {
-    setDeleting(true);
-    await new Promise((r) => setTimeout(r, 600));
-    onDelete(tamu.id);
-    toast.success(`${tamu.nama} dihapus dari daftar tamu`);
-  }
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -20, height: 0 }}
-      transition={{ duration: 0.2 }}
-      className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-3.5"
-    >
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15 border border-indigo-500/20">
-        <span className="text-sm font-bold text-indigo-300">
-          {tamu.nama.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-        </span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white/80 truncate">{tamu.nama}</p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[0.65rem] font-medium text-indigo-400/70 bg-indigo-500/10 border border-indigo-500/15 rounded-md px-1.5 py-0.5">
-            {tamu.hubungan}
-          </span>
-          {tamu.noHp && (
-            <span className="text-[0.65rem] text-white/25 truncate">{tamu.noHp}</span>
-          )}
+      {/* Undangan info jika sudah approved */}
+      {status === "APPROVED" && undangan && (
+        <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.05] px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Ticket className="size-3.5 text-emerald-400/60" />
+            <span className="text-xs text-white/40">Kode Undangan</span>
+          </div>
+          <span className="font-mono text-xs font-bold text-emerald-400">{undangan.kode}</span>
         </div>
-      </div>
-      <button
-        type="button"
-        onClick={handleDelete}
-        disabled={deleting}
-        className="flex size-8 shrink-0 items-center justify-center rounded-xl text-white/20 hover:bg-red-500/10 hover:text-red-400 transition-colors disabled:opacity-40"
-      >
-        {deleting ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
-      </button>
+      )}
     </motion.div>
-  );
-}
-
-// ─── Add Tamu Form ────────────────────────────────────────────────────────────
-
-function AddTamuForm({ onAdd }: { onAdd: (t: Tamu) => void }) {
-  const [open, setOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ nama: "", hubungan: "Ibu", noHp: "" });
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!form.nama.trim()) { toast.error("Nama tamu wajib diisi"); return; }
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 800));
-    onAdd({ id: Date.now().toString(), ...form });
-    setForm({ nama: "", hubungan: "Ibu", noHp: "" });
-    setSaving(false);
-    setOpen(false);
-    toast.success("Tamu berhasil ditambahkan");
-  }
-
-  const inputCls = "w-full h-12 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white/80 placeholder-white/20 outline-none transition-all focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10";
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-white/[0.12] bg-white/[0.02] py-4 text-sm font-semibold text-white/30 hover:border-blue-500/30 hover:bg-blue-500/[0.04] hover:text-blue-400 transition-all"
-      >
-        <Plus className="size-4" />
-        Tambah Tamu
-      </button>
-    );
-  }
-
-  return (
-    <motion.form
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      onSubmit={handleSubmit}
-      className="rounded-2xl border border-blue-500/20 bg-blue-500/[0.04] p-4 space-y-3"
-    >
-      <p className="text-[0.72rem] font-bold uppercase tracking-wider text-blue-400/60">Tambah Tamu Baru</p>
-
-      <input
-        type="text"
-        value={form.nama}
-        onChange={(e) => setForm((f) => ({ ...f, nama: e.target.value }))}
-        placeholder="Nama lengkap tamu"
-        className={inputCls}
-        autoFocus
-      />
-
-      <div className="grid grid-cols-2 gap-3">
-        <select
-          value={form.hubungan}
-          onChange={(e) => setForm((f) => ({ ...f, hubungan: e.target.value }))}
-          className={inputCls + " cursor-pointer"}
-        >
-          {HUBUNGAN_OPTIONS.map((h) => (
-            <option key={h} value={h} className="bg-[#0F172A]">{h}</option>
-          ))}
-        </select>
-        <input
-          type="tel"
-          value={form.noHp}
-          onChange={(e) => setForm((f) => ({ ...f, noHp: e.target.value }))}
-          placeholder="No. HP (opsional)"
-          className={inputCls}
-        />
-      </div>
-
-      <div className="flex gap-2.5">
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="flex-1 h-11 rounded-2xl border border-white/[0.08] bg-white/[0.04] text-sm font-semibold text-white/40 hover:bg-white/[0.07] transition-all"
-        >
-          Batal
-        </button>
-        <button
-          type="submit"
-          disabled={saving}
-          className="flex-1 h-11 rounded-2xl border border-blue-500/30 bg-blue-500/15 text-sm font-bold text-blue-400 hover:bg-blue-500/20 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-        >
-          {saving ? <><Loader2 className="size-4 animate-spin" /> Menyimpan...</> : <><UserCheck className="size-4" /> Tambahkan</>}
-        </button>
-      </div>
-    </motion.form>
   );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TamuPage() {
-  const [tamuList, setTamuList] = useState<Tamu[]>(MOCK_TAMU_AWAL);
-  const isLocked = !MOCK_PROFILE_COMPLETE;
-  const kuotaSisa = KUOTA_TAMU - tamuList.length;
+  const [tamuData, setTamuData] = useState<TamuData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [jumlahTamu, setJumlahTamu] = useState(2);
 
-  function handleAdd(t: Tamu) {
-    setTamuList((prev) => [...prev, t]);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/portal/tamu", {
+        headers: authHeaders(),
+        credentials: "include",
+      });
+      const result = await res.json();
+      if (result.data) {
+        setTamuData(result.data);
+        if (result.data.requestedTamu > 0) {
+          setJumlahTamu(result.data.requestedTamu);
+        }
+      }
+    } catch {
+      toast.error("Gagal memuat data pengajuan tamu");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  function handleDelete(id: string) {
-    setTamuList((prev) => prev.filter((t) => t.id !== id));
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (jumlahTamu < 1 || jumlahTamu > 10) {
+      toast.error("Jumlah tamu harus antara 1–10 orang");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/portal/tamu", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        credentials: "include",
+        body: JSON.stringify({ jumlahTamu }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Gagal mengirim pengajuan");
+      toast.success("Pengajuan tamu berhasil dikirim!");
+      await fetchData();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal mengirim pengajuan");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleCancel() {
+    setIsCancelling(true);
+    try {
+      const res = await fetch("/api/portal/tamu", {
+        method: "DELETE",
+        headers: authHeaders(),
+        credentials: "include",
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Gagal membatalkan");
+      toast.success("Pengajuan berhasil dibatalkan");
+      await fetchData();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal membatalkan pengajuan");
+    } finally {
+      setIsCancelling(false);
+    }
+  }
+
+  const status = tamuData?.statusPengajuan ?? "NONE";
+  const isPending = status === "PENDING";
+  const isApproved = status === "APPROVED";
+  const isFormDisabled = isPending || isApproved;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-16 rounded-2xl bg-white/[0.03] animate-pulse" />
+        <div className="h-32 rounded-2xl bg-white/[0.03] animate-pulse" />
+        <div className="h-48 rounded-2xl bg-white/[0.03] animate-pulse" />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
-          <Users className="size-5 text-indigo-400" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
+            <Users className="size-5 text-indigo-400" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-white/90">Pengajuan Tamu</h1>
+            <p className="text-xs text-white/30">Ajukan jumlah tamu untuk wisuda Anda</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg font-bold text-white/90">Pengajuan Tamu</h1>
-          <p className="text-xs text-white/30">Daftarkan keluarga / pendamping Anda</p>
-        </div>
+        <button
+          type="button"
+          onClick={fetchData}
+          className="flex size-8 items-center justify-center rounded-xl text-white/25 hover:bg-white/[0.06] hover:text-white/50 transition-colors"
+          title="Refresh"
+        >
+          <RefreshCw className="size-4" />
+        </button>
       </div>
 
-      {isLocked ? (
-        <LockedState />
-      ) : (
-        <>
-          {/* Kuota bar */}
-          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <KuotaBar used={tamuList.length} max={KUOTA_TAMU} />
-          </motion.div>
+      {/* Status card */}
+      <AnimatePresence mode="wait">
+        {status !== "NONE" && (
+          <StatusCard
+            key={status}
+            status={status}
+            requestedTamu={tamuData?.requestedTamu ?? 0}
+            undangan={tamuData?.undangan ?? null}
+          />
+        )}
+      </AnimatePresence>
 
-          {/* Daftar tamu */}
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="space-y-2.5"
-          >
-            {tamuList.length > 0 && (
-              <p className="text-[0.72rem] font-bold uppercase tracking-wider text-white/25 px-1">
-                Tamu Terdaftar ({tamuList.length})
-              </p>
-            )}
-
-            <AnimatePresence mode="popLayout">
-              {tamuList.map((t, i) => (
-                <TamuCard key={t.id} tamu={t} index={i} onDelete={handleDelete} />
-              ))}
-            </AnimatePresence>
-
-            {tamuList.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col items-center py-8 text-center"
-              >
-                <Users className="size-8 text-white/10 mb-2" />
-                <p className="text-sm text-white/25">Belum ada tamu terdaftar</p>
-              </motion.div>
-            )}
-          </motion.div>
-
-          {/* Add form */}
-          {kuotaSisa > 0 && (
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <AddTamuForm onAdd={handleAdd} />
-            </motion.div>
-          )}
-
-          {/* Info */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-start gap-2.5 rounded-2xl border border-white/[0.05] bg-white/[0.02] p-3.5"
-          >
-            <CheckCircle2 className="size-4 text-white/20 shrink-0 mt-0.5" />
-            <p className="text-[0.7rem] text-white/25 leading-relaxed">
-              Tamu yang terdaftar akan mendapatkan akses masuk ke venue wisuda bersama Anda.
-              Pastikan data yang dimasukkan sudah benar.
+      {/* Form pengajuan */}
+      {!isApproved && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 space-y-5"
+        >
+          <div className="flex items-center gap-2">
+            <Users className="size-3.5 text-indigo-400/60" />
+            <p className="text-[0.7rem] font-black uppercase tracking-widest text-white/25">
+              {isPending ? "Pengajuan Terkirim" : "Form Pengajuan Tamu"}
             </p>
-          </motion.div>
-        </>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Input jumlah */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-white/40">
+                Berapa jumlah tamu/keluarga yang ingin diundang?
+              </label>
+              <div className="flex items-center gap-3">
+                {/* Decrement */}
+                <button
+                  type="button"
+                  onClick={() => setJumlahTamu((v) => Math.max(1, v - 1))}
+                  disabled={isFormDisabled || jumlahTamu <= 1}
+                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-xl font-bold text-white/50 hover:bg-white/[0.08] hover:text-white/80 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                >
+                  −
+                </button>
+
+                {/* Number display */}
+                <div className={`flex-1 h-14 rounded-2xl border flex items-center justify-center gap-2 ${
+                  isFormDisabled
+                    ? "border-white/[0.05] bg-white/[0.02]"
+                    : "border-indigo-500/30 bg-indigo-500/[0.06]"
+                }`}>
+                  <Users className={`size-4 ${isFormDisabled ? "text-white/20" : "text-indigo-400/60"}`} />
+                  <span className={`text-2xl font-black tabular-nums ${isFormDisabled ? "text-white/30" : "text-white/90"}`}>
+                    {jumlahTamu}
+                  </span>
+                  <span className={`text-xs ${isFormDisabled ? "text-white/20" : "text-white/40"}`}>orang</span>
+                </div>
+
+                {/* Increment */}
+                <button
+                  type="button"
+                  onClick={() => setJumlahTamu((v) => Math.min(10, v + 1))}
+                  disabled={isFormDisabled || jumlahTamu >= 10}
+                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-xl font-bold text-white/50 hover:bg-white/[0.08] hover:text-white/80 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                >
+                  +
+                </button>
+              </div>
+              <p className="text-[0.65rem] text-white/20">Maksimal 10 orang tamu</p>
+            </div>
+
+            {/* Sesi info */}
+            {tamuData?.sesiWisuda && (
+              <div className="flex items-center gap-2 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5">
+                <span className="size-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="text-xs text-white/35">Sesi wisuda Anda:</span>
+                <span className="text-xs font-bold text-cyan-400">{tamuData.sesiWisuda}</span>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2.5">
+              {isPending ? (
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isCancelling}
+                  className="flex-1 h-12 rounded-2xl border border-red-500/20 bg-red-500/[0.06] text-sm font-semibold text-red-400/70 hover:bg-red-500/[0.12] hover:text-red-400 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isCancelling ? (
+                    <><Loader2 className="size-4 animate-spin" /> Membatalkan...</>
+                  ) : (
+                    <><X className="size-4" /> Batalkan Pengajuan</>
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isSubmitting || isFormDisabled}
+                  className="flex-1 h-12 rounded-2xl border border-indigo-500/30 bg-indigo-500/15 text-sm font-bold text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98]"
+                >
+                  {isSubmitting ? (
+                    <><Loader2 className="size-4 animate-spin" /> Mengirim...</>
+                  ) : (
+                    <><Send className="size-4" /> Kirim Pengajuan</>
+                  )}
+                </button>
+              )}
+            </div>
+          </form>
+        </motion.div>
       )}
+
+      {/* Info box */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.15 }}
+        className="flex items-start gap-2.5 rounded-2xl border border-white/[0.05] bg-white/[0.02] p-3.5"
+      >
+        <AlertTriangle className="size-4 text-white/15 shrink-0 mt-0.5" />
+        <p className="text-[0.68rem] text-white/22 leading-relaxed">
+          Pengajuan tamu akan ditinjau oleh admin. Setelah disetujui, undangan digital Anda akan otomatis digenerate dengan kuota tamu sesuai pengajuan.
+        </p>
+      </motion.div>
     </div>
   );
 }

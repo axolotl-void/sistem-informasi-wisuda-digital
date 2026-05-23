@@ -34,6 +34,13 @@ enum StatusUndangan {
   DIBATALKAN
 }
 
+enum StatusPengajuanTamu {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum StatusKehadiran {
   HADIR
   TIDAK_HADIR
@@ -72,6 +79,10 @@ model Mahasiswa {
   sesiWisuda String?
   foto       String?
 
+  // Request & Approve tamu
+  requestedTamu    Int                  @default(0)
+  statusPengajuan  StatusPengajuanTamu  @default(NONE)
+
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -84,6 +95,7 @@ model Mahasiswa {
   @@index([nim])
   @@index([fakultas])
   @@index([status])
+  @@index([statusPengajuan])
   @@map("mahasiswa")
 }
 
