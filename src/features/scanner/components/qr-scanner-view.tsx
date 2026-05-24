@@ -126,46 +126,54 @@ export function QrScannerView() {
       </div>
 
       {/* Viewfinder */}
-      <div className="relative aspect-square w-full max-w-[340px] mx-auto rounded-2xl border border-gray-300 dark:border-white/[0.08] bg-gray-900 dark:bg-black/60 overflow-hidden shadow-inner flex items-center justify-center">
-        {/* Corner brackets */}
-        <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
-          <div className="relative w-[70%] h-[70%]">
-            {[
-              "top-0 left-0 border-t-2 border-l-2 rounded-tl-lg",
-              "top-0 right-0 border-t-2 border-r-2 rounded-tr-lg",
-              "bottom-0 left-0 border-b-2 border-l-2 rounded-bl-lg",
-              "bottom-0 right-0 border-b-2 border-r-2 rounded-br-lg",
-            ].map((cls, i) => (
-              <div key={i} className={cn(
-                "absolute size-6", cls,
-                localLoading ? "border-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
-                  : isScanning ? "border-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.6)] animate-pulse"
-                  : "border-white/30",
-                "transition-colors duration-300"
-              )} />
-            ))}
-            {isScanning && !localLoading && (
-              <motion.div
-                className="absolute left-1.5 right-1.5 h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_8px_rgba(96,165,250,0.8)]"
-                animate={{ top: ["8%", "92%", "8%"] }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-              />
-            )}
+      <div className={cn(
+        "relative aspect-square w-full max-w-[340px] mx-auto rounded-2xl overflow-hidden flex items-center justify-center transition-colors duration-300",
+        isScanning
+          ? "border-2 border-blue-200 dark:border-white/[0.08] bg-gray-950 dark:bg-black/60 shadow-lg"
+          : "border-2 border-dashed border-gray-200 dark:border-white/[0.08] bg-gray-50 dark:bg-black/60"
+      )}>
+        {/* Corner brackets — only shown when scanning */}
+        {isScanning && (
+          <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
+            <div className="relative w-[70%] h-[70%]">
+              {[
+                "top-0 left-0 border-t-2 border-l-2 rounded-tl-lg",
+                "top-0 right-0 border-t-2 border-r-2 rounded-tr-lg",
+                "bottom-0 left-0 border-b-2 border-l-2 rounded-bl-lg",
+                "bottom-0 right-0 border-b-2 border-r-2 rounded-br-lg",
+              ].map((cls, i) => (
+                <div key={i} className={cn(
+                  "absolute size-6", cls,
+                  localLoading
+                    ? "border-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                    : "border-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.6)] animate-pulse",
+                  "transition-colors duration-300"
+                )} />
+              ))}
+              {!localLoading && (
+                <motion.div
+                  className="absolute left-1.5 right-1.5 h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_8px_rgba(96,165,250,0.8)]"
+                  animate={{ top: ["8%", "92%", "8%"] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div id={containerId} className={cn("w-full h-full object-cover transition-opacity duration-300",
-          (localLoading || !isScanning) ? "opacity-30" : "opacity-100"
+        <div id={containerId} className={cn(
+          "w-full h-full object-cover transition-opacity duration-300",
+          (localLoading || !isScanning) ? "opacity-0" : "opacity-100"
         )} />
 
-        {/* Camera off overlay */}
+        {/* Camera off state — light-mode friendly */}
         {!isScanning && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-gray-900/90 backdrop-blur-md">
-            <div className="flex size-14 items-center justify-center rounded-full bg-white/[0.05] border border-white/[0.1] text-white/30 mb-3">
-              <CameraOff className="size-6 animate-pulse" />
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center">
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-gray-100 border border-gray-200 text-gray-300 dark:bg-white/[0.04] dark:border-white/[0.08] dark:text-white/20 mb-4">
+              <CameraOff className="size-7" />
             </div>
-            <p className="text-xs font-black uppercase tracking-wider text-white/40">Kamera Mati</p>
-            <p className="text-[10px] font-semibold text-white/25 mt-1 max-w-[200px] text-center">
+            <p className="text-sm font-bold text-gray-400 dark:text-white/30">Kamera Tidak Aktif</p>
+            <p className="text-xs text-gray-300 dark:text-white/20 mt-1 max-w-[200px] text-center leading-relaxed">
               Klik tombol di bawah untuk mengaktifkan pemindai
             </p>
           </div>
@@ -173,7 +181,7 @@ export function QrScannerView() {
 
         {/* Processing overlay */}
         {localLoading && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
             <Loader2 className="size-10 text-amber-400 animate-spin" />
             <p className="text-xs font-bold text-amber-400 mt-3 tracking-widest uppercase">Memvalidasi...</p>
           </div>
