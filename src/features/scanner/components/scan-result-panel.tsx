@@ -98,14 +98,14 @@ export function ScanResultPanel() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* ─── Main Result Panel ─── */}
-      <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#090D16]/80 p-6 backdrop-blur-xl shadow-md dark:shadow-2xl min-h-[360px] flex flex-col justify-between">
+      <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white dark:border-white/[0.08] dark:bg-[#0C1120] shadow-sm min-h-[340px] flex flex-col justify-between">
 
-        {status === "success" && <div className="absolute -right-20 -top-20 -z-10 size-48 rounded-full bg-emerald-500/10 blur-[80px]" />}
-        {status === "error"   && <div className="absolute -right-20 -top-20 -z-10 size-48 rounded-full bg-red-500/10 blur-[80px]" />}
+        {status === "success" && <div className="absolute -right-16 -top-16 -z-10 size-40 rounded-full bg-emerald-400/10 blur-[60px]" />}
+        {status === "error"   && <div className="absolute -right-16 -top-16 -z-10 size-40 rounded-full bg-red-400/10 blur-[60px]" />}
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col p-5">
           {/* Header */}
           <div className="mb-4 flex items-center justify-between border-b border-gray-100 dark:border-white/[0.06] pb-3">
             <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-white/30 flex items-center gap-1.5">
@@ -113,8 +113,8 @@ export function ScanResultPanel() {
               Panel Validasi Absensi
             </span>
             {(status === "success" || status === "error") && (
-              <span className="text-[10px] font-bold text-gray-500 dark:text-white/40 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] px-2.5 py-0.5 rounded-full">
-                Auto-reset: {timeLeft}s
+              <span className="text-[10px] font-semibold text-gray-400 dark:text-white/30 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] px-2 py-0.5 rounded-full">
+                Reset {timeLeft}s
               </span>
             )}
           </div>
@@ -124,9 +124,9 @@ export function ScanResultPanel() {
             {status === "idle" && (
               <motion.div key="idle" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
                 className="flex-1 flex flex-col items-center justify-center py-10 text-center">
-                <div className="relative mb-4 flex size-16 items-center justify-center rounded-2xl bg-gray-100 border border-gray-200 text-gray-300 dark:bg-white/[0.02] dark:border-white/[0.06] dark:text-white/20">
-                  <Clock className="size-7 animate-pulse" />
-                  <div className="absolute inset-0 rounded-2xl border border-blue-400/20 animate-ping opacity-30" />
+                <div className="relative mb-4 flex size-14 items-center justify-center rounded-2xl bg-gray-100 border border-gray-200 text-gray-300 dark:bg-white/[0.03] dark:border-white/[0.06] dark:text-white/20">
+                  <Clock className="size-6 animate-pulse" />
+                  <div className="absolute inset-0 rounded-2xl border border-blue-400/20 animate-ping opacity-20" />
                 </div>
                 <h4 className="text-sm font-bold text-gray-700 dark:text-white/80">Menunggu Pemindaian</h4>
                 <p className="text-xs text-gray-400 dark:text-white/40 mt-1 max-w-[240px] leading-relaxed">
@@ -276,11 +276,11 @@ export function ScanResultPanel() {
 
         {/* Action Button & Timer */}
         {(status === "success" || status === "error") && (
-          <div className="mt-5 pt-3 border-t border-gray-100 dark:border-white/[0.05] relative">
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-white/[0.05] relative">
             <button
               type="button"
               onClick={resetStatus}
-              className="flex w-full h-11 items-center justify-center gap-2 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 text-xs font-bold text-gray-600 transition-all cursor-pointer dark:bg-white/[0.04] dark:border-white/[0.08] dark:hover:bg-white/[0.08] dark:text-white"
+              className="flex w-full h-10 items-center justify-center gap-2 rounded-xl bg-gray-900 hover:bg-gray-800 text-xs font-bold text-white transition-all cursor-pointer dark:bg-white/[0.06] dark:border dark:border-white/[0.1] dark:hover:bg-white/[0.1] dark:text-white"
             >
               Scan Selanjutnya
               <ArrowRight className="size-3.5" />
@@ -299,37 +299,41 @@ export function ScanResultPanel() {
       </div>
 
       {/* ─── Counter Widget ─── */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/[0.02] p-4 text-center">
-          <div className="absolute top-2.5 right-2.5 text-emerald-200 dark:text-emerald-500/10">
-            <CheckCircle2 className="size-8" />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white dark:border-emerald-500/20 dark:from-emerald-500/[0.06] dark:to-transparent p-3.5 shadow-sm dark:shadow-none">
+          <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-500/15">
+            <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">{totalScanned}</p>
-          <p className="text-[10px] font-black text-gray-400 dark:text-white/40 uppercase mt-1 tracking-widest">Berhasil</p>
+          <div>
+            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 leading-none">{totalScanned}</p>
+            <p className="text-[10px] font-semibold text-emerald-500/60 dark:text-emerald-400/40 uppercase tracking-wider mt-0.5">Berhasil</p>
+          </div>
         </div>
-        <div className="relative overflow-hidden rounded-2xl border border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-500/[0.02] p-4 text-center">
-          <div className="absolute top-2.5 right-2.5 text-red-200 dark:text-red-500/10">
-            <XCircle className="size-8" />
+        <div className="flex items-center gap-3 rounded-xl border border-red-100 bg-gradient-to-br from-red-50 to-white dark:border-red-500/20 dark:from-red-500/[0.06] dark:to-transparent p-3.5 shadow-sm dark:shadow-none">
+          <div className="flex size-9 items-center justify-center rounded-lg bg-red-100 dark:bg-red-500/15">
+            <XCircle className="size-4 text-red-500 dark:text-red-400" />
           </div>
-          <p className="text-3xl font-black text-red-500 dark:text-red-400 tracking-tight">{scanHistory.filter(r => !r.success).length}</p>
-          <p className="text-[10px] font-black text-gray-400 dark:text-white/40 uppercase mt-1 tracking-widest">Gagal</p>
+          <div>
+            <p className="text-2xl font-black text-red-500 dark:text-red-400 leading-none">{scanHistory.filter(r => !r.success).length}</p>
+            <p className="text-[10px] font-semibold text-red-400/60 dark:text-red-400/40 uppercase tracking-wider mt-0.5">Gagal</p>
+          </div>
         </div>
       </div>
 
       {/* ─── Scan History ─── */}
       {scanHistory.length > 0 && (
-        <div className="rounded-3xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#090D16]/80 p-5 backdrop-blur-xl shadow-md dark:shadow-2xl">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-white/40 flex items-center gap-1.5">
-              <Activity className="size-3.5 text-blue-500 dark:text-blue-400 animate-pulse" />
-              Riwayat Pemindaian ({scanHistory.length})
+        <div className="rounded-2xl border border-gray-200/80 bg-white dark:border-white/[0.08] dark:bg-[#0C1120] overflow-hidden shadow-sm dark:shadow-none">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-white/[0.06]">
+            <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-white/40 flex items-center gap-1.5">
+              <Activity className="size-3.5 text-blue-500 dark:text-blue-400" />
+              Riwayat ({scanHistory.length})
             </h4>
-            <button onClick={clearHistory} className="text-[10px] font-bold text-red-400 hover:text-red-600 dark:text-red-400/60 dark:hover:text-red-400 flex items-center gap-1 hover:underline transition-all cursor-pointer">
+            <button onClick={clearHistory} className="text-[10px] font-bold text-red-400 hover:text-red-600 dark:text-red-400/60 dark:hover:text-red-400 flex items-center gap-1 transition-all cursor-pointer">
               <Trash2 className="size-3" />
               Hapus
             </button>
           </div>
-          <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+          <div className="p-3 space-y-1.5 max-h-44 overflow-y-auto">
             <AnimatePresence initial={false}>
               {scanHistory.slice(0, 8).map((result, idx) => (
                 <motion.div
@@ -339,25 +343,23 @@ export function ScanResultPanel() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl p-3 border text-xs transition-colors",
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition-colors",
                     result.success
-                      ? "border-emerald-200 bg-emerald-50 hover:bg-emerald-100 dark:border-emerald-500/10 dark:bg-emerald-500/[0.02] dark:hover:bg-emerald-500/[0.04]"
-                      : "border-red-200 bg-red-50 hover:bg-red-100 dark:border-red-500/10 dark:bg-red-500/[0.02] dark:hover:bg-red-500/[0.04]"
+                      ? "bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/[0.04] dark:hover:bg-emerald-500/[0.07]"
+                      : "bg-red-50 hover:bg-red-100 dark:bg-red-500/[0.04] dark:hover:bg-red-500/[0.07]"
                   )}
                 >
-                  <div className="shrink-0">
-                    {result.success ? (
-                      <div className="flex size-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-                        <CheckCircle2 className="size-3.5" />
-                      </div>
-                    ) : (
-                      <div className="flex size-6 items-center justify-center rounded-lg bg-red-100 text-red-500 dark:bg-red-500/10 dark:text-red-400">
-                        <XCircle className="size-3.5" />
-                      </div>
-                    )}
+                  <div className={cn(
+                    "flex size-5 shrink-0 items-center justify-center rounded-md",
+                    result.success ? "bg-emerald-100 dark:bg-emerald-500/15" : "bg-red-100 dark:bg-red-500/15"
+                  )}>
+                    {result.success
+                      ? <CheckCircle2 className="size-3 text-emerald-600 dark:text-emerald-400" />
+                      : <XCircle className="size-3 text-red-500 dark:text-red-400" />
+                    }
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-extrabold text-gray-800 dark:text-white truncate">
+                    <p className="font-bold text-gray-800 dark:text-white truncate text-[11px]">
                       {result.mahasiswa?.nama ?? "QR Code Tidak Valid"}
                     </p>
                     <p className="text-[10px] text-gray-400 dark:text-white/40 font-semibold truncate mt-0.5">
