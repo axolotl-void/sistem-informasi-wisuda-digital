@@ -16,28 +16,24 @@ interface StatCardProps {
 
 const accentMap = {
   blue: {
-    icon: "text-blue-400",
-    iconBg: "bg-blue-500/10",
-    ring: "ring-blue-500/20",
-    glow: "hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]",
+    icon: "text-blue-600 dark:text-blue-400",
+    iconBg: "bg-blue-100 dark:bg-blue-500/10",
+    glow: "hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)] dark:hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]",
   },
   emerald: {
-    icon: "text-emerald-400",
-    iconBg: "bg-emerald-500/10",
-    ring: "ring-emerald-500/20",
-    glow: "hover:shadow-[0_0_30px_rgba(16,185,129,0.12)]",
+    icon: "text-emerald-600 dark:text-emerald-400",
+    iconBg: "bg-emerald-100 dark:bg-emerald-500/10",
+    glow: "hover:shadow-[0_8px_30px_rgba(16,185,129,0.15)] dark:hover:shadow-[0_0_30px_rgba(16,185,129,0.12)]",
   },
   orange: {
-    icon: "text-orange-400",
-    iconBg: "bg-orange-500/10",
-    ring: "ring-orange-500/20",
-    glow: "hover:shadow-[0_0_30px_rgba(249,115,22,0.12)]",
+    icon: "text-orange-600 dark:text-orange-400",
+    iconBg: "bg-orange-100 dark:bg-orange-500/10",
+    glow: "hover:shadow-[0_8px_30px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_30px_rgba(249,115,22,0.12)]",
   },
   violet: {
-    icon: "text-violet-400",
-    iconBg: "bg-violet-500/10",
-    ring: "ring-violet-500/20",
-    glow: "hover:shadow-[0_0_30px_rgba(139,92,246,0.12)]",
+    icon: "text-violet-600 dark:text-violet-400",
+    iconBg: "bg-violet-100 dark:bg-violet-500/10",
+    glow: "hover:shadow-[0_8px_30px_rgba(139,92,246,0.15)] dark:hover:shadow-[0_0_30px_rgba(139,92,246,0.12)]",
   },
 };
 
@@ -58,30 +54,30 @@ export function StatCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay, ease: "easeOut" }}
       className={cn(
-        "group relative rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5",
-        "backdrop-blur-xl transition-all duration-500",
-        "hover:-translate-y-0.5 hover:border-white/[0.12] hover:bg-white/[0.06]",
+        "group relative rounded-3xl border p-5",
+        // Light mode: white glass card dengan soft shadow
+        "bg-white/70 border-white/60 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-md",
+        // Dark mode: tetap seperti semula
+        "dark:bg-white/[0.04] dark:border-white/[0.08] dark:shadow-none dark:backdrop-blur-xl",
+        "transition-all duration-500",
+        "hover:-translate-y-0.5",
+        "dark:hover:border-white/[0.12] dark:hover:bg-white/[0.06]",
         colors.glow,
       )}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wider text-white/35">
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-white/35">
             {label}
           </p>
-          <p className="text-4xl font-bold tracking-tight text-white">
+          <p className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
             {value}
           </p>
           {subtitle && (
-            <p className="text-xs font-medium text-white/25">{subtitle}</p>
+            <p className="text-xs font-medium text-slate-400 dark:text-white/25">{subtitle}</p>
           )}
           {trend && (
-            <p
-              className={cn(
-                "text-xs font-semibold",
-                trend.positive ? "text-emerald-400" : "text-red-400",
-              )}
-            >
+            <p className={cn("text-xs font-semibold", trend.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400")}>
               {trend.positive ? "↑" : "↓"} {trend.value}
             </p>
           )}

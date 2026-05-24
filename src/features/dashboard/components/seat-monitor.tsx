@@ -39,49 +39,96 @@ export interface SeatData {
 // ─── Block Configuration ─────────────────────────────────────────────────────
 // 4 blocks positioned flat (2D) over the background image.
 // Coordinates are tuned to align with the neon outlines in Ruangan-wisuda.png.
+// rowsLayout dihitung dinamis dari kapasitas yang dikonfigurasi di Pengaturan.
 
-const BLOCKS_CONFIG = [
+// Helper: distribusi kursi ke baris secara merata
+function buildRowsLayout(totalSeats: number): number[] {
+  if (totalSeats <= 0) return [];
+  // Target ~7 kursi per baris, maks 10
+  const seatsPerRow = Math.min(10, Math.max(5, Math.round(totalSeats / Math.ceil(totalSeats / 8))));
+  const rows: number[] = [];
+  let remaining = totalSeats;
+  while (remaining > 0) {
+    const count = Math.min(seatsPerRow, remaining);
+    rows.push(count);
+    remaining -= count;
+  }
+  return rows;
+}
+
+// Default kapasitas per blok (fallback jika belum dikonfigurasi)
+const DEFAULT_BLOK_KAPASITAS = { kuning: 39, biru: 52, ungu: 52, hijau: 39 };
+
+function getBlokKapasitas() {
+  try {
+    const raw = typeof window !== "undefined" ? localStorage.getItem("wisuda_blok_kursi") : null;
+    if (raw) {
+      const parsed = JSON.parse(raw) as typeof DEFAULT_BLOK_KAPASITAS;
+      return {
+        kuning: parsed.kuning ?? DEFAULT_BLOK_KAPASITAS.kuning,
+        biru: parsed.biru ?? DEFAULT_BLOK_KAPASITAS.biru,
+        ungu: parsed.ungu ?? DEFAULT_BLOK_KAPASITAS.ungu,
+        hijau: parsed.hijau ?? DEFAULT_BLOK_KAPASITAS.hijau,
+      };
+    }
+  } catch { /* ignore */ }
+  return DEFAULT_BLOK_KAPASITAS;
+}
+
+const BLOCKS_BASE = [
   { 
     id: "yellow", 
     name: "Blok Kuning", 
+    kapasitasKey: "kuning" as const,
     borderColor: "border-amber-500/30",
     bgColor: "bg-amber-950/10",
     hoverShadow: "hover:shadow-[0_0_25px_rgba(245,158,11,0.2)]", 
     textColor: "text-amber-400",
     position: { top: "36%", left: "6%", width: "22%", height: "28%" },
-    rowsLayout: [5, 6, 6, 7, 7, 8],
   },
   { 
     id: "cyan", 
     name: "Blok Biru", 
+    kapasitasKey: "biru" as const,
     borderColor: "border-cyan-500/30",
     bgColor: "bg-cyan-950/10",
     hoverShadow: "hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]", 
     textColor: "text-cyan-400",
     position: { top: "39%", left: "29%", width: "20%", height: "30%" },
-    rowsLayout: [7, 7, 7, 7, 8, 8, 8],
   },
   { 
     id: "purple", 
     name: "Blok Ungu", 
+    kapasitasKey: "ungu" as const,
     borderColor: "border-fuchsia-500/30",
     bgColor: "bg-fuchsia-950/10",
     hoverShadow: "hover:shadow-[0_0_25px_rgba(217,70,239,0.2)]", 
     textColor: "text-fuchsia-400",
     position: { top: "39%", left: "51%", width: "20%", height: "30%" },
-    rowsLayout: [7, 7, 7, 7, 8, 8, 8],
   },
   { 
     id: "green", 
     name: "Blok Hijau", 
+    kapasitasKey: "hijau" as const,
     borderColor: "border-lime-400/30",
     bgColor: "bg-emerald-950/10",
     hoverShadow: "hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]", 
     textColor: "text-lime-400",
     position: { top: "36%", left: "72%", width: "22%", height: "28%" },
-    rowsLayout: [5, 6, 6, 7, 7, 8],
   },
 ];
+
+// Build blocksConfig dengan rowsLayout dinamis dari konfigurasi
+function buildBlocksConfig() {
+  const kapasitas = getBlokKapasitas();
+  return BLOCKS_BASE.map((b) => ({
+    ...b,
+    rowsLayout: buildRowsLayout(kapasitas[b.kapasitasKey]),
+  }));
+}
+
+// Gunakan sebagai konstanta yang bisa di-refresh — hanya untuk SSR fallback
+// Nilai aktual dikelola via state `blocksConfig` di dalam komponen
 
 // ─── Status Styles ───────────────────────────────────────────────────────────
 // Use CSS filter to tint the kursi.png image per status.
@@ -122,107 +169,6 @@ const statusConfig: Record<SeatStatus, {
   },
 };
 
-// ─── Seat Mapping ────────────────────────────────────────────────────────────
-
-function mapInvitationsToSeats(invitations: any[]): SeatData[] {
-  const seats: SeatData[] = [];
-
-  const sortedInvs = [...invitations].sort((a, b) =>
-    (a.mahasiswa?.nim || "").localeCompare(b.mahasiswa?.nim || "")
-  );
-
-  const numStudents = sortedInvs.length;
-
-  // Calculate total capacity per block from rowsLayout
-  const blockCapacities = BLOCKS_CONFIG.map((b) =>
-    b.rowsLayout.reduce((sum, cols) => sum + cols, 0)
-  );
-  const totalCapacity = blockCapacities.reduce((a, b) => a + b, 0);
-
-  // Distribute students proportionally
-  let allocated = 0;
-  const groups: Record<string, any[]> = {};
-  BLOCKS_CONFIG.forEach((block, idx) => {
-    const cap = blockCapacities[idx];
-    const count =
-      idx === BLOCKS_CONFIG.length - 1
-        ? numStudents - allocated
-        : Math.round((cap / totalCapacity) * numStudents);
-    groups[block.id] = sortedInvs.slice(allocated, allocated + count);
-    allocated += count;
-  });
-
-  const processBlock = (blockId: string, blockName: string, groupInvs: any[]) => {
-    const config = BLOCKS_CONFIG.find((b) => b.id === blockId);
-    if (!config) return;
-
-    let studentIndex = 0;
-
-    config.rowsLayout.forEach((colsInRow, row) => {
-      for (let col = 0; col < colsInRow; col++) {
-        const seatCode = `${String.fromCharCode(65 + row)}${col + 1}`;
-        const inv = groupInvs[studentIndex];
-
-        if (inv && inv.mahasiswa) {
-          const isHadir =
-            inv.kehadiran?.statusKehadiran === "HADIR" ||
-            inv.kehadiran?.statusKehadiran === "TERLAMBAT";
-
-          let seatStatus: SeatStatus = "empty";
-          if (isHadir) {
-            seatStatus = row === 0 ? "vip" : "checked-in";
-          } else {
-            seatStatus = "not-arrived";
-          }
-
-          seats.push({
-            id: `${blockId}-${row}-${col}`,
-            blockId,
-            blockName,
-            row,
-            col,
-            seatCode,
-            status: seatStatus,
-            student: {
-              mahasiswaId: inv.mahasiswa.id,
-              name: inv.mahasiswa.nama,
-              nim: inv.mahasiswa.nim,
-              faculty: inv.mahasiswa.fakultas,
-              prodi: inv.mahasiswa.prodi,
-              sesi: inv.mahasiswa.sesiWisuda || "Sesi Utama",
-              invitationNo: inv.kode,
-              scanTime: inv.kehadiran
-                ? new Date(inv.kehadiran.waktuScan).toLocaleTimeString("id-ID", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : undefined,
-              gate: inv.kehadiran?.catatan || undefined,
-            },
-          });
-          studentIndex++;
-        } else {
-          seats.push({
-            id: `${blockId}-${row}-${col}`,
-            blockId,
-            blockName,
-            row,
-            col,
-            seatCode,
-            status: "empty",
-          });
-        }
-      }
-    });
-  };
-
-  BLOCKS_CONFIG.forEach((block) => {
-    processBlock(block.id, block.name, groups[block.id]);
-  });
-
-  return seats;
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function SeatMonitor() {
@@ -236,9 +182,114 @@ export function SeatMonitor() {
     blockName: string;
     seatCode: string;
   } | null>(null);
+  // State untuk trigger re-render saat konfigurasi blok berubah
+  const [blocksConfig, setBlocksConfig] = useState(() => buildBlocksConfig());
 
   const { socket } = useSocket("admin");
   const { isConnected, lastResult } = useScannerStore();
+
+  // ── Fungsi mapping invitations → seats (menggunakan blocksConfig state) ──
+  const mapInvitationsToSeats = useCallback((invitations: any[]): SeatData[] => {
+    const seats: SeatData[] = [];
+    const currentConfig = blocksConfig;
+
+    const sortedInvs = [...invitations].sort((a, b) =>
+      (a.mahasiswa?.nim || "").localeCompare(b.mahasiswa?.nim || "")
+    );
+    const numStudents = sortedInvs.length;
+
+    const blockCapacities = currentConfig.map((b) =>
+      b.rowsLayout.reduce((sum, cols) => sum + cols, 0)
+    );
+    const totalCapacity = blockCapacities.reduce((a, b) => a + b, 0);
+
+    // Distribusi mahasiswa proporsional ke tiap blok
+    let allocated = 0;
+    const groups: Record<string, any[]> = {};
+    currentConfig.forEach((block, idx) => {
+      const cap = blockCapacities[idx];
+      const count =
+        idx === currentConfig.length - 1
+          ? numStudents - allocated
+          : Math.round((cap / Math.max(totalCapacity, 1)) * numStudents);
+      groups[block.id] = sortedInvs.slice(allocated, allocated + count);
+      allocated += count;
+    });
+
+    currentConfig.forEach((block) => {
+      const groupInvs = groups[block.id] ?? [];
+      let studentIndex = 0;
+
+      block.rowsLayout.forEach((colsInRow, row) => {
+        for (let col = 0; col < colsInRow; col++) {
+          const seatCode = `${String.fromCharCode(65 + row)}${col + 1}`;
+          const inv = groupInvs[studentIndex];
+
+          if (inv && inv.mahasiswa) {
+            const isHadir =
+              inv.kehadiran?.statusKehadiran === "HADIR" ||
+              inv.kehadiran?.statusKehadiran === "TERLAMBAT";
+
+            const seatStatus: SeatStatus = isHadir
+              ? row === 0 ? "vip" : "checked-in"
+              : "not-arrived";
+
+            seats.push({
+              id: `${block.id}-${row}-${col}`,
+              blockId: block.id,
+              blockName: block.name,
+              row,
+              col,
+              seatCode,
+              status: seatStatus,
+              student: {
+                mahasiswaId: inv.mahasiswa.id,
+                name: inv.mahasiswa.nama,
+                nim: inv.mahasiswa.nim,
+                faculty: inv.mahasiswa.fakultas,
+                prodi: inv.mahasiswa.prodi,
+                sesi: inv.mahasiswa.sesiWisuda || "Sesi Utama",
+                invitationNo: inv.kode,
+                scanTime: inv.kehadiran
+                  ? new Date(inv.kehadiran.waktuScan).toLocaleTimeString("id-ID", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : undefined,
+                gate: inv.kehadiran?.catatan || undefined,
+              },
+            });
+            studentIndex++;
+          } else {
+            seats.push({
+              id: `${block.id}-${row}-${col}`,
+              blockId: block.id,
+              blockName: block.name,
+              row,
+              col,
+              seatCode,
+              status: "empty",
+            });
+          }
+        }
+      });
+    });
+
+    return seats;
+  }, [blocksConfig]);
+
+  // Listen perubahan konfigurasi blok dari localStorage (saat admin simpan di Pengaturan)
+  useEffect(() => {
+    function handleStorageChange(e: StorageEvent) {
+      if (e.key === "wisuda_blok_kursi") {
+        setBlocksConfig(buildBlocksConfig());
+      }
+    }
+    window.addEventListener("storage", handleStorageChange);
+    // Refresh saat mount untuk memastikan pakai nilai terbaru dari localStorage
+    setBlocksConfig(buildBlocksConfig());
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const fetchSeats = useCallback(async () => {
     try {
@@ -254,7 +305,7 @@ export function SeatMonitor() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mapInvitationsToSeats]);
 
   useEffect(() => {
     fetchSeats();
@@ -315,12 +366,12 @@ export function SeatMonitor() {
   // Group seats by block
   const seatsByBlock = useMemo(() => {
     const grouped: Record<string, SeatData[]> = {};
-    BLOCKS_CONFIG.forEach((b) => (grouped[b.id] = []));
+    blocksConfig.forEach((b) => (grouped[b.id] = []));
     seats.forEach((seat) => {
       if (grouped[seat.blockId]) grouped[seat.blockId].push(seat);
     });
     return grouped;
-  }, [seats]);
+  }, [seats, blocksConfig]);
 
   // Stats
   const statsSummary = useMemo(() => {
@@ -476,7 +527,7 @@ export function SeatMonitor() {
           />
 
           {/* ── 4 Seat Blocks (Flat 2D, no skew) ──────────────────── */}
-          {BLOCKS_CONFIG.map((block) => {
+          {blocksConfig.map((block) => {
             const blockSeats = seatsByBlock[block.id] || [];
 
             // Split seats into rows based on rowsLayout

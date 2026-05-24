@@ -27,26 +27,26 @@ function DeleteRowDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-white/[0.08] bg-[#0F172A] p-6 shadow-2xl">
-        <div className="mb-4 flex size-10 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10">
-          <Trash2 className="size-4 text-red-400" />
+      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#0F172A] p-6 shadow-2xl">
+        <div className="mb-4 flex size-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10">
+          <Trash2 className="size-4 text-red-500 dark:text-red-400" />
         </div>
-        <h2 className="text-sm font-bold text-white/90">Hapus Undangan?</h2>
-        <p className="mt-1.5 text-[0.78rem] leading-relaxed text-white/40">
-          Undangan milik <span className="font-semibold text-white/70">{nama}</span> akan dihapus permanen.
+        <h2 className="text-sm font-bold text-gray-900 dark:text-white/90">Hapus Undangan?</h2>
+        <p className="mt-1.5 text-[0.78rem] leading-relaxed text-gray-500 dark:text-white/40">
+          Undangan milik <span className="font-semibold text-gray-800 dark:text-white/70">{nama}</span> akan dihapus permanen.
         </p>
         <div className="mt-5 flex gap-2.5">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] text-[0.78rem] font-semibold text-white/60 transition-all hover:bg-white/[0.07] active:scale-[0.98]"
+            className="flex-1 h-9 rounded-xl border border-gray-200 bg-gray-50 text-[0.78rem] font-semibold text-gray-600 transition-all hover:bg-gray-100 active:scale-[0.98] dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 dark:hover:bg-white/[0.07]"
           >
             Batal
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 h-9 rounded-xl border border-red-500/30 bg-red-500/15 text-[0.78rem] font-bold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.98]"
+            className="flex-1 h-9 rounded-xl border border-red-300 bg-red-50 text-[0.78rem] font-bold text-red-600 transition-all hover:bg-red-100 active:scale-[0.98] dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/25"
           >
             Hapus
           </button>
@@ -64,7 +64,6 @@ function ActionMenu({ inv }: { inv: Invitation }) {
 
   function handleDownload(id: string) {
     markDownloaded(id);
-    // Placeholder: di production ini akan trigger download PDF
     console.log("Download undangan:", id);
   }
 
@@ -80,7 +79,7 @@ function ActionMenu({ inv }: { inv: Invitation }) {
         <button
           type="button"
           onClick={() => openDrawer(inv)}
-          className="flex size-7 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white/70 cursor-pointer"
+          className="flex size-7 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 cursor-pointer dark:text-white/30 dark:hover:bg-white/[0.08] dark:hover:text-white/70"
           title="Detail QR"
         >
           <QrCode className="size-3.5" />
@@ -91,7 +90,7 @@ function ActionMenu({ inv }: { inv: Invitation }) {
           <button
             type="button"
             onClick={() => generateInvitation(inv.id)}
-            className="flex size-7 items-center justify-center rounded-lg text-blue-400/50 transition-colors hover:bg-blue-500/10 hover:text-blue-400 cursor-pointer"
+            className="flex size-7 items-center justify-center rounded-lg text-blue-400/70 transition-colors hover:bg-blue-50 hover:text-blue-600 cursor-pointer dark:text-blue-400/50 dark:hover:bg-blue-500/10 dark:hover:text-blue-400"
             title="Generate QR"
           >
             <RefreshCw className="size-3.5" />
@@ -103,7 +102,7 @@ function ActionMenu({ inv }: { inv: Invitation }) {
           <button
             type="button"
             onClick={() => handleDownload(inv.id)}
-            className="flex size-7 items-center justify-center rounded-lg text-emerald-400/50 transition-colors hover:bg-emerald-500/10 hover:text-emerald-400 cursor-pointer"
+            className="flex size-7 items-center justify-center rounded-lg text-emerald-500/70 transition-colors hover:bg-emerald-50 hover:text-emerald-600 cursor-pointer dark:text-emerald-400/50 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
             title="Download Undangan"
           >
             <Download className="size-3.5" />
@@ -114,7 +113,7 @@ function ActionMenu({ inv }: { inv: Invitation }) {
         <button
           type="button"
           onClick={() => setConfirmDelete(true)}
-          className="flex size-7 items-center justify-center rounded-lg text-red-400/40 transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+          className="flex size-7 items-center justify-center rounded-lg text-red-400/60 transition-colors hover:bg-red-50 hover:text-red-600 cursor-pointer dark:text-red-400/40 dark:hover:bg-red-500/10 dark:hover:text-red-400"
           title="Hapus Undangan"
         >
           <Trash2 className="size-3.5" />
@@ -143,22 +142,22 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
       exit={{ opacity: 0, x: -10 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
       onClick={() => openPreview(inv)}
-      className="group border-b border-white/[0.04] transition-colors duration-150 hover:bg-white/[0.025] cursor-pointer"
+      className="group border-b border-gray-100 transition-colors duration-150 hover:bg-gray-50 cursor-pointer dark:border-white/[0.04] dark:hover:bg-white/[0.025]"
     >
       {/* QR Preview */}
       <td className="py-3 pl-4 pr-3">
-        <div 
+        <div
           onClick={(e) => {
             e.stopPropagation();
             openDrawer(inv);
-          }} 
+          }}
           className="cursor-pointer"
         >
           {inv.status !== "belum_generate" ? (
             <QrCell token={inv.qrToken} size={36} />
           ) : (
-            <div className="flex size-9 items-center justify-center rounded-md border border-dashed border-white/[0.08]">
-              <QrCode className="size-4 text-white/15" />
+            <div className="flex size-9 items-center justify-center rounded-md border border-dashed border-gray-300 dark:border-white/[0.08]">
+              <QrCode className="size-4 text-gray-300 dark:text-white/15" />
             </div>
           )}
         </div>
@@ -166,7 +165,7 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
 
       {/* Kode */}
       <td className="py-3 pr-4">
-        <span className="font-mono text-[0.72rem] font-medium text-white/50">
+        <span className="font-mono text-[0.72rem] font-medium text-gray-500 dark:text-white/50">
           {inv.kode}
         </span>
       </td>
@@ -174,29 +173,29 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
       {/* Mahasiswa */}
       <td className="py-3 pr-4">
         <div>
-          <p className="text-[0.82rem] font-semibold text-white/80 leading-tight">
+          <p className="text-[0.82rem] font-semibold text-gray-800 leading-tight dark:text-white/80">
             {inv.mahasiswaNama}
           </p>
-          <p className="text-[0.68rem] font-medium text-white/30 mt-0.5">{inv.nim}</p>
+          <p className="text-[0.68rem] font-medium text-gray-400 mt-0.5 dark:text-white/30">{inv.nim}</p>
         </div>
       </td>
 
       {/* Fakultas */}
       <td className="hidden py-3 pr-4 lg:table-cell">
         <div>
-          <p className="text-[0.75rem] font-medium text-white/50 leading-tight">{inv.fakultas}</p>
-          <p className="text-[0.65rem] text-white/25 mt-0.5">{inv.prodi}</p>
+          <p className="text-[0.75rem] font-medium text-gray-600 leading-tight dark:text-white/50">{inv.fakultas}</p>
+          <p className="text-[0.65rem] text-gray-400 mt-0.5 dark:text-white/25">{inv.prodi}</p>
         </div>
       </td>
 
       {/* Sesi */}
       <td className="hidden py-3 pr-4 md:table-cell">
-        <span className="text-[0.72rem] font-medium text-white/40">{inv.sesi}</span>
+        <span className="text-[0.72rem] font-medium text-gray-500 dark:text-white/40">{inv.sesi}</span>
       </td>
 
       {/* Kursi */}
       <td className="hidden py-3 pr-4 xl:table-cell">
-        <span className="rounded-md bg-white/[0.05] px-2 py-0.5 font-mono text-[0.7rem] font-medium text-white/50">
+        <span className="rounded-md bg-gray-100 px-2 py-0.5 font-mono text-[0.7rem] font-medium text-gray-600 dark:bg-white/[0.05] dark:text-white/50">
           {inv.nomorKursi}
         </span>
       </td>
@@ -204,9 +203,9 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
       {/* Kuota Tamu */}
       <td className="hidden py-3 pr-4 xl:table-cell">
         <div className="flex items-center gap-1.5">
-          <span className="text-[0.75rem] font-semibold text-white/60">{inv.tamuHadir}</span>
-          <span className="text-[0.65rem] text-white/20">/</span>
-          <span className="text-[0.72rem] text-white/35">{inv.kuotaTamu}</span>
+          <span className="text-[0.75rem] font-semibold text-gray-700 dark:text-white/60">{inv.tamuHadir}</span>
+          <span className="text-[0.65rem] text-gray-300 dark:text-white/20">/</span>
+          <span className="text-[0.72rem] text-gray-400 dark:text-white/35">{inv.kuotaTamu}</span>
         </div>
       </td>
 
@@ -241,7 +240,6 @@ export function InvitationTable() {
   } = useUndanganStore();
 
   const filtered = (invitations || []).filter((inv) => {
-    // 1. Search Query
     if (searchQuery) {
       const q = searchQuery.toLowerCase().trim();
       const matchNama = inv.mahasiswaNama?.toLowerCase().includes(q);
@@ -249,18 +247,15 @@ export function InvitationTable() {
       const matchKode = inv.kode?.toLowerCase().includes(q);
       if (!matchNama && !matchNim && !matchKode) return false;
     }
-    // 2. Filter Status
     if (filterStatus && filterStatus !== "all") {
       if (inv.status !== filterStatus) return false;
     }
-    // 3. Filter Sesi
     if (filterSesi && filterSesi !== "all") {
       const sessionKeyword = filterSesi.replace("Sesi ", "");
       if (!inv.sesi || !inv.sesi.toLowerCase().includes(sessionKeyword.toLowerCase())) {
         return false;
       }
     }
-    // 4. Filter Attendance
     if (filterAttendance && filterAttendance !== "all") {
       if (inv.attendance !== filterAttendance) return false;
     }
@@ -270,11 +265,11 @@ export function InvitationTable() {
   if (isLoading) return <LoadingSkeleton />;
 
   return (
-    <div id="invitation-table-print" className="rounded-2xl border border-white/[0.07] bg-[#080f1e] overflow-hidden">
+    <div id="invitation-table-print" className="rounded-2xl border border-gray-200 bg-white dark:border-white/[0.07] dark:bg-[#080f1e] overflow-hidden shadow-sm dark:shadow-none">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px]">
           <thead>
-            <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+            <tr className="border-b border-gray-100 bg-gray-50 dark:border-white/[0.06] dark:bg-white/[0.02]">
               {[
                 { label: "QR", cls: "pl-4 pr-3 w-12" },
                 { label: "Kode", cls: "pr-4" },
@@ -289,7 +284,7 @@ export function InvitationTable() {
               ].map((h) => (
                 <th
                   key={h.label}
-                  className={`py-3 text-left text-[0.65rem] font-semibold uppercase tracking-wider text-white/20 ${h.cls}`}
+                  className={`py-3 text-left text-[0.65rem] font-semibold uppercase tracking-wider text-gray-400 dark:text-white/20 ${h.cls}`}
                 >
                   {h.label}
                 </th>
@@ -316,8 +311,8 @@ export function InvitationTable() {
 
       {/* Footer */}
       {filtered.length > 0 && (
-        <div className="border-t border-white/[0.04] px-4 py-3">
-          <p className="text-[0.7rem] font-medium text-white/20">
+        <div className="border-t border-gray-100 px-4 py-3 dark:border-white/[0.04]">
+          <p className="text-[0.7rem] font-medium text-gray-400 dark:text-white/20">
             Menampilkan {filtered.length} undangan
           </p>
         </div>

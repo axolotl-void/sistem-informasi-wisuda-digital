@@ -95,9 +95,11 @@ export function AccountStats({ data, total }: AccountStatsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: i * 0.05, ease: "easeOut" }}
             className={cn(
-              "group relative rounded-xl border border-white/[0.06] bg-white/[0.03] p-3.5",
+              "group relative rounded-xl border p-3.5",
+              "bg-white/70 border-white/60 shadow-[0_2px_12px_rgba(0,0,0,0.05)]",
+              "dark:bg-white/[0.03] dark:border-white/[0.06] dark:shadow-none",
               "transition-all duration-300 ease-out",
-              "hover:-translate-y-px hover:bg-white/[0.05]",
+              "hover:-translate-y-px hover:bg-white/90 dark:hover:bg-white/[0.05]",
               c.borderGlow,
             )}
           >
@@ -107,10 +109,10 @@ export function AccountStats({ data, total }: AccountStatsProps) {
             <div className={cn("mb-2.5 flex size-7 items-center justify-center rounded-lg", c.iconBg)}>
               <c.icon className={cn("size-3.5", c.accent)} />
             </div>
-            <p className="text-xl font-bold tracking-tight text-white leading-none">
+            <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-none">
               {value}
             </p>
-            <p className="mt-1 text-[10px] font-medium tracking-wide text-white/25 uppercase">
+            <p className="mt-1 text-[10px] font-medium tracking-wide text-slate-500 dark:text-white/25 uppercase">
               {c.label}
             </p>
           </motion.div>

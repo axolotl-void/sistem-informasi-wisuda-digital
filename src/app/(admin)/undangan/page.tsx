@@ -39,23 +39,23 @@ export default function UndanganPage() {
           className="flex items-start justify-between gap-4"
         >
           <div className="flex items-center gap-4">
-            <div className="flex size-11 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
-              <Mail className="size-5 text-blue-400" />
+            <div className="flex size-11 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/[0.08] dark:bg-white/[0.04]">
+              <Mail className="size-5 text-blue-500 dark:text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white/90">
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white/90">
                 Undangan Digital
               </h1>
-              <p className="mt-0.5 text-sm text-white/30">
+              <p className="mt-0.5 text-sm text-gray-400 dark:text-white/30">
                 Generate dan kelola undangan wisuda digital
               </p>
             </div>
           </div>
 
           {/* Live indicator */}
-          <div className="hidden items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/8 px-3 py-1.5 sm:flex">
-            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[0.72rem] font-semibold text-emerald-400">
+          <div className="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:flex dark:border-emerald-500/20 dark:bg-emerald-500/8">
+            <span className="size-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+            <span className="text-[0.72rem] font-semibold text-emerald-600 dark:text-emerald-400">
               {stats.total} Total
             </span>
           </div>

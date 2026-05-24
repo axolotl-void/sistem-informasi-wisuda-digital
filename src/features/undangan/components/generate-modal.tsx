@@ -32,7 +32,6 @@ export function GenerateInvitationModal() {
     kuotaTamu: 2,
   });
 
-  // Mahasiswa yang dipilih
   const selectedMahasiswa = mahasiswaList.find(m => m.id === form.mahasiswaId);
 
   const fetchMahasiswa = useCallback(async () => {
@@ -43,9 +42,6 @@ export function GenerateInvitationModal() {
       });
       if (!response.ok) throw new Error("Failed to fetch");
       const result = await response.json();
-      
-      // Ambil semua mahasiswa (tidak filter berdasarkan status dulu untuk debugging)
-      // Nanti bisa di-filter lagi jika perlu
       setMahasiswaList(result.data.data);
     } catch (error) {
       console.error("Failed to fetch mahasiswa:", error);
@@ -55,7 +51,6 @@ export function GenerateInvitationModal() {
     }
   }, []);
 
-  // Fetch mahasiswa yang belum punya undangan
   useEffect(() => {
     if (isGenerateModalOpen) {
       void fetchMahasiswa();
@@ -69,12 +64,11 @@ export function GenerateInvitationModal() {
       return;
     }
 
-    // Validasi sesi wisuda
     if (!selectedMahasiswa?.sesiWisuda) {
       toast.error("Mahasiswa belum memiliki sesi wisuda. Silakan set sesi di fitur Akun Wisudawan terlebih dahulu.");
       return;
     }
-    
+
     setIsLoading(true);
     try {
       const response = await fetch("/api/undangan", {
@@ -92,15 +86,12 @@ export function GenerateInvitationModal() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Tampilkan error detail dari server
         console.error("Generate error:", result);
         throw new Error(result.message || "Gagal generate undangan");
       }
 
       toast.success("Undangan berhasil digenerate");
       closeGenerateModal();
-      
-      // Refresh data undangan
       await init();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Gagal generate undangan";
@@ -130,24 +121,24 @@ export function GenerateInvitationModal() {
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className="pointer-events-auto w-full max-w-md rounded-2xl border border-white/[0.1] bg-[#080f1e] shadow-2xl"
+              className="pointer-events-auto w-full max-w-md rounded-2xl border border-gray-200 bg-white dark:border-white/[0.1] dark:bg-[#080f1e] shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
+              <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-white/[0.06]">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-8 items-center justify-center rounded-xl bg-blue-500/10">
-                    <Sparkles className="size-4 text-blue-400" />
+                  <div className="flex size-8 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10">
+                    <Sparkles className="size-4 text-blue-500 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-semibold text-white/90">Generate Undangan</h2>
-                    <p className="text-xs text-white/30">Buat undangan digital baru</p>
+                    <h2 className="text-sm font-semibold text-gray-900 dark:text-white/90">Generate Undangan</h2>
+                    <p className="text-xs text-gray-400 dark:text-white/30">Buat undangan digital baru</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={closeGenerateModal}
-                  className="flex size-8 items-center justify-center rounded-xl text-white/30 hover:bg-white/[0.08] hover:text-white/60 cursor-pointer transition-colors"
+                  className="flex size-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer transition-colors dark:text-white/30 dark:hover:bg-white/[0.08] dark:hover:text-white/60"
                 >
                   <X className="size-4" />
                 </button>
@@ -157,26 +148,26 @@ export function GenerateInvitationModal() {
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 {/* Mahasiswa select */}
                 <div className="space-y-1.5">
-                  <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">
+                  <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/30">
                     Mahasiswa
                   </label>
                   <select
                     value={form.mahasiswaId}
                     onChange={(e) => setForm((f) => ({ ...f, mahasiswaId: e.target.value }))}
                     disabled={loadingMahasiswa}
-                    className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none transition-all hover:border-white/[0.12] focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 cursor-pointer disabled:opacity-50"
+                    className="w-full h-10 rounded-xl border border-gray-200 bg-white px-3 text-[0.82rem] text-gray-700 outline-none transition-all hover:border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 cursor-pointer disabled:opacity-50 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70 dark:hover:border-white/[0.12] dark:focus:border-blue-500/40 dark:shadow-none"
                   >
-                    <option value="" className="bg-[#0F172A]">
+                    <option value="" className="bg-white text-gray-800 dark:bg-[#0F172A] dark:text-white">
                       {loadingMahasiswa ? "Memuat..." : "Pilih mahasiswa..."}
                     </option>
                     {mahasiswaList.map((mhs) => (
-                      <option key={mhs.id} value={mhs.id} className="bg-[#0F172A]">
+                      <option key={mhs.id} value={mhs.id} className="bg-white text-gray-800 dark:bg-[#0F172A] dark:text-white">
                         {mhs.nama} — {mhs.nim} — {mhs.status} {mhs.sesiWisuda ? `— ${mhs.sesiWisuda}` : '— Belum ada sesi'}
                       </option>
                     ))}
                   </select>
                   {!loadingMahasiswa && mahasiswaList.length === 0 && (
-                    <p className="text-[0.7rem] text-white/30 mt-1">
+                    <p className="text-[0.7rem] text-gray-400 dark:text-white/30 mt-1">
                       Tidak ada data mahasiswa
                     </p>
                   )}
@@ -185,53 +176,53 @@ export function GenerateInvitationModal() {
                 {/* Sesi */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">Sesi</label>
+                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/30">Sesi</label>
                     <div className="relative">
                       <input
                         type="text"
                         value={selectedMahasiswa?.sesiWisuda || "Belum ditentukan"}
                         disabled
-                        className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 text-[0.82rem] text-white/50 outline-none cursor-not-allowed"
+                        className="w-full h-10 rounded-xl border border-gray-200 bg-gray-50 px-3 text-[0.82rem] text-gray-500 outline-none cursor-not-allowed dark:border-white/[0.08] dark:bg-white/[0.02] dark:text-white/50"
                       />
                       {!selectedMahasiswa?.sesiWisuda && (
-                        <p className="text-[0.65rem] text-amber-400/70 mt-1">
+                        <p className="text-[0.65rem] text-amber-500 dark:text-amber-400/70 mt-1">
                           ⚠️ Set sesi di Akun Wisudawan
                         </p>
                       )}
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">Kuota Tamu</label>
+                    <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/30">Kuota Tamu</label>
                     <input
                       type="number"
                       min={1}
                       max={10}
                       value={form.kuotaTamu}
                       onChange={(e) => setForm((f) => ({ ...f, kuotaTamu: Number(e.target.value) }))}
-                      className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none focus:border-blue-500/40"
+                      className="w-full h-10 rounded-xl border border-gray-200 bg-white px-3 text-[0.82rem] text-gray-700 outline-none focus:border-blue-400 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70 dark:focus:border-blue-500/40 dark:shadow-none"
                     />
                   </div>
                 </div>
 
                 {/* Gedung */}
                 <div className="space-y-1.5">
-                  <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">Gedung</label>
+                  <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/30">Gedung</label>
                   <input
                     type="text"
                     value={form.gedung}
                     onChange={(e) => setForm((f) => ({ ...f, gedung: e.target.value }))}
-                    className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none focus:border-blue-500/40"
+                    className="w-full h-10 rounded-xl border border-gray-200 bg-white px-3 text-[0.82rem] text-gray-700 outline-none focus:border-blue-400 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70 dark:focus:border-blue-500/40 dark:shadow-none"
                   />
                 </div>
 
                 {/* Tanggal */}
                 <div className="space-y-1.5">
-                  <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">Tanggal Wisuda</label>
+                  <label className="text-[0.72rem] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/30">Tanggal Wisuda</label>
                   <input
                     type="date"
                     value={form.tanggalWisuda}
                     onChange={(e) => setForm((f) => ({ ...f, tanggalWisuda: e.target.value }))}
-                    className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none focus:border-blue-500/40"
+                    className="w-full h-10 rounded-xl border border-gray-200 bg-white px-3 text-[0.82rem] text-gray-700 outline-none focus:border-blue-400 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70 dark:focus:border-blue-500/40 dark:shadow-none"
                   />
                 </div>
 
@@ -239,7 +230,7 @@ export function GenerateInvitationModal() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-11 rounded-xl border border-blue-500/30 bg-blue-500/10 text-sm font-semibold text-blue-400 transition-all hover:border-blue-500/50 hover:bg-blue-500/15 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full h-11 rounded-xl border border-blue-300 bg-blue-50 text-sm font-semibold text-blue-600 transition-all hover:border-blue-400 hover:bg-blue-100 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:border-blue-500/50 dark:hover:bg-blue-500/15"
                 >
                   {isLoading ? (
                     <><Loader2 className="size-4 animate-spin" /> Generating...</>

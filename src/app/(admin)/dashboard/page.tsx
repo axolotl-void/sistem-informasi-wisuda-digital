@@ -27,8 +27,10 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-semibold tracking-tight text-white">Dashboard</h1>
-        <p className="mt-2 text-sm font-medium text-white/35">
+        <h1 className="text-4xl font-semibold tracking-tight text-slate-900 dark:text-white">
+          Dashboard
+        </h1>
+        <p className="mt-2 text-sm font-medium text-slate-500 dark:text-white/35">
           Monitoring realtime wisuda digital — {new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
         </p>
       </div>

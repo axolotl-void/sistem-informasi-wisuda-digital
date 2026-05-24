@@ -43,22 +43,22 @@ export default function MahasiswaPage() {
         className="flex items-start justify-between gap-4"
       >
         <div className="flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-            <Users className="size-4 text-blue-400" />
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-white/[0.04]">
+            <Users className="size-4 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-[1.1rem] font-bold tracking-tight text-white/90 leading-tight">
+              <h1 className="text-[1.1rem] font-bold tracking-tight text-slate-900 dark:text-white/90 leading-tight">
                 Akun Wisudawan
               </h1>
               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/[0.18] bg-emerald-500/[0.07] px-1.5 py-px">
-                <span className="size-1 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[0.55rem] font-semibold uppercase tracking-wider text-emerald-400/80">
+                <span className="size-1 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+                <span className="text-[0.55rem] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400/80">
                   Live
                 </span>
               </span>
             </div>
-            <p className="text-[0.68rem] text-white/28 mt-0.5 leading-tight">
+            <p className="text-[0.68rem] text-slate-500 dark:text-white/28 mt-0.5 leading-tight">
               Kelola akun dan data wisudawan
             </p>
           </div>
@@ -69,7 +69,7 @@ export default function MahasiswaPage() {
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-500/[0.08] px-2.5 text-[0.68rem] font-semibold text-blue-400 transition-all duration-150 hover:border-blue-500/40 hover:bg-blue-500/[0.14] active:scale-[0.97] cursor-pointer"
+            className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-600 dark:bg-blue-500/[0.08] px-2.5 text-[0.68rem] font-semibold text-white dark:text-blue-400 transition-all duration-150 hover:bg-blue-700 dark:hover:border-blue-500/40 dark:hover:bg-blue-500/[0.14] active:scale-[0.97] cursor-pointer"
           >
             <Plus className="size-3" />
             Tambah

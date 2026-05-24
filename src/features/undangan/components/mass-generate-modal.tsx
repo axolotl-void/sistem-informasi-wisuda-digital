@@ -61,7 +61,6 @@ export function MassGenerateModal() {
     gedung: "Auditorium Utama",
   });
 
-  // ── Fetch preview count from API ──────────────────────────────────────────
   const fetchPreview = useCallback(async (sesi: string) => {
     setIsLoadingPreview(true);
     setPreview(null);
@@ -80,14 +79,12 @@ export function MassGenerateModal() {
     }
   }, []);
 
-  // Fetch when modal opens or sesi changes
   useEffect(() => {
     if (isMassGenerateOpen && step === "config") {
       fetchPreview(config.sesi);
     }
   }, [isMassGenerateOpen, config.sesi, step, fetchPreview]);
 
-  // ── Generate handler ──────────────────────────────────────────────────────
   async function handleGenerate() {
     if (!preview || preview.eligible === 0) {
       toast.error("Tidak ada mahasiswa yang perlu digenerate undangannya");
@@ -132,7 +129,6 @@ export function MassGenerateModal() {
       setResult(json.data);
       setStep("done");
 
-      // Refresh store
       await init();
       toast.success(json.message || "Bulk generate berhasil");
     } catch (err) {
@@ -156,6 +152,15 @@ export function MassGenerateModal() {
 
   const eligible = preview?.eligible ?? 0;
 
+  const inputClass =
+    "w-full h-10 rounded-xl border border-gray-200 bg-white px-3 text-[0.82rem] text-gray-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70 dark:focus:border-blue-500/40 dark:shadow-none";
+
+  const selectClass =
+    "w-full h-10 rounded-xl border border-gray-200 bg-white px-3 text-[0.82rem] text-gray-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 cursor-pointer transition-all shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70 dark:focus:border-blue-500/40 dark:shadow-none";
+
+  const labelClass =
+    "flex items-center gap-1.5 text-[0.72rem] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/30";
+
   return (
     <AnimatePresence>
       {isMassGenerateOpen && (
@@ -178,18 +183,18 @@ export function MassGenerateModal() {
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className="pointer-events-auto w-full max-w-lg rounded-2xl border border-white/[0.1] bg-[#080f1e] shadow-2xl overflow-hidden"
+              className="pointer-events-auto w-full max-w-lg rounded-2xl border border-gray-200 bg-white dark:border-white/[0.1] dark:bg-[#080f1e] shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
+              <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-white/[0.06]">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-9 items-center justify-center rounded-xl bg-violet-500/10 border border-violet-500/20">
-                    <Zap className="size-4 text-violet-400" />
+                  <div className="flex size-9 items-center justify-center rounded-xl bg-violet-50 border border-violet-200 dark:bg-violet-500/10 dark:border-violet-500/20">
+                    <Zap className="size-4 text-violet-500 dark:text-violet-400" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-semibold text-white/90">Generate Massal</h2>
-                    <p className="text-xs text-white/30 mt-0.5">
+                    <h2 className="text-sm font-semibold text-gray-900 dark:text-white/90">Generate Massal</h2>
+                    <p className="text-xs text-gray-400 dark:text-white/30 mt-0.5">
                       Buat undangan untuk semua wisudawan sekaligus
                     </p>
                   </div>
@@ -198,7 +203,7 @@ export function MassGenerateModal() {
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="flex size-8 items-center justify-center rounded-xl text-white/30 hover:bg-white/[0.08] hover:text-white/60 cursor-pointer transition-colors"
+                    className="flex size-8 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-gray-600 cursor-pointer transition-colors dark:text-white/30 dark:hover:bg-white/[0.08] dark:hover:text-white/60"
                   >
                     <X className="size-4" />
                   </button>
@@ -216,79 +221,77 @@ export function MassGenerateModal() {
                     {/* Preview Stats */}
                     <div className="grid grid-cols-3 gap-3">
                       {/* Total Mahasiswa */}
-                      <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 text-center">
-                        <Users className="size-4 text-blue-400 mx-auto mb-1.5" />
-                        <p className="text-xl font-bold text-white/90">
+                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-white/[0.07] dark:bg-white/[0.03]">
+                        <Users className="size-4 text-blue-500 dark:text-blue-400 mx-auto mb-1.5" />
+                        <p className="text-xl font-bold text-gray-900 dark:text-white/90">
                           {isLoadingPreview ? (
-                            <span className="inline-block w-6 h-5 bg-white/10 rounded animate-pulse" />
+                            <span className="inline-block w-6 h-5 bg-gray-200 dark:bg-white/10 rounded animate-pulse" />
                           ) : (
                             preview?.total ?? "—"
                           )}
                         </p>
-                        <p className="text-[0.65rem] text-white/30 mt-0.5 leading-tight">Total<br/>Wisudawan</p>
+                        <p className="text-[0.65rem] text-gray-400 dark:text-white/30 mt-0.5 leading-tight">Total<br/>Wisudawan</p>
                       </div>
 
                       {/* Eligible */}
                       <div className={`rounded-xl border p-3 text-center transition-all ${
                         eligible > 0
-                          ? "border-violet-500/30 bg-violet-500/[0.07]"
-                          : "border-white/[0.07] bg-white/[0.03]"
+                          ? "border-violet-200 bg-violet-50 dark:border-violet-500/30 dark:bg-violet-500/[0.07]"
+                          : "border-gray-200 bg-gray-50 dark:border-white/[0.07] dark:bg-white/[0.03]"
                       }`}>
-                        <Zap className={`size-4 mx-auto mb-1.5 ${eligible > 0 ? "text-violet-400" : "text-white/20"}`} />
-                        <p className={`text-xl font-bold ${eligible > 0 ? "text-violet-300" : "text-white/90"}`}>
+                        <Zap className={`size-4 mx-auto mb-1.5 ${eligible > 0 ? "text-violet-500 dark:text-violet-400" : "text-gray-300 dark:text-white/20"}`} />
+                        <p className={`text-xl font-bold ${eligible > 0 ? "text-violet-600 dark:text-violet-300" : "text-gray-900 dark:text-white/90"}`}>
                           {isLoadingPreview ? (
-                            <span className="inline-block w-6 h-5 bg-white/10 rounded animate-pulse" />
+                            <span className="inline-block w-6 h-5 bg-gray-200 dark:bg-white/10 rounded animate-pulse" />
                           ) : (
                             eligible
                           )}
                         </p>
-                        <p className="text-[0.65rem] text-white/30 mt-0.5 leading-tight">Akan<br/>Digenerate</p>
+                        <p className="text-[0.65rem] text-gray-400 dark:text-white/30 mt-0.5 leading-tight">Akan<br/>Digenerate</p>
                       </div>
 
                       {/* Already generated */}
-                      <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 text-center">
-                        <UserCheck className="size-4 text-emerald-400 mx-auto mb-1.5" />
-                        <p className="text-xl font-bold text-white/90">
+                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-white/[0.07] dark:bg-white/[0.03]">
+                        <UserCheck className="size-4 text-emerald-500 dark:text-emerald-400 mx-auto mb-1.5" />
+                        <p className="text-xl font-bold text-gray-900 dark:text-white/90">
                           {isLoadingPreview ? (
-                            <span className="inline-block w-6 h-5 bg-white/10 rounded animate-pulse" />
+                            <span className="inline-block w-6 h-5 bg-gray-200 dark:bg-white/10 rounded animate-pulse" />
                           ) : (
                             preview?.alreadyGenerated ?? "—"
                           )}
                         </p>
-                        <p className="text-[0.65rem] text-white/30 mt-0.5 leading-tight">Sudah<br/>Punya</p>
+                        <p className="text-[0.65rem] text-gray-400 dark:text-white/30 mt-0.5 leading-tight">Sudah<br/>Punya</p>
                       </div>
                     </div>
 
                     {/* Warning if no eligible */}
                     {!isLoadingPreview && preview && eligible === 0 && (
-                      <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.07] px-4 py-3">
-                        <AlertCircle className="size-4 text-amber-400 mt-0.5 flex-shrink-0" />
-                        <p className="text-[0.78rem] text-amber-300/80 leading-relaxed">
+                      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-500/20 dark:bg-amber-500/[0.07]">
+                        <AlertCircle className="size-4 text-amber-500 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-[0.78rem] text-amber-700 dark:text-amber-300/80 leading-relaxed">
                           Semua wisudawan pada sesi ini sudah memiliki undangan. Tidak ada yang perlu digenerate.
                         </p>
                       </div>
                     )}
 
                     {/* Divider */}
-                    <div className="border-t border-white/[0.05]" />
+                    <div className="border-t border-gray-100 dark:border-white/[0.05]" />
 
                     {/* Form Fields */}
                     <div className="space-y-4">
                       {/* Filter Sesi */}
                       <div className="space-y-1.5">
-                        <label className="flex items-center gap-1.5 text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">
+                        <label className={labelClass}>
                           <Users className="size-3" />
                           Filter Sesi
                         </label>
                         <select
                           value={config.sesi}
-                          onChange={(e) =>
-                            setConfig((c) => ({ ...c, sesi: e.target.value }))
-                          }
-                          className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 cursor-pointer transition-all"
+                          onChange={(e) => setConfig((c) => ({ ...c, sesi: e.target.value }))}
+                          className={selectClass}
                         >
                           {SESI_LIST.map((s) => (
-                            <option key={s.value} value={s.value} className="bg-[#0F172A]">
+                            <option key={s.value} value={s.value} className="bg-white text-gray-800 dark:bg-[#0F172A] dark:text-white">
                               {s.label}
                             </option>
                           ))}
@@ -297,35 +300,31 @@ export function MassGenerateModal() {
 
                       {/* Tanggal Wisuda */}
                       <div className="space-y-1.5">
-                        <label className="flex items-center gap-1.5 text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">
+                        <label className={labelClass}>
                           <CalendarDays className="size-3" />
                           Tanggal Wisuda
                         </label>
                         <input
                           type="date"
                           value={config.tanggalWisuda}
-                          onChange={(e) =>
-                            setConfig((c) => ({ ...c, tanggalWisuda: e.target.value }))
-                          }
-                          className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 transition-all [color-scheme:dark]"
+                          onChange={(e) => setConfig((c) => ({ ...c, tanggalWisuda: e.target.value }))}
+                          className={inputClass}
                         />
                       </div>
 
                       {/* Gedung / Tempat Wisuda */}
                       <div className="space-y-1.5">
-                        <label className="flex items-center gap-1.5 text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">
+                        <label className={labelClass}>
                           <Building2 className="size-3" />
                           Tempat / Gedung Wisuda
                         </label>
                         <select
                           value={config.gedung}
-                          onChange={(e) =>
-                            setConfig((c) => ({ ...c, gedung: e.target.value }))
-                          }
-                          className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-[0.82rem] text-white/70 outline-none focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 cursor-pointer transition-all"
+                          onChange={(e) => setConfig((c) => ({ ...c, gedung: e.target.value }))}
+                          className={selectClass}
                         >
                           {GEDUNG_LIST.map((g) => (
-                            <option key={g} value={g} className="bg-[#0F172A]">
+                            <option key={g} value={g} className="bg-white text-gray-800 dark:bg-[#0F172A] dark:text-white">
                               {g}
                             </option>
                           ))}
@@ -334,7 +333,7 @@ export function MassGenerateModal() {
 
                       {/* Kuota Tamu */}
                       <div className="space-y-1.5">
-                        <label className="flex items-center gap-1.5 text-[0.72rem] font-semibold uppercase tracking-wider text-white/30">
+                        <label className={labelClass}>
                           <UserX className="size-3" />
                           Kuota Tamu Default
                         </label>
@@ -344,16 +343,14 @@ export function MassGenerateModal() {
                             min={1}
                             max={10}
                             value={config.kuotaTamu}
-                            onChange={(e) =>
-                              setConfig((c) => ({ ...c, kuotaTamu: Number(e.target.value) }))
-                            }
+                            onChange={(e) => setConfig((c) => ({ ...c, kuotaTamu: Number(e.target.value) }))}
                             className="flex-1 accent-violet-500"
                           />
-                          <div className="flex size-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-sm font-bold text-white/70">
+                          <div className="flex size-10 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-sm font-bold text-gray-700 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70">
                             {config.kuotaTamu}
                           </div>
                         </div>
-                        <p className="text-[0.68rem] text-white/20">
+                        <p className="text-[0.68rem] text-gray-400 dark:text-white/20">
                           Setiap wisudawan dapat membawa {config.kuotaTamu} tamu
                         </p>
                       </div>
@@ -364,7 +361,7 @@ export function MassGenerateModal() {
                       type="button"
                       onClick={handleGenerate}
                       disabled={isLoadingPreview || eligible === 0}
-                      className="w-full h-11 rounded-xl border border-violet-500/30 bg-violet-500/10 text-sm font-semibold text-violet-400 transition-all hover:border-violet-500/50 hover:bg-violet-500/15 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full h-11 rounded-xl border border-violet-300 bg-violet-50 text-sm font-semibold text-violet-600 transition-all hover:border-violet-400 hover:bg-violet-100 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer flex items-center justify-center gap-2 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-400 dark:hover:border-violet-500/50 dark:hover:bg-violet-500/15"
                     >
                       {isLoadingPreview ? (
                         <>
@@ -395,8 +392,9 @@ export function MassGenerateModal() {
                           <circle
                             cx="40" cy="40" r="34"
                             fill="none"
-                            stroke="rgba(255,255,255,0.06)"
+                            stroke="rgba(0,0,0,0.06)"
                             strokeWidth="5"
+                            className="dark:[stroke:rgba(255,255,255,0.06)]"
                           />
                           <circle
                             cx="40" cy="40" r="34"
@@ -415,21 +413,21 @@ export function MassGenerateModal() {
                             </linearGradient>
                           </defs>
                         </svg>
-                        <Loader2 className="size-7 text-violet-400 animate-spin" />
+                        <Loader2 className="size-7 text-violet-500 dark:text-violet-400 animate-spin" />
                       </div>
 
                       <div className="text-center">
-                        <p className="text-3xl font-bold text-white/90">
+                        <p className="text-3xl font-bold text-gray-900 dark:text-white/90">
                           {Math.round(progress)}%
                         </p>
-                        <p className="text-xs text-white/30 mt-1">
+                        <p className="text-xs text-gray-400 dark:text-white/30 mt-1">
                           Sedang meng-generate undangan & QR code...
                         </p>
                       </div>
                     </div>
 
                     {/* Progress bar */}
-                    <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden">
+                    <div className="h-1.5 w-full rounded-full bg-gray-100 dark:bg-white/[0.06] overflow-hidden">
                       <motion.div
                         className="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500"
                         animate={{ width: `${progress}%` }}
@@ -437,7 +435,7 @@ export function MassGenerateModal() {
                       />
                     </div>
 
-                    <p className="text-center text-xs text-white/20">
+                    <p className="text-center text-xs text-gray-400 dark:text-white/20">
                       Proses mungkin memerlukan beberapa menit. Jangan tutup halaman ini.
                     </p>
                   </motion.div>
@@ -453,32 +451,32 @@ export function MassGenerateModal() {
                     {/* Success icon */}
                     <div className="relative">
                       <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl scale-150" />
-                      <div className="relative flex size-18 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 p-4">
-                        <CheckCircle2 className="size-9 text-emerald-400" />
+                      <div className="relative flex size-18 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10 p-4">
+                        <CheckCircle2 className="size-9 text-emerald-500 dark:text-emerald-400" />
                       </div>
                     </div>
 
                     <div>
-                      <p className="text-lg font-bold text-white/90">Selesai!</p>
-                      <p className="text-sm text-white/40 mt-1">
+                      <p className="text-lg font-bold text-gray-900 dark:text-white/90">Selesai!</p>
+                      <p className="text-sm text-gray-400 dark:text-white/40 mt-1">
                         Proses generate massal telah selesai
                       </p>
                     </div>
 
                     {/* Result stats */}
                     <div className="w-full grid grid-cols-2 gap-3">
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.07] p-3 text-center">
-                        <p className="text-2xl font-bold text-emerald-400">{result.generated}</p>
-                        <p className="text-xs text-white/30 mt-0.5">Berhasil Dibuat</p>
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-center dark:border-emerald-500/20 dark:bg-emerald-500/[0.07]">
+                        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{result.generated}</p>
+                        <p className="text-xs text-gray-500 dark:text-white/30 mt-0.5">Berhasil Dibuat</p>
                       </div>
-                      <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 text-center">
-                        <p className="text-2xl font-bold text-white/50">{result.skipped}</p>
-                        <p className="text-xs text-white/30 mt-0.5">Dilewati</p>
+                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-white/[0.07] dark:bg-white/[0.03]">
+                        <p className="text-2xl font-bold text-gray-500 dark:text-white/50">{result.skipped}</p>
+                        <p className="text-xs text-gray-400 dark:text-white/30 mt-0.5">Dilewati</p>
                       </div>
                     </div>
 
                     {result.skipped > 0 && (
-                      <p className="text-[0.72rem] text-white/25 leading-relaxed">
+                      <p className="text-[0.72rem] text-gray-400 dark:text-white/25 leading-relaxed">
                         {result.skipped} mahasiswa dilewati karena sudah memiliki undangan aktif.
                       </p>
                     )}
@@ -486,7 +484,7 @@ export function MassGenerateModal() {
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] text-sm font-medium text-white/60 transition-all hover:bg-white/[0.07] hover:text-white/80 cursor-pointer"
+                      className="w-full h-10 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-600 transition-all hover:bg-gray-100 hover:text-gray-800 cursor-pointer dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 dark:hover:bg-white/[0.07] dark:hover:text-white/80"
                     >
                       Tutup
                     </button>

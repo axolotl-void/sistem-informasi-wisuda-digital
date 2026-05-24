@@ -46,15 +46,15 @@ function GlassSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 appearance-none rounded-xl border border-white/[0.08] bg-white/[0.04] pl-3 pr-8 text-[0.78rem] font-medium text-white/60 outline-none transition-all hover:border-white/[0.12] hover:bg-white/[0.06] focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 cursor-pointer"
+        className="h-9 appearance-none rounded-xl border border-gray-200 bg-white text-gray-700 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 pl-3 pr-8 text-[0.78rem] font-medium outline-none transition-all hover:border-gray-300 dark:hover:border-white/[0.12] dark:hover:bg-white/[0.06] focus:border-blue-400 dark:focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 cursor-pointer shadow-sm dark:shadow-none"
       >
         {options.map((o) => (
-          <option key={o.value} value={o.value} className="bg-[#0F172A] text-white">
+          <option key={o.value} value={o.value} className="bg-white text-gray-800 dark:bg-[#0F172A] dark:text-white">
             {o.label}
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-white/30" />
+      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-gray-400 dark:text-white/30" />
     </div>
   );
 }
@@ -71,10 +71,14 @@ function GlassButton({
   variant?: "default" | "primary" | "ghost" | "danger";
 }) {
   const styles = {
-    default: "border-white/[0.08] bg-white/[0.04] text-white/60 hover:border-white/[0.12] hover:bg-white/[0.07] hover:text-white/80",
-    primary: "border-blue-500/30 bg-blue-500/10 text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/15",
-    ghost: "border-transparent bg-transparent text-white/40 hover:bg-white/[0.04] hover:text-white/60",
-    danger: "border-red-500/30 bg-red-500/10 text-red-400 hover:border-red-500/50 hover:bg-red-500/15",
+    default:
+      "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 dark:hover:border-white/[0.12] dark:hover:bg-white/[0.07] dark:hover:text-white/80 shadow-sm dark:shadow-none",
+    primary:
+      "border-blue-300 bg-blue-50 text-blue-600 hover:border-blue-400 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:border-blue-500/50 dark:hover:bg-blue-500/15",
+    ghost:
+      "border-transparent bg-transparent text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-white/40 dark:hover:bg-white/[0.04] dark:hover:text-white/60",
+    danger:
+      "border-red-200 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:border-red-500/50 dark:hover:bg-red-500/15",
   };
 
   return (
@@ -112,17 +116,17 @@ function DeleteAllDialog({
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={!isDeleting ? onCancel : undefined}
       />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#0F172A] p-6 shadow-2xl">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10">
-          <Trash2 className="size-5 text-red-400" />
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#0F172A] p-6 shadow-2xl">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10">
+          <Trash2 className="size-5 text-red-500 dark:text-red-400" />
         </div>
 
-        <h2 className="text-base font-bold text-white/90">
+        <h2 className="text-base font-bold text-gray-900 dark:text-white/90">
           Hapus Semua Undangan?
         </h2>
-        <p className="mt-2 text-[0.82rem] leading-relaxed text-white/40">
+        <p className="mt-2 text-[0.82rem] leading-relaxed text-gray-500 dark:text-white/40">
           Anda akan menghapus{" "}
-          <span className="font-semibold text-red-400">{count} undangan</span>.
+          <span className="font-semibold text-red-500 dark:text-red-400">{count} undangan</span>.
           Tindakan ini tidak dapat dibatalkan dan semua data QR code akan hilang permanen dari database.
         </p>
 
@@ -131,7 +135,7 @@ function DeleteAllDialog({
             type="button"
             onClick={onCancel}
             disabled={isDeleting}
-            className="flex-1 h-10 rounded-xl border border-white/[0.08] bg-white/[0.04] text-[0.82rem] font-semibold text-white/60 transition-all hover:bg-white/[0.07] hover:text-white/80 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 h-10 rounded-xl border border-gray-200 bg-gray-50 text-[0.82rem] font-semibold text-gray-600 transition-all hover:bg-gray-100 hover:text-gray-800 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 dark:hover:bg-white/[0.07] dark:hover:text-white/80"
           >
             Batal
           </button>
@@ -139,7 +143,7 @@ function DeleteAllDialog({
             type="button"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex-1 h-10 rounded-xl border border-red-500/30 bg-red-500/15 text-[0.82rem] font-bold text-red-400 transition-all hover:border-red-500/50 hover:bg-red-500/25 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 h-10 rounded-xl border border-red-300 bg-red-50 text-[0.82rem] font-bold text-red-600 transition-all hover:border-red-400 hover:bg-red-100 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400 dark:hover:border-red-500/50 dark:hover:bg-red-500/25"
           >
             {isDeleting ? (
               <>
@@ -172,7 +176,6 @@ export function InvitationToolbar() {
   } = useUndanganStore();
 
   const filtered = (invitations || []).filter((inv) => {
-    // 1. Search Query
     if (searchQuery) {
       const q = searchQuery.toLowerCase().trim();
       const matchNama = inv.mahasiswaNama?.toLowerCase().includes(q);
@@ -180,18 +183,15 @@ export function InvitationToolbar() {
       const matchKode = inv.kode?.toLowerCase().includes(q);
       if (!matchNama && !matchNim && !matchKode) return false;
     }
-    // 2. Filter Status
     if (filterStatus && filterStatus !== "all") {
       if (inv.status !== filterStatus) return false;
     }
-    // 3. Filter Sesi
     if (filterSesi && filterSesi !== "all") {
       const sessionKeyword = filterSesi.replace("Sesi ", "");
       if (!inv.sesi || !inv.sesi.toLowerCase().includes(sessionKeyword.toLowerCase())) {
         return false;
       }
     }
-    // 4. Filter Attendance
     if (filterAttendance && filterAttendance !== "all") {
       if (inv.attendance !== filterAttendance) return false;
     }
@@ -270,11 +270,11 @@ export function InvitationToolbar() {
       const imgData = canvas.toDataURL("image/png");
 
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 190; // margin left/right 10mm
+      const imgWidth = 190;
       const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-      let position = 10; // margin top 10mm
+      let position = 10;
 
       pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
@@ -303,13 +303,13 @@ export function InvitationToolbar() {
         <div className="flex flex-wrap items-center gap-2">
           {/* Search */}
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-white/25" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-gray-400 dark:text-white/25" />
             <input
               type="text"
               placeholder="Cari nama, NIM, kode..."
               value={searchQuery}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-9 w-56 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-9 pr-3 text-[0.78rem] text-white/70 placeholder-white/20 outline-none transition-all hover:border-white/[0.12] focus:border-blue-500/40 focus:bg-white/[0.06] focus:ring-2 focus:ring-blue-500/10"
+              className="h-9 w-56 rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-[0.78rem] text-gray-700 placeholder-gray-400 outline-none transition-all hover:border-gray-300 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-500/10 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70 dark:placeholder-white/20 dark:hover:border-white/[0.12] dark:focus:border-blue-500/40 dark:focus:bg-white/[0.06] dark:shadow-none"
             />
           </div>
 

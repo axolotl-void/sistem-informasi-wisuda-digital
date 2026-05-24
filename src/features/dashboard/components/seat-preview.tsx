@@ -137,7 +137,10 @@ export function SeatPreview() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-      className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.04] p-6 backdrop-blur-xl shadow-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.06]"
+      className="group relative rounded-2xl border p-6 backdrop-blur-xl overflow-hidden cursor-pointer transition-all duration-300
+        bg-white/70 border-white/60 shadow-[0_4px_24px_rgba(0,0,0,0.06)]
+        dark:bg-white/[0.04] dark:border-white/[0.08] dark:shadow-2xl
+        hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:hover:border-white/[0.12] dark:hover:bg-white/[0.06]"
       onClick={() => router.push(ROUTES.ADMIN.SEAT_MONITORING)}
     >
       {/* Backdrop glow */}
@@ -152,7 +155,7 @@ export function SeatPreview() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold tracking-tight text-white">
+              <h3 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
                 Seat Monitoring
               </h3>
               {/* Live badge */}
@@ -166,7 +169,7 @@ export function SeatPreview() {
                 {isConnected ? "LIVE" : "OFF"}
               </div>
             </div>
-            <p className="text-xs font-medium text-white/30 mt-0.5">
+            <p className="text-xs font-medium text-slate-500 dark:text-white/30 mt-0.5">
               Gedung Auditorium Utama
             </p>
           </div>
@@ -174,28 +177,28 @@ export function SeatPreview() {
 
         {/* Arrow CTA */}
         <div className="flex items-center gap-2 text-white/30 group-hover:text-emerald-400 transition-colors duration-300">
-          <span className="text-xs font-semibold hidden sm:inline">Buka Detail</span>
-          <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+          <span className="text-xs font-semibold hidden sm:inline text-slate-500 dark:text-white/30 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">Buka Detail</span>
+          <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1 text-slate-400 dark:text-white/30 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
         </div>
       </div>
 
       {/* Global Summary Stats Row */}
       <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/25">Total Kursi</p>
-          <p className="text-xl font-bold text-white/80 tabular-nums mt-0.5">
+        <div className="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-4 py-3 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/25">Total Kursi</p>
+          <p className="text-xl font-bold text-slate-800 dark:text-white/80 tabular-nums mt-0.5">
             {loading ? "—" : globalStats.total}
           </p>
         </div>
-        <div className="rounded-xl border border-emerald-500/10 bg-emerald-500/[0.03] px-4 py-3 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/40">Hadir</p>
-          <p className="text-xl font-bold text-emerald-400 tabular-nums mt-0.5">
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-500/10 bg-emerald-50 dark:bg-emerald-500/[0.03] px-4 py-3 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400/40">Hadir</p>
+          <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums mt-0.5">
             {loading ? "—" : globalStats.checkedIn}
           </p>
         </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/25">Kehadiran</p>
-          <p className="text-xl font-bold text-white/80 tabular-nums mt-0.5">
+        <div className="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-4 py-3 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/25">Kehadiran</p>
+          <p className="text-xl font-bold text-slate-800 dark:text-white/80 tabular-nums mt-0.5">
             {loading ? "—" : `${globalStats.pct}%`}
           </p>
         </div>
@@ -212,8 +215,8 @@ export function SeatPreview() {
           />
         </div>
         <div className="flex items-center justify-between mt-1.5">
-          <span className="text-[10px] font-semibold text-white/20">{globalStats.checkedIn} terisi</span>
-          <span className="text-[10px] font-semibold text-white/20">{globalStats.notArrived} belum hadir</span>
+          <span className="text-[10px] font-semibold text-slate-400 dark:text-white/20">{globalStats.checkedIn} terisi</span>
+          <span className="text-[10px] font-semibold text-slate-400 dark:text-white/20">{globalStats.notArrived} belum hadir</span>
         </div>
       </div>
 
