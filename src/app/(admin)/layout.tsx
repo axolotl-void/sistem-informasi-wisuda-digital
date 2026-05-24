@@ -10,7 +10,7 @@ export default async function AdminLayout({
   await requireRole(["SUPER_ADMIN", "ADMIN_FAKULTAS", "PETUGAS_SCAN"]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-[#07111F]">
+    <div className="flex h-screen overflow-hidden bg-[#e4ecf8] dark:bg-[#07111F]">
       {/* Floating glass sidebar */}
       <AdminSidebar />
 

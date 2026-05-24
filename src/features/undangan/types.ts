@@ -1,4 +1,4 @@
-// ─── Undangan Feature Types ───────────────────────────────────────────────────
+// --- Undangan Feature Types ---------------------------------------------------
 
 export type InvitationStatus =
   | "belum_generate"

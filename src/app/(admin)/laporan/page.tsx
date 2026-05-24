@@ -7,7 +7,7 @@ import {
   TrendingUp, Users, UserCheck, QrCode, Calendar,
 } from "lucide-react";
 
-// ─── Report card ──────────────────────────────────────────────────────────────
+// --- Report card --------------------------------------------------------------
 
 interface ReportCardProps {
   title: string;
@@ -55,7 +55,7 @@ function ReportCard({ title, description, icon: Icon, iconColor, iconBg, actions
   );
 }
 
-// ─── Stat mini ────────────────────────────────────────────────────────────────
+// --- Stat mini ----------------------------------------------------------------
 
 function MiniStat({ label, value, color }: { label: string; value: string; color: string }) {
   return (
@@ -66,7 +66,7 @@ function MiniStat({ label, value, color }: { label: string; value: string; color
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// --- Page ---------------------------------------------------------------------
 
 export default function LaporanPage() {
   const handleDownload = (type: string) => {

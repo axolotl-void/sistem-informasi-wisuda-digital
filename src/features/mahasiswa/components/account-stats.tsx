@@ -8,7 +8,7 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WisudawanRow } from "@/services/wisudawan.service";
 
-// ─── Config ──────────────────────────────────────────────────────────────────
+// --- Config ------------------------------------------------------------------
 
 interface CardConfig {
   label: string;
@@ -70,7 +70,7 @@ const cards: CardConfig[] = [
   },
 ];
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// --- Component ---------------------------------------------------------------
 
 interface AccountStatsProps {
   data: WisudawanRow[];

@@ -49,7 +49,7 @@ export function AdminSidebar() {
 
   return (
     <aside
-      className="hidden lg:flex flex-col bg-white/70 dark:bg-white/[0.04] backdrop-blur-xl border border-white/60 dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-none"
+      className="hidden lg:flex flex-col border border-white/90 bg-white/55 shadow-[0_8px_32px_rgba(59,130,246,0.1),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-3xl backdrop-saturate-150 dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none"
       style={{
         width: 260,
         flexShrink: 0,

@@ -59,7 +59,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return apiSuccess(null, "Pengajuan tamu ditolak");
     }
 
-    // ── APPROVE ──────────────────────────────────────────────────────────────
+    // -- APPROVE --------------------------------------------------------------
     // Cek apakah sudah punya undangan aktif
     if (mahasiswa.undangan.length > 0) {
       // Sudah punya undangan — update kuotaTamu saja

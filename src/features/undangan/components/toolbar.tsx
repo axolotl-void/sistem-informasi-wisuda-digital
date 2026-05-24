@@ -93,7 +93,7 @@ function GlassButton({
   );
 }
 
-// ─── Delete All Confirmation Dialog ──────────────────────────────────────────
+// --- Delete All Confirmation Dialog ------------------------------------------
 
 function DeleteAllDialog({
   open,
@@ -163,7 +163,7 @@ function DeleteAllDialog({
   );
 }
 
-// ─── Toolbar ─────────────────────────────────────────────────────────────────
+// --- Toolbar -----------------------------------------------------------------
 
 export function InvitationToolbar() {
   const {

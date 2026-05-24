@@ -11,7 +11,7 @@ import {
 import { toast } from "sonner";
 import Link from "next/link";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface MahasiswaData {
   id: string;
@@ -45,7 +45,7 @@ interface FormErrors {
   prodi?: string;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// --- Constants ----------------------------------------------------------------
 
 const FAKULTAS_OPTIONS = [
   "Fakultas Teknik",
@@ -60,7 +60,7 @@ const FAKULTAS_OPTIONS = [
 
 const TOGA_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
-// ─── Progress helpers ─────────────────────────────────────────────────────────
+// --- Progress helpers ---------------------------------------------------------
 
 function calcProgress(data: MahasiswaData | null, toga: string): number {
   if (!data) return 0;
@@ -84,7 +84,7 @@ function getProgressColor(value: number) {
   return { bar: "from-emerald-500 to-teal-400", text: "text-emerald-400", glow: "shadow-emerald-500/20" };
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// --- Sub-components -----------------------------------------------------------
 
 function SkeletonCard({ h = "h-32" }: { h?: string }) {
   return (
@@ -131,7 +131,7 @@ const inputDisabled =
 const selectBase =
   `${inputNormal} cursor-pointer appearance-none`;
 
-// ─── Toga Segmented Control ───────────────────────────────────────────────────
+// --- Toga Segmented Control ---------------------------------------------------
 
 function TogaControl({
   value, onChange,
@@ -169,7 +169,7 @@ function TogaControl({
   );
 }
 
-// ─── Avatar Upload ────────────────────────────────────────────────────────────
+// --- Avatar Upload ------------------------------------------------------------
 
 function AvatarUpload({
   foto, nama, onUpload, isUploading = false,
@@ -222,7 +222,7 @@ function AvatarUpload({
   );
 }
 
-// ─── Progress Bar ─────────────────────────────────────────────────────────────
+// --- Progress Bar -------------------------------------------------------------
 
 function ProfileProgress({ value }: { value: number }) {
   const { bar, text, glow } = getProgressColor(value);
@@ -269,7 +269,7 @@ function ProfileProgress({ value }: { value: number }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// --- Main Page ----------------------------------------------------------------
 
 export default function ProfilPage() {
   const [data, setData] = useState<MahasiswaData | null>(null);
@@ -310,7 +310,7 @@ export default function ProfilPage() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  // ── Upload foto handler ─────────────────────────────────────────────────────
+  // -- Upload foto handler -----------------------------------------------------
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -412,7 +412,7 @@ export default function ProfilPage() {
 
   const progress = calcProgress(data, form.ukuranToga);
 
-  // ── Loading skeleton ────────────────────────────────────────────────────────
+  // -- Loading skeleton --------------------------------------------------------
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -426,7 +426,7 @@ export default function ProfilPage() {
 
   return (
     <div className="space-y-5 pb-4">
-      {/* ── Hero Header ──────────────────────────────────────────────────────── */}
+      {/* -- Hero Header -------------------------------------------------------- */}
       <SectionCard delay={0} className="p-5 overflow-hidden relative">
         {/* Ambient glow */}
         <div className="absolute -top-10 -right-10 size-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -475,7 +475,7 @@ export default function ProfilPage() {
         </div>
       </SectionCard>
 
-      {/* ── Undangan Status ──────────────────────────────────────────────────── */}
+      {/* -- Undangan Status ---------------------------------------------------- */}
       {data?.undangan && (
         <SectionCard delay={0.05} className="p-4 space-y-3">
           <div className="flex items-center justify-between">
@@ -513,7 +513,7 @@ export default function ProfilPage() {
         </SectionCard>
       )}
 
-      {/* ── Form ─────────────────────────────────────────────────────────────── */}
+      {/* -- Form --------------------------------------------------------------- */}
       <form onSubmit={handleSave} className="space-y-4">
 
         {/* Grup Kredensial */}

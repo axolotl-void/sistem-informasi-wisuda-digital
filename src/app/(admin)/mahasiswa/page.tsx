@@ -35,7 +35,7 @@ export default function MahasiswaPage() {
 
   return (
     <div className="space-y-4">
-      {/* ── Header ──────────────────────────────────────────────────── */}
+      {/* -- Header ---------------------------------------------------- */}
       <motion.div
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -77,7 +77,7 @@ export default function MahasiswaPage() {
         </div>
       </motion.div>
 
-      {/* ── Stats ───────────────────────────────────────────────────── */}
+      {/* -- Stats ----------------------------------------------------- */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ export default function MahasiswaPage() {
         <AccountStats data={data} total={total} />
       </motion.div>
 
-      {/* ── Toolbar ─────────────────────────────────────────────────── */}
+      {/* -- Toolbar --------------------------------------------------- */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -103,7 +103,7 @@ export default function MahasiswaPage() {
         />
       </motion.div>
 
-      {/* ── Table ───────────────────────────────────────────────────── */}
+      {/* -- Table ----------------------------------------------------- */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -122,7 +122,7 @@ export default function MahasiswaPage() {
         />
       </motion.div>
 
-      {/* ── Overlays ────────────────────────────────────────────────── */}
+      {/* -- Overlays -------------------------------------------------- */}
       <EditModal
         student={editTarget}
         open={!!editTarget}

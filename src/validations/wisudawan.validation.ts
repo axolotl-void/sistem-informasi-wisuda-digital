@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// ─── Create Account ──────────────────────────────────────────────────────────
+// --- Create Account ----------------------------------------------------------
 
 export const createWisudawanSchema = z.object({
   nama: z
@@ -27,7 +27,7 @@ export const createWisudawanSchema = z.object({
 
 export type CreateWisudawanInput = z.infer<typeof createWisudawanSchema>;
 
-// ─── Update Account ──────────────────────────────────────────────────────────
+// --- Update Account ----------------------------------------------------------
 
 export const updateWisudawanSchema = z.object({
   nim: z.string().min(8, "NIM minimal 8 karakter").max(20, "NIM maksimal 20 karakter").optional(),
@@ -44,7 +44,7 @@ export const updateWisudawanSchema = z.object({
 
 export type UpdateWisudawanInput = z.infer<typeof updateWisudawanSchema>;
 
-// ─── Reset Password ──────────────────────────────────────────────────────────
+// --- Reset Password ----------------------------------------------------------
 
 export const resetPasswordSchema = z.object({
   newPassword: z
@@ -57,7 +57,7 @@ export const resetPasswordSchema = z.object({
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
-// ─── Verify Account ──────────────────────────────────────────────────────────
+// --- Verify Account ----------------------------------------------------------
 
 export const verifyAccountSchema = z.object({
   action: z.enum(["approve", "reject", "revision"], {

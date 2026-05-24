@@ -104,7 +104,7 @@ export default function LoginPage() {
           "fill-mode-both duration-700 ease-out",
         ].join(" ")}
       >
-        {/* ── Logo Icon ─────────────────────────────────────────────── */}
+        {/* -- Logo Icon ----------------------------------------------- */}
         <div
           className={[
             "mb-4 flex justify-center",
@@ -117,7 +117,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* ── Title — Gradient Shimmer ──────────────────────────────── */}
+        {/* -- Title — Gradient Shimmer -------------------------------- */}
         <div
           className={[
             "mb-8 text-center",
@@ -135,7 +135,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* ── Form ──────────────────────────────────────────────────── */}
+        {/* -- Form ---------------------------------------------------- */}
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
           {/* Error banner */}
           {error && (
@@ -144,7 +144,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* ── Email ───────────────────────────────────────────────── */}
+          {/* -- Email ------------------------------------------------- */}
           <div
             className={[
               "space-y-2",
@@ -181,7 +181,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* ── Password ────────────────────────────────────────────── */}
+          {/* -- Password ---------------------------------------------- */}
           <div
             className={[
               "space-y-2",
@@ -239,7 +239,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* ── Submit Button — 3D Pop ──────────────────────────────── */}
+          {/* -- Submit Button — 3D Pop -------------------------------- */}
           <div
             className={[
               "pt-1",
@@ -281,7 +281,7 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* ── Footer ────────────────────────────────────────────────── */}
+        {/* -- Footer -------------------------------------------------- */}
         <p
           className={[
             "mt-8 text-center text-xs text-slate-400 dark:text-zinc-600",

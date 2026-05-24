@@ -7,7 +7,7 @@ import { User, Users, Ticket, GraduationCap, LogOut, Bell, ChevronRight } from "
 import axios from "axios";
 import { useAuthStore } from "@/store/auth.store";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface PortalUser {
   id: string;
@@ -20,7 +20,7 @@ interface PortalUser {
   avatar: string;
 }
 
-// ─── Nav items ────────────────────────────────────────────────────────────────
+// --- Nav items ----------------------------------------------------------------
 
 const NAV_ITEMS = [
   { href: "/portal", label: "Profil", icon: User, exact: true },
@@ -28,7 +28,7 @@ const NAV_ITEMS = [
   { href: "/portal/tiket", label: "E-Ticket", icon: Ticket, exact: false },
 ];
 
-// ─── Sidebar (desktop) ───────────────────────────────────────────────────────
+// --- Sidebar (desktop) -------------------------------------------------------
 
 function Sidebar({ pathname, user, onLogout }: { pathname: string; user: PortalUser; onLogout: () => void }) {
   return (
@@ -106,7 +106,7 @@ function Sidebar({ pathname, user, onLogout }: { pathname: string; user: PortalU
   );
 }
 
-// ─── Bottom Nav (mobile) ──────────────────────────────────────────────────────
+// --- Bottom Nav (mobile) ------------------------------------------------------
 
 function BottomNav({ pathname }: { pathname: string }) {
   return (
@@ -138,7 +138,7 @@ function BottomNav({ pathname }: { pathname: string }) {
   );
 }
 
-// ─── Mobile Header ────────────────────────────────────────────────────────────
+// --- Mobile Header ------------------------------------------------------------
 
 function MobileHeader({ user }: { user: PortalUser }) {
   return (
@@ -168,7 +168,7 @@ function MobileHeader({ user }: { user: PortalUser }) {
   );
 }
 
-// ─── Shell ────────────────────────────────────────────────────────────────────
+// --- Shell --------------------------------------------------------------------
 
 export function PortalShell({
   children,

@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface TamuRequest {
   id: string;
@@ -24,7 +24,7 @@ interface TamuRequest {
   undangan: { id: string; kode: string; statusUndangan: string } | null;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 function getToken(): string | null {
   try {
@@ -40,7 +40,7 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// ─── Row component ────────────────────────────────────────────────────────────
+// --- Row component ------------------------------------------------------------
 
 function RequestRow({
   req,
@@ -135,7 +135,7 @@ function RequestRow({
   );
 }
 
-// ─── Main Panel ───────────────────────────────────────────────────────────────
+// --- Main Panel ---------------------------------------------------------------
 
 export function TamuRequestsPanel({ onRefreshUndangan }: { onRefreshUndangan?: () => void }) {
   const [requests, setRequests] = useState<TamuRequest[]>([]);

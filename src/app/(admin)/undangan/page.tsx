@@ -31,7 +31,7 @@ export default function UndanganPage() {
       />
 
       <div className="relative z-10 space-y-6">
-        {/* ── Page Header ─────────────────────────────────────────────── */}
+        {/* -- Page Header ----------------------------------------------- */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -61,7 +61,7 @@ export default function UndanganPage() {
           </div>
         </motion.div>
 
-        {/* ── Stats ───────────────────────────────────────────────────── */}
+        {/* -- Stats ----------------------------------------------------- */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ export default function UndanganPage() {
           <InvitationStatsCards stats={stats} />
         </motion.div>
 
-        {/* ── Toolbar ─────────────────────────────────────────────────── */}
+        {/* -- Toolbar --------------------------------------------------- */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -79,7 +79,7 @@ export default function UndanganPage() {
           <InvitationToolbar />
         </motion.div>
 
-        {/* ── Request Tamu Panel ───────────────────────────────────── */}
+        {/* -- Request Tamu Panel ------------------------------------- */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,7 +88,7 @@ export default function UndanganPage() {
           <TamuRequestsPanel onRefreshUndangan={() => init()} />
         </motion.div>
 
-        {/* ── Table ───────────────────────────────────────────────────── */}
+        {/* -- Table ----------------------------------------------------- */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -98,7 +98,7 @@ export default function UndanganPage() {
         </motion.div>
       </div>
 
-      {/* ── Modals & Drawers ────────────────────────────────────────── */}
+      {/* -- Modals & Drawers ------------------------------------------ */}
       <InvitationPreviewModal />
       <QRDrawer />
       <GenerateInvitationModal />

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, RotateCcw, ClipboardList, Loader2, UserCheck, RefreshCw } from "lucide-react";
 import { useKehadiranStore } from "@/store/kehadiran.store";
 
-// ─── Status Config ────────────────────────────────────────────────────────────
+// --- Status Config ------------------------------------------------------------
 const statusCfg: Record<string, { label: string; pill: string; dot: string }> = {
   HADIR: {
     label: "Hadir",

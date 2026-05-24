@@ -14,7 +14,7 @@ export default function ScanPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl flex h-full flex-col gap-5">
-      {/* ── Header ── */}
+      {/* -- Header -- */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -54,7 +54,7 @@ export default function ScanPage() {
         </div>
       </motion.div>
 
-      {/* ── Main Grid ── */}
+      {/* -- Main Grid -- */}
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Left */}
         <div className="flex flex-col gap-4 overflow-y-auto">

@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 
 interface StatCardProps {
   label: string;
@@ -16,24 +16,28 @@ interface StatCardProps {
 
 const accentMap = {
   blue: {
-    icon: "text-blue-600 dark:text-blue-400",
-    iconBg: "bg-blue-100 dark:bg-blue-500/10",
-    glow: "hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)] dark:hover:shadow-[0_0_30px_rgba(59,130,246,0.12)]",
+    icon: "text-blue-700 dark:text-blue-300",
+    iconBg:
+      "bg-gradient-to-br from-blue-400/35 to-blue-600/15 border border-blue-400/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_12px_rgba(59,130,246,0.15)] dark:from-blue-500/20 dark:to-blue-600/5 dark:border-blue-500/25 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]",
+    ring: "group-hover:shadow-[0_20px_50px_rgba(59,130,246,0.18)]",
   },
   emerald: {
-    icon: "text-emerald-600 dark:text-emerald-400",
-    iconBg: "bg-emerald-100 dark:bg-emerald-500/10",
-    glow: "hover:shadow-[0_8px_30px_rgba(16,185,129,0.15)] dark:hover:shadow-[0_0_30px_rgba(16,185,129,0.12)]",
+    icon: "text-emerald-700 dark:text-emerald-300",
+    iconBg:
+      "bg-gradient-to-br from-emerald-400/35 to-emerald-600/15 border border-emerald-400/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_12px_rgba(16,185,129,0.15)] dark:from-emerald-500/20 dark:to-emerald-600/5 dark:border-emerald-500/25",
+    ring: "group-hover:shadow-[0_20px_50px_rgba(16,185,129,0.18)]",
   },
   orange: {
-    icon: "text-orange-600 dark:text-orange-400",
-    iconBg: "bg-orange-100 dark:bg-orange-500/10",
-    glow: "hover:shadow-[0_8px_30px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_30px_rgba(249,115,22,0.12)]",
+    icon: "text-orange-700 dark:text-orange-300",
+    iconBg:
+      "bg-gradient-to-br from-orange-400/35 to-orange-600/15 border border-orange-400/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_12px_rgba(249,115,22,0.15)] dark:from-orange-500/20 dark:to-orange-600/5 dark:border-orange-500/25",
+    ring: "group-hover:shadow-[0_20px_50px_rgba(249,115,22,0.18)]",
   },
   violet: {
-    icon: "text-violet-600 dark:text-violet-400",
-    iconBg: "bg-violet-100 dark:bg-violet-500/10",
-    glow: "hover:shadow-[0_8px_30px_rgba(139,92,246,0.15)] dark:hover:shadow-[0_0_30px_rgba(139,92,246,0.12)]",
+    icon: "text-violet-700 dark:text-violet-300",
+    iconBg:
+      "bg-gradient-to-br from-violet-400/35 to-violet-600/15 border border-violet-400/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_12px_rgba(139,92,246,0.15)] dark:from-violet-500/20 dark:to-violet-600/5 dark:border-violet-500/25",
+    ring: "group-hover:shadow-[0_20px_50px_rgba(139,92,246,0.18)]",
   },
 };
 
@@ -49,48 +53,50 @@ export function StatCard({
   const colors = accentMap[accent];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
-      className={cn(
-        "group relative rounded-3xl border p-5",
-        // Light mode: white glass card dengan soft shadow
-        "bg-white/70 border-white/60 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-md",
-        // Dark mode: tetap seperti semula
-        "dark:bg-white/[0.04] dark:border-white/[0.08] dark:shadow-none dark:backdrop-blur-xl",
-        "transition-all duration-500",
-        "hover:-translate-y-0.5",
-        "dark:hover:border-white/[0.12] dark:hover:bg-white/[0.06]",
-        colors.glow,
-      )}
+    <LiquidGlassCard
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={cn("group p-5", colors.ring)}
     >
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-white/35">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1.5">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-slate-600 dark:text-white/40">
             {label}
           </p>
-          <p className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {value}
+          <p className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white dark:drop-shadow-[0_0_24px_rgba(255,255,255,0.12)]">
+            <span className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-600 bg-clip-text text-transparent dark:hidden">
+              {value}
+            </span>
+            <span className="hidden dark:inline">{value}</span>
           </p>
           {subtitle && (
-            <p className="text-xs font-medium text-slate-400 dark:text-white/25">{subtitle}</p>
+            <p className="text-xs font-medium text-slate-600 dark:text-white/35">
+              {subtitle}
+            </p>
           )}
           {trend && (
-            <p className={cn("text-xs font-semibold", trend.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400")}>
+            <p
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold backdrop-blur-md",
+                trend.positive
+                  ? "border-emerald-400/30 bg-emerald-500/15 text-emerald-800 dark:border-transparent dark:bg-emerald-500/10 dark:text-emerald-300"
+                  : "border-red-400/30 bg-red-500/15 text-red-800 dark:border-transparent dark:bg-red-500/10 dark:text-red-300",
+              )}
+            >
               {trend.positive ? "↑" : "↓"} {trend.value}
             </p>
           )}
         </div>
         <div
           className={cn(
-            "flex size-10 items-center justify-center rounded-xl",
+            "flex size-11 shrink-0 items-center justify-center rounded-2xl backdrop-blur-md",
             colors.iconBg,
           )}
         >
           <Icon className={cn("size-5", colors.icon)} />
         </div>
       </div>
-    </motion.div>
+    </LiquidGlassCard>
   );
 }

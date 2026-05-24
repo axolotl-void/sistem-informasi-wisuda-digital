@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 type StatusPengajuan = "NONE" | "PENDING" | "APPROVED" | "REJECTED";
 
@@ -25,7 +25,7 @@ interface TamuData {
   } | null;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 function getToken(): string | null {
   try {
@@ -41,7 +41,7 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// ─── Status UI configs ────────────────────────────────────────────────────────
+// --- Status UI configs --------------------------------------------------------
 
 const STATUS_CFG = {
   NONE: null,
@@ -77,7 +77,7 @@ const STATUS_CFG = {
   },
 };
 
-// ─── Components ───────────────────────────────────────────────────────────────
+// --- Components ---------------------------------------------------------------
 
 function StatusCard({ status, requestedTamu, undangan }: {
   status: StatusPengajuan;
@@ -132,7 +132,7 @@ function StatusCard({ status, requestedTamu, undangan }: {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// --- Page ---------------------------------------------------------------------
 
 export default function TamuPage() {
   const [tamuData, setTamuData] = useState<TamuData | null>(null);

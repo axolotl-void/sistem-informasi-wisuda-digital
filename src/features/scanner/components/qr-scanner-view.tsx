@@ -77,7 +77,7 @@ export function QrScannerView() {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="rounded-2xl border border-gray-200/80 bg-white dark:border-white/[0.08] dark:bg-[#0C1120] shadow-sm overflow-hidden"
     >
-      {/* ── Top bar ── */}
+      {/* -- Top bar -- */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-white/[0.06]">
         <div className="flex items-center gap-2.5">
           <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500 shadow-md shadow-blue-500/30">
@@ -109,7 +109,7 @@ export function QrScannerView() {
         </AnimatePresence>
       </div>
 
-      {/* ── Viewfinder ── */}
+      {/* -- Viewfinder -- */}
       <div className="px-4 pt-3 pb-3">
         <div className={cn(
           "relative w-full overflow-hidden rounded-xl flex items-center justify-center transition-all duration-300",
@@ -170,7 +170,7 @@ export function QrScannerView() {
         </div>
       </div>
 
-      {/* ── Permission alert ── */}
+      {/* -- Permission alert -- */}
       {hasPermission === false && (
         <div className="mx-4 mb-3 flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 dark:border-red-500/20 dark:bg-red-500/[0.06] p-3">
           <AlertCircle className="size-3.5 shrink-0 mt-0.5 text-red-500 dark:text-red-400" />
@@ -183,7 +183,7 @@ export function QrScannerView() {
         </div>
       )}
 
-      {/* ── Toggle button ── */}
+      {/* -- Toggle button -- */}
       <div className="px-4 pb-4">
         <button
           type="button"

@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GlassChip, LiquidGlassCard } from "@/components/ui/liquid-glass";
 
 interface Activity {
   id: string;
@@ -25,78 +25,105 @@ const activities: Activity[] = [
 ];
 
 const statusConfig = {
-  success: { icon: CheckCircle2, text: "Berhasil", color: "text-emerald-400" },
-  failed: { icon: XCircle, text: "Gagal", color: "text-red-400" },
-  pending: { icon: Clock, text: "Menunggu", color: "text-orange-400" },
+  success: {
+    icon: CheckCircle2,
+    text: "Berhasil",
+    chip: "text-emerald-700 dark:text-emerald-300",
+    bg: "bg-emerald-500/12 border-emerald-500/25",
+  },
+  failed: {
+    icon: XCircle,
+    text: "Gagal",
+    chip: "text-red-700 dark:text-red-300",
+    bg: "bg-red-500/12 border-red-500/25",
+  },
+  pending: {
+    icon: Clock,
+    text: "Menunggu",
+    chip: "text-amber-700 dark:text-amber-300",
+    bg: "bg-amber-500/12 border-amber-500/25",
+  },
 };
 
 export function ActivityTable() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <LiquidGlassCard
+      initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
-      className="rounded-2xl border p-6 backdrop-blur-xl
-        bg-white/70 border-white/60 shadow-[0_4px_24px_rgba(0,0,0,0.06)]
-        dark:bg-white/[0.04] dark:border-white/[0.08] dark:shadow-none"
+      transition={{ duration: 0.55, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      hover={false}
+      className="p-6"
     >
       <div className="mb-5">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Aktivitas Terkini</h2>
-        <p className="text-sm font-medium text-slate-500 dark:text-white/35">Log scan kehadiran realtime</p>
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Aktivitas Terkini
+        </h2>
+        <p className="text-sm font-medium text-slate-500 dark:text-white/35">
+          Log scan kehadiran realtime
+        </p>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-2xl border border-white/80 bg-white/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl dark:border-white/[0.06] dark:bg-white/[0.02] dark:shadow-none">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 dark:border-white/[0.06]">
+            <tr className="border-b border-slate-200/80 bg-white/30 dark:border-white/[0.08] dark:bg-transparent">
               {["Waktu", "Nama", "Kursi", "Gate", "Status"].map((h) => (
                 <th
                   key={h}
-                  className="pb-3 pr-4 text-left text-xs font-semibold tracking-wider text-slate-400 dark:text-white/25 uppercase last:pr-0"
+                  className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/30"
                 >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-            {activities.map((a, i) => {
+          <tbody>
+            {activities.map((a) => {
               const cfg = statusConfig[a.status];
               const Icon = cfg.icon;
               return (
-                <motion.tr
+                <tr
                   key={a.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.04 }}
-                  className="group"
+                  className="border-t border-slate-200/60 transition-colors hover:bg-white/55 dark:border-white/[0.05] dark:hover:bg-white/[0.04]"
                 >
-                  <td className="py-3 pr-4">
-                    <span className="font-mono text-xs tabular-nums text-slate-400 dark:text-white/40">{a.time}</span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="text-sm font-medium text-slate-800 dark:text-white/80">{a.name}</span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className="rounded bg-slate-100 dark:bg-white/[0.06] px-2 py-0.5 text-xs font-mono text-slate-600 dark:text-white/50">
-                      {a.seat}
+                  <td className="px-4 py-3">
+                    <span className="font-mono text-xs tabular-nums text-slate-500 dark:text-white/45">
+                      {a.time}
                     </span>
                   </td>
-                  <td className="py-3 pr-4">
-                    <span className="text-xs font-medium text-slate-500 dark:text-white/40">{a.gate}</span>
+                  <td className="px-4 py-3">
+                    <span className="font-medium text-slate-800 dark:text-white/85">
+                      {a.name}
+                    </span>
                   </td>
-                  <td className="py-3">
-                    <span className={cn("inline-flex items-center gap-1", cfg.color)}>
+                  <td className="px-4 py-3">
+                    <GlassChip className="inline-block px-2 py-0.5">
+                      <span className="font-mono text-xs text-slate-600 dark:text-white/55">
+                        {a.seat}
+                      </span>
+                    </GlassChip>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-slate-500 dark:text-white/40">
+                    {a.gate}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold backdrop-blur-md",
+                        cfg.bg,
+                        cfg.chip,
+                      )}
+                    >
                       <Icon className="size-3.5" />
-                      <span className="text-xs font-semibold">{cfg.text}</span>
+                      {cfg.text}
                     </span>
                   </td>
-                </motion.tr>
+                </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-    </motion.div>
+    </LiquidGlassCard>
   );
 }

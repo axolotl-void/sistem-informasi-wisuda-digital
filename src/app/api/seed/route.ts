@@ -9,7 +9,7 @@ export async function GET() {
     // Hash password
     const hashedPassword = await bcrypt.hash("password123", 12);
 
-    // ── Super Admin ──────────────────────────────
+    // -- Super Admin ------------------------------
     const superAdmin = await prisma.user.upsert({
       where: { email: "superadmin@wisuda.ac.id" },
       update: {},
@@ -22,7 +22,7 @@ export async function GET() {
     });
     console.log("✅ Super Admin:", superAdmin.email);
 
-    // ── Admin Fakultas ───────────────────────────
+    // -- Admin Fakultas ---------------------------
     const adminFakultas = await prisma.user.upsert({
       where: { email: "admin.fkip@wisuda.ac.id" },
       update: {},
@@ -36,7 +36,7 @@ export async function GET() {
     });
     console.log("✅ Admin Fakultas:", adminFakultas.email);
 
-    // ── Petugas Scan ─────────────────────────────
+    // -- Petugas Scan -----------------------------
     const petugas = await prisma.user.upsert({
       where: { email: "petugas@wisuda.ac.id" },
       update: {},
@@ -49,7 +49,7 @@ export async function GET() {
     });
     console.log("✅ Petugas Scan:", petugas.email);
 
-    // ── Mahasiswa Sample ─────────────────────────
+    // -- Mahasiswa Sample -------------------------
     const mahasiswaUser = await prisma.user.upsert({
       where: { email: "mahasiswa@wisuda.ac.id" },
       update: {},

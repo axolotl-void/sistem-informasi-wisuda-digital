@@ -13,7 +13,7 @@ async function main() {
     console.log("🌱 Seeding database...");
     // Hash password
     const hashedPassword = await bcryptjs_1.default.hash("password123", 12);
-    // ── Super Admin ──────────────────────────────
+    // -- Super Admin ------------------------------
     const superAdmin = await prisma.user.upsert({
         where: { email: "superadmin@wisuda.ac.id" },
         update: {},
@@ -25,7 +25,7 @@ async function main() {
         },
     });
     console.log("✅ Super Admin:", superAdmin.email);
-    // ── Admin Fakultas ───────────────────────────
+    // -- Admin Fakultas ---------------------------
     const adminFakultas = await prisma.user.upsert({
         where: { email: "admin.fkip@wisuda.ac.id" },
         update: {},
@@ -38,7 +38,7 @@ async function main() {
         },
     });
     console.log("✅ Admin Fakultas:", adminFakultas.email);
-    // ── Petugas Scan ─────────────────────────────
+    // -- Petugas Scan -----------------------------
     const petugas = await prisma.user.upsert({
         where: { email: "petugas@wisuda.ac.id" },
         update: {},
@@ -50,7 +50,7 @@ async function main() {
         },
     });
     console.log("✅ Petugas Scan:", petugas.email);
-    // ── Mahasiswa Sample ─────────────────────────
+    // -- Mahasiswa Sample -------------------------
     const mahasiswaUser = await prisma.user.upsert({
         where: { email: "mahasiswa@wisuda.ac.id" },
         update: {},

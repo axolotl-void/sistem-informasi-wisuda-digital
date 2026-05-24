@@ -1,6 +1,6 @@
 import type { StudentStatus } from "./components/status-badge";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 export interface Student {
   id: string;
@@ -24,7 +24,7 @@ export interface Student {
   guests: { name: string; isVip: boolean }[];
 }
 
-// ─── Dummy data ───────────────────────────────────────────────────────────────
+// --- Dummy data ---------------------------------------------------------------
 
 const faculties = [
   "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",

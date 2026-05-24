@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { useWisudawan } from "@/hooks/use-wisudawan";
 import type { WisudawanRow } from "@/services/wisudawan.service";
 
-// ─── Props ───────────────────────────────────────────────────────────────────
+// --- Props -------------------------------------------------------------------
 
 interface DrawerProps {
   student: WisudawanRow | null;
@@ -21,7 +21,7 @@ interface DrawerProps {
   onResetClick: (s: WisudawanRow) => void;
 }
 
-// ─── Status config ───────────────────────────────────────────────────────────
+// --- Status config -----------------------------------------------------------
 
 const statusCfg: Record<string, { label: string; dot: string; text: string; bg: string }> = {
   AKTIF: { label: "Aktif", dot: "bg-blue-400", text: "text-blue-300", bg: "bg-blue-500/10" },
@@ -30,7 +30,7 @@ const statusCfg: Record<string, { label: string; dot: string; text: string; bg: 
   DROPOUT: { label: "Ditolak", dot: "bg-red-400", text: "text-red-300", bg: "bg-red-500/10" },
 };
 
-// ─── Info row ────────────────────────────────────────────────────────────────
+// --- Info row ----------------------------------------------------------------
 
 function InfoRow({ icon: Icon, label, value }: { icon: typeof Mail; label: string; value: string }) {
   return (
@@ -53,7 +53,7 @@ function StatusRow({ label, value, active }: { label: string; value: string; act
   );
 }
 
-// ─── Main drawer ─────────────────────────────────────────────────────────────
+// --- Main drawer -------------------------------------------------------------
 
 export function StudentDrawer({ student, onClose, onDeleteClick, onResetClick }: DrawerProps) {
   const { verify, generateInvitation } = useWisudawan();
@@ -129,7 +129,7 @@ export function StudentDrawer({ student, onClose, onDeleteClick, onResetClick }:
               boxShadow: "-20px 0 60px rgba(0,0,0,0.4)",
             }}
           >
-            {/* ── Header ─────────────────────────────────────────── */}
+            {/* -- Header ------------------------------------------- */}
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "14px 20px",
@@ -163,7 +163,7 @@ export function StudentDrawer({ student, onClose, onDeleteClick, onResetClick }:
               </button>
             </div>
 
-            {/* ── Scrollable content ─────────────────────────────── */}
+            {/* -- Scrollable content ------------------------------- */}
             <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
@@ -266,7 +266,7 @@ export function StudentDrawer({ student, onClose, onDeleteClick, onResetClick }:
               </div>
             </div>
 
-            {/* ── Footer actions ──────────────────────────────────── */}
+            {/* -- Footer actions ------------------------------------ */}
             <div style={{
               padding: 14,
               borderTop: "1px solid rgba(255,255,255,0.06)",

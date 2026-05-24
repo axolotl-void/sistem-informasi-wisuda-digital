@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import { cn } from "@/lib/utils";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 /** Kolom wajib yang harus ada di file Excel */
 const REQUIRED_COLUMNS = ["NIM", "Nama", "Email", "Fakultas", "Prodi", "Angkatan"] as const;
@@ -35,7 +35,7 @@ interface ImportExportButtonsProps {
   onImportSuccess?: () => void;
 }
 
-// ─── Template download helper ─────────────────────────────────────────────────
+// --- Template download helper -------------------------------------------------
 
 function downloadTemplate() {
   const ws = XLSX.utils.aoa_to_sheet([
@@ -54,14 +54,14 @@ function downloadTemplate() {
   XLSX.writeFile(wb, "Template_Import_Wisudawan.xlsx");
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// --- Main Component -----------------------------------------------------------
 
 export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  // ── IMPORT ──────────────────────────────────────────────────────────────────
+  // -- IMPORT ------------------------------------------------------------------
 
   function handleImportClick() {
     fileInputRef.current?.click();
@@ -170,7 +170,7 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
     }
   }
 
-  // ── EXPORT ──────────────────────────────────────────────────────────────────
+  // -- EXPORT ------------------------------------------------------------------
 
   async function handleExport() {
     if (isExporting) return;
@@ -220,7 +220,7 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
     }
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  // -- Render -------------------------------------------------------------------
 
   const btnBase = cn(
     "inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5",

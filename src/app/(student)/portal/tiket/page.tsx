@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import QRCode from "qrcode";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface UndanganData {
   id: string;
@@ -33,7 +33,7 @@ interface MahasiswaData {
   undangan: UndanganData | null;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 function getToken(): string | null {
   try {
@@ -62,7 +62,7 @@ function getSesiInfo(sesi: string | null) {
   return { waktu: "—", gate: "Gate Utama" };
 }
 
-// ─── Status config ────────────────────────────────────────────────────────────
+// --- Status config ------------------------------------------------------------
 
 const STATUS_CFG = {
   AKTIF: {
@@ -95,7 +95,7 @@ const STATUS_CFG = {
   },
 };
 
-// ─── Ticket Card ──────────────────────────────────────────────────────────────
+// --- Ticket Card --------------------------------------------------------------
 
 function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
   mahasiswa: MahasiswaData;
@@ -220,7 +220,7 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
   );
 }
 
-// ─── Empty State ──────────────────────────────────────────────────────────────
+// --- Empty State --------------------------------------------------------------
 
 function NoTicket() {
   return (
@@ -240,7 +240,7 @@ function NoTicket() {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// --- Page ---------------------------------------------------------------------
 
 export default function TiketPage() {
   const [mahasiswa, setMahasiswa] = useState<MahasiswaData | null>(null);

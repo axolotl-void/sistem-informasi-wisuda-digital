@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Armchair, Users, Loader2, Save, Calculator, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface BlokConfig {
   kuning: string;
@@ -23,7 +23,7 @@ interface BlokInfo {
   dot: string;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// --- Constants ----------------------------------------------------------------
 
 const BLOK_LIST: BlokInfo[] = [
   {
@@ -68,7 +68,7 @@ const DEFAULT_CONFIG: BlokConfig = {
   kuotaPendamping: "2",
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 function getToken(): string | null {
   try {
@@ -79,7 +79,7 @@ function getToken(): string | null {
   } catch { return null; }
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// --- Component ----------------------------------------------------------------
 
 export function KuotaKursiTab() {
   const [form, setForm] = useState<BlokConfig>(DEFAULT_CONFIG);

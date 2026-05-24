@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import { getTokenFromRequest, unauthorizedResponse, forbiddenResponse } from "@/lib/auth";
 import { apiSuccess, apiError } from "@/lib/utils";
 
-// ─── Schema validasi per-baris ────────────────────────────────────────────────
+// --- Schema validasi per-baris ------------------------------------------------
 
 const rowSchema = z.object({
   nim:      z.string().min(1, "NIM wajib diisi").max(20),
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       return apiError("Maksimal 1000 baris per sekali import", 422);
     }
 
-    // ── 1. Validasi schema tiap baris ─────────────────────────────────────────
+    // -- 1. Validasi schema tiap baris -----------------------------------------
     const valid: ImportRow[] = [];
     const validationErrors: string[] = [];
 
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ── 2. Cek duplikat NIM & Email sekaligus (batch query) ───────────────────
+    // -- 2. Cek duplikat NIM & Email sekaligus (batch query) -------------------
     const incomingNims   = valid.map((r) => r.nim);
     const incomingEmails = valid.map((r) => r.email);
 
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     );
     const skippedDuplicate = valid.length - toInsert.length;
 
-    // ── 3. Insert ke database ─────────────────────────────────────────────────
+    // -- 3. Insert ke database -------------------------------------------------
     let created = 0;
     let skippedError = 0;
 

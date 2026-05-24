@@ -11,7 +11,7 @@ import { SeatModal } from "./seat-modal";
 import { useSocket } from "@/hooks/use-socket";
 import { useScannerStore } from "@/store/scanner.store";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 export type SeatStatus = "checked-in" | "not-arrived" | "vip" | "empty";
 
@@ -36,7 +36,7 @@ export interface SeatData {
   };
 }
 
-// ─── Block Configuration ─────────────────────────────────────────────────────
+// --- Block Configuration -----------------------------------------------------
 // 4 blocks positioned flat (2D) over the background image.
 // Coordinates are tuned to align with the neon outlines in Ruangan-wisuda.png.
 // rowsLayout dihitung dinamis dari kapasitas yang dikonfigurasi di Pengaturan.
@@ -130,7 +130,7 @@ function buildBlocksConfig() {
 // Gunakan sebagai konstanta yang bisa di-refresh — hanya untuk SSR fallback
 // Nilai aktual dikelola via state `blocksConfig` di dalam komponen
 
-// ─── Status Styles ───────────────────────────────────────────────────────────
+// --- Status Styles -----------------------------------------------------------
 // Use CSS filter to tint the kursi.png image per status.
 // The image is a dark outline on transparent bg, so we use
 // brightness + invert + sepia + hue-rotate + saturate to colorize it.
@@ -169,7 +169,7 @@ const statusConfig: Record<SeatStatus, {
   },
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// --- Component ----------------------------------------------------------------
 
 export function SeatMonitor() {
   const [seats, setSeats] = useState<SeatData[]>([]);
@@ -188,7 +188,7 @@ export function SeatMonitor() {
   const { socket } = useSocket("admin");
   const { isConnected, lastResult } = useScannerStore();
 
-  // ── Fungsi mapping invitations → seats (menggunakan blocksConfig state) ──
+  // -- Fungsi mapping invitations → seats (menggunakan blocksConfig state) --
   const mapInvitationsToSeats = useCallback((invitations: any[]): SeatData[] => {
     const seats: SeatData[] = [];
     const currentConfig = blocksConfig;
@@ -399,7 +399,7 @@ export function SeatMonitor() {
       <div className="absolute -top-40 left-1/3 -z-10 size-[500px] rounded-full bg-violet-600/10 blur-[120px] animate-pulse" />
       <div className="absolute -bottom-40 right-1/4 -z-10 size-[450px] rounded-full bg-blue-600/5 blur-[120px]" />
 
-      {/* ── Header ────────────────────────────────────────────────── */}
+      {/* -- Header -------------------------------------------------- */}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-white/[0.06] pb-5">
         <div>
           <div className="flex items-center gap-2.5">
@@ -476,7 +476,7 @@ export function SeatMonitor() {
         </div>
       </div>
 
-      {/* ── Scan Alert Banner ─────────────────────────────────────── */}
+      {/* -- Scan Alert Banner --------------------------------------- */}
       <AnimatePresence>
         {recentArrival && (
           <motion.div
@@ -511,7 +511,7 @@ export function SeatMonitor() {
         )}
       </AnimatePresence>
 
-      {/* ── Main Seat Map ─────────────────────────────────────────── */}
+      {/* -- Main Seat Map ------------------------------------------- */}
       <div className="relative w-full border border-white/[0.08] bg-black/60 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
         {/* Stage gradient line */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-600 via-blue-500 to-emerald-500 blur-[1px]" />
@@ -526,7 +526,7 @@ export function SeatMonitor() {
             }}
           />
 
-          {/* ── 4 Seat Blocks (Flat 2D, no skew) ──────────────────── */}
+          {/* -- 4 Seat Blocks (Flat 2D, no skew) -------------------- */}
           {blocksConfig.map((block) => {
             const blockSeats = seatsByBlock[block.id] || [];
 

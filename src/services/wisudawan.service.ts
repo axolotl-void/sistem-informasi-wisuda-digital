@@ -9,7 +9,7 @@ import type {
   VerifyAccountInput,
 } from "@/validations/wisudawan.validation";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 export interface WisudawanRow {
   id: string;
@@ -49,7 +49,7 @@ export interface WisudawanPagination {
   totalPages: number;
 }
 
-// ─── Service ──────────────────────────────────────────────────────────────────
+// --- Service ------------------------------------------------------------------
 
 export class WisudawanService {
   /**

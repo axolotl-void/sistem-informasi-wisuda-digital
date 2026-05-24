@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import type { WisudawanRow } from "@/services/wisudawan.service";
 import { ChevronLeft, ChevronRight, Upload, Pencil, Trash2 } from "lucide-react";
 
-// ─── Status badge ────────────────────────────────────────────────────────────
+// --- Status badge ------------------------------------------------------------
 
 const statusConfig: Record<string, {
   label: string;
@@ -34,7 +34,7 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-// ─── Loading skeleton ────────────────────────────────────────────────────────
+// --- Loading skeleton --------------------------------------------------------
 
 function TableSkeleton() {
   return (
@@ -55,7 +55,7 @@ function TableSkeleton() {
   );
 }
 
-// ─── Empty state ─────────────────────────────────────────────────────────────
+// --- Empty state -------------------------------------------------------------
 
 function EmptyState() {
   return (
@@ -72,7 +72,7 @@ function EmptyState() {
   );
 }
 
-// ─── Main table ──────────────────────────────────────────────────────────────
+// --- Main table --------------------------------------------------------------
 
 interface StudentTableProps {
   data: WisudawanRow[];

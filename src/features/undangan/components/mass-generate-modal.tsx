@@ -211,7 +211,7 @@ export function MassGenerateModal() {
               </div>
 
               <div className="p-6">
-                {/* ── CONFIG STEP ──────────────────────────────────────── */}
+                {/* -- CONFIG STEP ---------------------------------------- */}
                 {step === "config" && (
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -378,7 +378,7 @@ export function MassGenerateModal() {
                   </motion.div>
                 )}
 
-                {/* ── PROGRESS STEP ─────────────────────────────────────── */}
+                {/* -- PROGRESS STEP --------------------------------------- */}
                 {step === "progress" && (
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -441,7 +441,7 @@ export function MassGenerateModal() {
                   </motion.div>
                 )}
 
-                {/* ── DONE STEP ─────────────────────────────────────────── */}
+                {/* -- DONE STEP ------------------------------------------- */}
                 {step === "done" && result && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}

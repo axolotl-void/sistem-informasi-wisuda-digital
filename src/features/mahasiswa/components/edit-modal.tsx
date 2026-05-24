@@ -21,7 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface EditModalProps {
   student: WisudawanRow | null;
@@ -44,7 +44,7 @@ interface EditFormData {
   kuotaTamu: number;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// --- Constants ----------------------------------------------------------------
 
 const FAKULTAS_OPTIONS = [
   "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
@@ -88,7 +88,7 @@ const STATUS_OPTIONS = [
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-// ─── Status config ────────────────────────────────────────────────────────────
+// --- Status config ------------------------------------------------------------
 
 const STATUS_CFG: Record<string, {
   label: string;
@@ -135,7 +135,7 @@ const STATUS_CFG: Record<string, {
   },
 };
 
-// ─── Shared class strings ─────────────────────────────────────────────────────
+// --- Shared class strings -----------------------------------------------------
 
 // Input field — bersih, putih, kontras tinggi
 const inputCls = cn(
@@ -171,7 +171,7 @@ function FL({ icon: Icon, children }: { icon: React.ElementType; children: React
   );
 }
 
-// ─── Tab 1: Detail & Status ───────────────────────────────────────────────────
+// --- Tab 1: Detail & Status ---------------------------------------------------
 
 function TabDetail({
   student,
@@ -187,7 +187,7 @@ function TabDetail({
   return (
     <div className="space-y-5">
 
-      {/* ── Status Banner ───────────────────────────────────────── */}
+      {/* -- Status Banner ----------------------------------------- */}
       <div className={cn(
         "flex items-center gap-4 rounded-2xl border p-4",
         sc.bgLight, sc.borderLight,
@@ -220,7 +220,7 @@ function TabDetail({
         </div>
       </div>
 
-      {/* ── Sesi Wisuda Banner (jika ada) ────────────────────────── */}
+      {/* -- Sesi Wisuda Banner (jika ada) -------------------------- */}
       {student.sesiWisuda && (
         <div className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 border border-blue-200">
@@ -235,7 +235,7 @@ function TabDetail({
         </div>
       )}
 
-      {/* ── Data Grid 2 kolom ────────────────────────────────────── */}
+      {/* -- Data Grid 2 kolom -------------------------------------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Nama */}
         <div className="md:col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
@@ -293,10 +293,10 @@ function TabDetail({
         </div>
       </div>
 
-      {/* ── Divider ─────────────────────────────────────────────── */}
+      {/* -- Divider ----------------------------------------------- */}
       <div className="h-px bg-slate-100" />
 
-      {/* ── Verifikasi Actions ───────────────────────────────────── */}
+      {/* -- Verifikasi Actions ------------------------------------- */}
       {student.status !== "LULUS" ? (
         <div className="space-y-2.5">
           <p className={sectionHeading}>Aksi Verifikasi</p>
@@ -354,7 +354,7 @@ function TabDetail({
   );
 }
 
-// ─── Tab 2: Form Edit ─────────────────────────────────────────────────────────
+// --- Tab 2: Form Edit ---------------------------------------------------------
 
 function TabEdit({
   form,
@@ -374,7 +374,7 @@ function TabEdit({
 
   return (
     <form id="edit-form" onSubmit={onSubmit}>
-      {/* ── 2-column grid layout ─────────────────────────────────── */}
+      {/* -- 2-column grid layout ----------------------------------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
 
         {/* ════════════════ KOLOM KIRI ════════════════ */}
@@ -595,7 +595,7 @@ function TabEdit({
         </div>
       </div>
 
-      {/* ── Footer Buttons ───────────────────────────────────────── */}
+      {/* -- Footer Buttons ----------------------------------------- */}
       <div className="flex gap-3 mt-7 pt-5 border-t border-slate-100">
         {/* Batal */}
         <button
@@ -640,7 +640,7 @@ function TabEdit({
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// --- Main Component -----------------------------------------------------------
 
 export function EditModal({ student, open, onClose, onSuccess, onUpdated }: EditModalProps) {
   const { update, verify } = useWisudawan();
@@ -745,19 +745,19 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
       <DialogContent
         showCloseButton={false}
         className={cn(
-          // ── Size ──────────────────────────────────────────────────
+          // -- Size --------------------------------------------------
           "w-[95vw] sm:max-w-3xl md:max-w-4xl",
           "max-h-[90vh] overflow-y-auto",
           "p-0 gap-0",
           "rounded-2xl",
-          // ── Selalu putih/terang — tidak ikut dark mode ────────────
+          // -- Selalu putih/terang — tidak ikut dark mode ------------
           "bg-white",
           "border border-slate-200",
           "shadow-[0_20px_60px_rgba(0,0,0,0.15),0_4px_16px_rgba(0,0,0,0.08)]",
           "text-slate-900",
         )}
       >
-        {/* ── Header ─────────────────────────────────────────────── */}
+        {/* -- Header ----------------------------------------------- */}
         <DialogHeader className="px-6 pt-5 pb-4 border-b border-slate-100 bg-slate-50/80">
           <div className="flex items-center gap-4">
             {/* Avatar */}
@@ -795,7 +795,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
           </div>
         </DialogHeader>
 
-        {/* ── Tabs — pill style, full width ──────────────────────── */}
+        {/* -- Tabs — pill style, full width ------------------------ */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col">
           <div className="flex justify-center px-6 py-3 border-b border-slate-100 bg-white">
             <TabsList className={cn(

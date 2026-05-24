@@ -39,7 +39,7 @@ export const InvitationCardPrint = forwardRef<HTMLDivElement, InvitationCardPrin
           boxSizing: "border-box",
         }}
       >
-        {/* ── Background decorations ─────────────────────────────────── */}
+        {/* -- Background decorations ----------------------------------- */}
         <div style={{
           position: "absolute", top: -80, right: -80,
           width: 300, height: 300, borderRadius: "50%",
@@ -53,7 +53,7 @@ export const InvitationCardPrint = forwardRef<HTMLDivElement, InvitationCardPrin
           pointerEvents: "none",
         }} />
 
-        {/* ── Header ────────────────────────────────────────────────── */}
+        {/* -- Header -------------------------------------------------- */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{
@@ -84,13 +84,13 @@ export const InvitationCardPrint = forwardRef<HTMLDivElement, InvitationCardPrin
           </div>
         </div>
 
-        {/* ── Divider ───────────────────────────────────────────────── */}
+        {/* -- Divider ------------------------------------------------- */}
         <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.35), transparent)", margin: "-8px 0" }} />
 
-        {/* ── Main content: KIRI (info + QR) | KANAN (foto) ─────────── */}
+        {/* -- Main content: KIRI (info + QR) | KANAN (foto) ----------- */}
         <div style={{ display: "flex", gap: 36, alignItems: "stretch" }}>
 
-          {/* ── KIRI: Info akademik + QR Code ─────────────────────── */}
+          {/* -- KIRI: Info akademik + QR Code ----------------------- */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 0 }}>
             {/* Nama & NIM */}
             <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.28)", letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 6px" }}>
@@ -126,7 +126,7 @@ export const InvitationCardPrint = forwardRef<HTMLDivElement, InvitationCardPrin
               ))}
             </div>
 
-            {/* ── QR Code utama (validasi kehadiran) ── */}
+            {/* -- QR Code utama (validasi kehadiran) -- */}
             <div style={{
               marginTop: 20,
               display: "flex",
@@ -174,7 +174,7 @@ export const InvitationCardPrint = forwardRef<HTMLDivElement, InvitationCardPrin
             </div>
           </div>
 
-          {/* ── KANAN: Foto Profil Mahasiswa ──────────────────────── */}
+          {/* -- KANAN: Foto Profil Mahasiswa ------------------------ */}
           <div style={{
             width: 180,
             flexShrink: 0,
@@ -254,7 +254,7 @@ export const InvitationCardPrint = forwardRef<HTMLDivElement, InvitationCardPrin
 
         </div>
 
-        {/* ── Footer ────────────────────────────────────────────────── */}
+        {/* -- Footer -------------------------------------------------- */}
         <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.2), transparent)", margin: "-4px 0" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <p style={{ fontSize: 9, color: "rgba(255,255,255,0.18)", margin: 0 }}>

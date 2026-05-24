@@ -14,7 +14,7 @@ import { formatDate } from "@/utils/format";
 import type { Mahasiswa } from "@/types/mahasiswa.type";
 import type { Undangan } from "@/types/undangan.type";
 
-// ─── Info card ────────────────────────────────────────────────────────────────
+// --- Info card ----------------------------------------------------------------
 
 function InfoCard({
   label, value, icon: Icon, delay,
@@ -41,7 +41,7 @@ function InfoCard({
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// --- Page ---------------------------------------------------------------------
 
 export default function MahasiswaDashboardPage() {
   const { user } = useAuth();

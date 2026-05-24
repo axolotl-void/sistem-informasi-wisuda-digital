@@ -10,7 +10,7 @@ import { EmptyState } from "./empty-state";
 import { LoadingSkeleton } from "./loading-skeleton";
 import type { Invitation } from "../types";
 
-// ─── Delete Row Confirmation ──────────────────────────────────────────────────
+// --- Delete Row Confirmation --------------------------------------------------
 
 function DeleteRowDialog({
   open,
@@ -56,7 +56,7 @@ function DeleteRowDialog({
   );
 }
 
-// ─── Action Menu ─────────────────────────────────────────────────────────────
+// --- Action Menu -------------------------------------------------------------
 
 function ActionMenu({ inv }: { inv: Invitation }) {
   const { openDrawer, generateInvitation, markDownloaded, deleteInvitation } = useUndanganStore();
@@ -130,7 +130,7 @@ function ActionMenu({ inv }: { inv: Invitation }) {
   );
 }
 
-// ─── Table Row ────────────────────────────────────────────────────────────────
+// --- Table Row ----------------------------------------------------------------
 
 function TableRow({ inv, index }: { inv: Invitation; index: number }) {
   const { openDrawer, openPreview } = useUndanganStore();
@@ -227,7 +227,7 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
   );
 }
 
-// ─── Main Table ───────────────────────────────────────────────────────────────
+// --- Main Table ---------------------------------------------------------------
 
 export function InvitationTable() {
   const {
