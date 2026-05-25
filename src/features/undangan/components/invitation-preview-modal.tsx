@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { GlassChip, glassBtnGhost, glassBtnPrimary } from "@/components/ui/liquid-glass";
+import { cn } from "@/lib/utils";
 import { X, Download, Share2, Copy, Printer, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
@@ -11,9 +13,9 @@ import { InvitationCardPrint } from "./invitation-card-print";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-2.5 border-b border-gray-100 dark:border-white/[0.04] last:border-0">
-      <span className="text-[0.72rem] font-medium text-gray-400 dark:text-white/30 shrink-0">{label}</span>
-      <span className="text-[0.78rem] font-medium text-gray-700 dark:text-white/70 text-right">{value}</span>
+    <div className="flex items-start justify-between gap-4 border-b border-white/50 py-2.5 last:border-0 dark:border-white/[0.06]">
+      <span className="shrink-0 text-[0.72rem] font-medium text-slate-500 dark:text-white/35">{label}</span>
+      <span className="text-right text-[0.78rem] font-medium text-slate-800 dark:text-white/80">{value}</span>
     </div>
   );
 }
@@ -33,21 +35,15 @@ function ActionButton({
   loading?: boolean;
   success?: boolean;
 }) {
-  const styles = {
-    default:
-      "border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-800 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 dark:hover:border-white/[0.14] dark:hover:bg-white/[0.07] dark:hover:text-white/80",
-    primary:
-      "border-blue-300 bg-blue-50 text-blue-600 hover:border-blue-400 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:border-blue-500/50 dark:hover:bg-blue-500/15",
-    danger:
-      "border-red-200 bg-red-50 text-red-500 hover:border-red-300 hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/8 dark:text-red-400/70 dark:hover:border-red-500/30 dark:hover:bg-red-500/12",
-  };
-
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={loading}
-      className={`flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-[0.75rem] font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer ${styles[variant]}`}
+      className={cn(
+        "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl py-2.5 text-[0.75rem] font-semibold disabled:opacity-50",
+        variant === "primary" ? glassBtnPrimary : glassBtnGhost,
+      )}
     >
       {loading ? (
         <Loader2 className="size-3.5 animate-spin" />
@@ -138,28 +134,20 @@ export function InvitationPreviewModal() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-50 bg-slate-900/45 dark:bg-black/60"
             onClick={closePreview}
           />
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
-          >
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <div
-              className="pointer-events-auto w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white dark:border-white/[0.1] dark:bg-[#080f1e] shadow-2xl"
+              className="pointer-events-auto max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-white/90 bg-gradient-to-br from-white/95 via-white/88 to-white/80 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:from-[#0f172a]/98 dark:via-[#0f172a]/95 dark:to-[#0f172a]/90"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal header */}
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white/95 px-6 py-4 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#080f1e]/95">
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/60 bg-white/50 px-6 py-4 backdrop-blur-xl dark:border-white/[0.08] dark:bg-[#0f172a]/80">
                 <div>
-                  <h2 className="text-base font-semibold text-gray-900 dark:text-white/90">Preview Undangan</h2>
-                  <p className="text-xs text-gray-400 dark:text-white/30 mt-0.5">{inv.kode}</p>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white">Preview Undangan</h2>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-white/40">{inv.kode}</p>
                 </div>
                 <button
                   type="button"
@@ -196,25 +184,21 @@ export function InvitationPreviewModal() {
                 {/* Right — Details + Actions */}
                 <div className="space-y-4">
                   {/* QR Code */}
-                  <div className="flex flex-col items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/[0.07] dark:bg-white/[0.03] p-5">
-                    <div className="relative">
-                      <div className="absolute inset-0 rounded-2xl bg-blue-500/10 blur-xl" />
-                      <div className="relative rounded-2xl bg-white p-3 shadow-2xl">
-                        {qrDataUrl ? (
-                          <img src={qrDataUrl} alt="QR Code" width={140} height={140} />
-                        ) : (
-                          <div className="size-[140px] bg-gray-100 rounded-lg animate-pulse" />
-                        )}
-                      </div>
+                  <GlassChip className="flex flex-col items-center gap-3 p-5">
+                    <div className="rounded-2xl bg-white p-3 shadow-lg">
+                      {qrDataUrl ? (
+                        <img src={qrDataUrl} alt="QR Code" width={140} height={140} />
+                      ) : (
+                        <div className="size-[140px] animate-pulse rounded-lg bg-slate-100" />
+                      )}
                     </div>
                     <div className="text-center">
-                      <p className="text-[0.62rem] font-semibold uppercase tracking-wider text-gray-400 dark:text-white/25">Token Kehadiran</p>
-                      <p className="mt-0.5 font-mono text-[0.65rem] text-gray-500 dark:text-white/40 break-all">{inv.qrToken}</p>
+                      <p className="text-[0.62rem] font-semibold uppercase tracking-wider text-slate-500 dark:text-white/35">Token Kehadiran</p>
+                      <p className="mt-0.5 break-all font-mono text-[0.65rem] text-slate-600 dark:text-white/45">{inv.qrToken}</p>
                     </div>
-                  </div>
+                  </GlassChip>
 
-                  {/* Info */}
-                  <div className="rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/[0.07] dark:bg-white/[0.03] px-4 py-2">
+                  <GlassChip className="px-4 py-2">
                     <InfoRow label="Nama" value={inv.mahasiswaNama} />
                     <InfoRow label="NIM" value={inv.nim} />
                     <InfoRow label="Fakultas" value={inv.fakultas} />
@@ -228,7 +212,7 @@ export function InvitationPreviewModal() {
                         day: "numeric", month: "long", year: "numeric",
                       })}
                     />
-                  </div>
+                  </GlassChip>
 
                   {/* Actions */}
                   <div className="grid grid-cols-2 gap-2">
@@ -259,7 +243,7 @@ export function InvitationPreviewModal() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

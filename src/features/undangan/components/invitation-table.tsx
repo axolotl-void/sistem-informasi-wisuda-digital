@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+
+import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 import { QrCode, RefreshCw, Download, Trash2 } from "lucide-react";
 import { useUndanganStore } from "../store";
 import { StatusBadge, AttendanceBadge } from "./status-badge";
@@ -26,8 +27,8 @@ function DeleteRowDialog({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#0F172A] p-6 shadow-2xl">
+      <div className="absolute inset-0 bg-slate-900/40 dark:bg-black/55" onClick={onCancel} />
+      <div className="relative z-10 w-full max-w-sm rounded-3xl border border-white/90 bg-white/95 p-6 shadow-xl dark:border-white/15 dark:bg-[#0f172a]/98">
         <div className="mb-4 flex size-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10">
           <Trash2 className="size-4 text-red-500 dark:text-red-400" />
         </div>
@@ -132,17 +133,13 @@ function ActionMenu({ inv }: { inv: Invitation }) {
 
 // --- Table Row ----------------------------------------------------------------
 
-function TableRow({ inv, index }: { inv: Invitation; index: number }) {
+function TableRow({ inv }: { inv: Invitation }) {
   const { openDrawer, openPreview } = useUndanganStore();
 
   return (
-    <motion.tr
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -10 }}
-      transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
+    <tr
       onClick={() => openPreview(inv)}
-      className="group border-b border-gray-100 transition-colors duration-150 hover:bg-gray-50 cursor-pointer dark:border-white/[0.04] dark:hover:bg-white/[0.025]"
+      className="group cursor-pointer border-b border-white/40 transition-colors hover:bg-white/40 dark:border-white/[0.05] dark:hover:bg-white/[0.04]"
     >
       {/* QR Preview */}
       <td className="py-3 pl-4 pr-3">
@@ -223,7 +220,7 @@ function TableRow({ inv, index }: { inv: Invitation; index: number }) {
       <td className="py-3 pr-4" onClick={(e) => e.stopPropagation()}>
         <ActionMenu inv={inv} />
       </td>
-    </motion.tr>
+    </tr>
   );
 }
 
@@ -265,11 +262,16 @@ export function InvitationTable() {
   if (isLoading) return <LoadingSkeleton />;
 
   return (
-    <div id="invitation-table-print" className="rounded-2xl border border-gray-200 bg-white dark:border-white/[0.07] dark:bg-[#080f1e] overflow-hidden shadow-sm dark:shadow-none">
+    <LiquidGlassCard
+      id="invitation-table-print"
+      noEntrance
+      hover={false}
+      className="overflow-hidden p-0"
+    >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px]">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50 dark:border-white/[0.06] dark:bg-white/[0.02]">
+            <tr className="border-b border-white/60 bg-white/30 dark:border-white/[0.08] dark:bg-white/[0.03]">
               {[
                 { label: "QR", cls: "pl-4 pr-3 w-12" },
                 { label: "Kode", cls: "pr-4" },
@@ -284,7 +286,7 @@ export function InvitationTable() {
               ].map((h) => (
                 <th
                   key={h.label}
-                  className={`py-3 text-left text-[0.65rem] font-semibold uppercase tracking-wider text-gray-400 dark:text-white/20 ${h.cls}`}
+                  className={`py-3 text-left text-[0.65rem] font-bold uppercase tracking-wider text-slate-500 dark:text-white/30 ${h.cls}`}
                 >
                   {h.label}
                 </th>
@@ -292,31 +294,27 @@ export function InvitationTable() {
             </tr>
           </thead>
           <tbody>
-            <AnimatePresence mode="popLayout">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={10}>
-                    <EmptyState />
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((inv, i) => (
-                  <TableRow key={inv.id} inv={inv} index={i} />
-                ))
-              )}
-            </AnimatePresence>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={10}>
+                  <EmptyState />
+                </td>
+              </tr>
+            ) : (
+              filtered.map((inv) => <TableRow key={inv.id} inv={inv} />)
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Footer */}
       {filtered.length > 0 && (
-        <div className="border-t border-gray-100 px-4 py-3 dark:border-white/[0.04]">
-          <p className="text-[0.7rem] font-medium text-gray-400 dark:text-white/20">
+        <div className="border-t border-white/50 bg-white/25 px-4 py-3 backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.02]">
+          <p className="text-[0.7rem] font-medium text-slate-500 dark:text-white/35">
             Menampilkan {filtered.length} undangan
           </p>
         </div>
       )}
-    </div>
+    </LiquidGlassCard>
   );
 }

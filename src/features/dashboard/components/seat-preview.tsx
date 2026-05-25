@@ -143,9 +143,7 @@ export function SeatPreview() {
 
   return (
     <LiquidGlassCard
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      noEntrance
       className="group cursor-pointer p-6"
       onClick={() => router.push(ROUTES.ADMIN.SEAT_MONITORING)}
     >

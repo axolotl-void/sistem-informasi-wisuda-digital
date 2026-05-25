@@ -27,13 +27,7 @@ export function QrPanel() {
   }
 
   return (
-    <LiquidGlassCard
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      hover={false}
-      className="p-6"
-    >
+    <LiquidGlassCard noEntrance hover={false} className="p-6">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">

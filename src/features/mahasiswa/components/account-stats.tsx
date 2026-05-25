@@ -1,21 +1,23 @@
 "use client";
 
-import { motion } from "framer-motion";
-import {
-  Users, UserX, FileWarning, Clock, ShieldCheck, UserCheck,
-} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import {
+  Users,
+  UserX,
+  FileWarning,
+  Clock,
+  ShieldCheck,
+  UserCheck,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 import type { WisudawanRow } from "@/services/wisudawan.service";
-
-// --- Config ------------------------------------------------------------------
 
 interface CardConfig {
   label: string;
   icon: LucideIcon;
   accent: string;
   iconBg: string;
-  borderGlow: string;
   compute: (data: WisudawanRow[]) => number;
 }
 
@@ -23,54 +25,56 @@ const cards: CardConfig[] = [
   {
     label: "Total Wisudawan",
     icon: Users,
-    accent: "text-blue-400",
-    iconBg: "bg-blue-500/[0.08]",
-    borderGlow: "group-hover:border-blue-500/20",
+    accent: "text-blue-700 dark:text-blue-300",
+    iconBg:
+      "bg-gradient-to-br from-blue-400/35 to-blue-600/10 border border-blue-400/40 dark:from-blue-500/20 dark:to-blue-600/5 dark:border-blue-500/25",
     compute: (d) => d.length,
   },
   {
     label: "Belum Login",
     icon: UserX,
-    accent: "text-zinc-400",
-    iconBg: "bg-zinc-500/[0.08]",
-    borderGlow: "group-hover:border-zinc-400/15",
-    compute: (d) => d.filter((s) => s.status === "AKTIF" && !s.hasUndangan && !s.kehadiranStatus).length,
+    accent: "text-slate-600 dark:text-zinc-300",
+    iconBg:
+      "bg-gradient-to-br from-slate-400/25 to-slate-600/10 border border-slate-400/35 dark:from-zinc-500/15 dark:to-zinc-600/5 dark:border-zinc-500/20",
+    compute: (d) =>
+      d.filter((s) => s.status === "AKTIF" && !s.hasUndangan && !s.kehadiranStatus)
+        .length,
   },
   {
     label: "Profile Belum Lengkap",
     icon: FileWarning,
-    accent: "text-orange-400",
-    iconBg: "bg-orange-500/[0.08]",
-    borderGlow: "group-hover:border-orange-500/20",
+    accent: "text-orange-700 dark:text-orange-300",
+    iconBg:
+      "bg-gradient-to-br from-orange-400/35 to-orange-600/10 border border-orange-400/40 dark:from-orange-500/20 dark:to-orange-600/5 dark:border-orange-500/25",
     compute: (d) => d.filter((s) => s.status === "AKTIF" && !s.hasUndangan).length,
   },
   {
     label: "Menunggu Verifikasi",
     icon: Clock,
-    accent: "text-yellow-400",
-    iconBg: "bg-yellow-500/[0.08]",
-    borderGlow: "group-hover:border-yellow-500/15",
-    compute: (d) => d.filter((s) => s.status === "AKTIF" && s.hasUndangan && !s.kehadiranStatus).length,
+    accent: "text-amber-700 dark:text-yellow-300",
+    iconBg:
+      "bg-gradient-to-br from-amber-400/35 to-amber-600/10 border border-amber-400/40 dark:from-yellow-500/20 dark:to-yellow-600/5 dark:border-yellow-500/25",
+    compute: (d) =>
+      d.filter((s) => s.status === "AKTIF" && s.hasUndangan && !s.kehadiranStatus)
+        .length,
   },
   {
     label: "Terverifikasi",
     icon: ShieldCheck,
-    accent: "text-sky-400",
-    iconBg: "bg-sky-500/[0.08]",
-    borderGlow: "group-hover:border-sky-500/20",
+    accent: "text-sky-700 dark:text-sky-300",
+    iconBg:
+      "bg-gradient-to-br from-sky-400/35 to-sky-600/10 border border-sky-400/40 dark:from-sky-500/20 dark:to-sky-600/5 dark:border-sky-500/25",
     compute: (d) => d.filter((s) => s.status === "LULUS").length,
   },
   {
     label: "Sudah Hadir",
     icon: UserCheck,
-    accent: "text-emerald-400",
-    iconBg: "bg-emerald-500/[0.08]",
-    borderGlow: "group-hover:border-emerald-500/20",
+    accent: "text-emerald-700 dark:text-emerald-300",
+    iconBg:
+      "bg-gradient-to-br from-emerald-400/35 to-emerald-600/10 border border-emerald-400/40 dark:from-emerald-500/20 dark:to-emerald-600/5 dark:border-emerald-500/25",
     compute: (d) => d.filter((s) => s.kehadiranStatus === "HADIR").length,
   },
 ];
-
-// --- Component ---------------------------------------------------------------
 
 interface AccountStatsProps {
   data: WisudawanRow[];
@@ -79,43 +83,35 @@ interface AccountStatsProps {
 
 export function AccountStats({ data, total }: AccountStatsProps) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-        gap: "0.5rem",
-      }}
-    >
-      {cards.map((c, i) => {
-        const value = i === 0 ? total : c.compute(data);
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {cards.map((c, index) => {
+        const value = index === 0 ? total : c.compute(data);
+        const Icon = c.icon;
         return (
-          <motion.div
+          <LiquidGlassCard
             key={c.label}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: i * 0.05, ease: "easeOut" }}
-            className={cn(
-              "group relative rounded-xl border p-3.5",
-              "bg-white/70 border-white/60 shadow-[0_2px_12px_rgba(0,0,0,0.05)]",
-              "dark:bg-white/[0.03] dark:border-white/[0.06] dark:shadow-none",
-              "transition-all duration-300 ease-out",
-              "hover:-translate-y-px hover:bg-white/90 dark:hover:bg-white/[0.05]",
-              c.borderGlow,
-            )}
+            noEntrance
+            hover={false}
+            className="p-3.5"
           >
-            {/* Top light reflection */}
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent rounded-t-xl" />
-
-            <div className={cn("mb-2.5 flex size-7 items-center justify-center rounded-lg", c.iconBg)}>
-              <c.icon className={cn("size-3.5", c.accent)} />
+            <div
+              className={cn(
+                "mb-2.5 flex size-8 items-center justify-center rounded-xl backdrop-blur-md",
+                c.iconBg,
+              )}
+            >
+              <Icon className={cn("size-4", c.accent)} />
             </div>
-            <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-none">
-              {value}
+            <p className="text-xl font-bold leading-none tracking-tight text-slate-900 dark:text-white dark:drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+              <span className="bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text text-transparent dark:hidden">
+                {value}
+              </span>
+              <span className="hidden dark:inline">{value}</span>
             </p>
-            <p className="mt-1 text-[10px] font-medium tracking-wide text-slate-500 dark:text-white/25 uppercase">
+            <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-wider text-slate-600 dark:text-white/35">
               {c.label}
             </p>
-          </motion.div>
+          </LiquidGlassCard>
         );
       })}
     </div>

@@ -66,7 +66,7 @@ export function AdminHeader() {
 
   return (
     <header
-      className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/60 bg-white/45 px-6 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_4px_24px_rgba(59,130,246,0.06)] backdrop-blur-2xl backdrop-saturate-150 dark:border-white/[0.06] dark:bg-[#07111F]/90 dark:shadow-none dark:backdrop-blur-xl"
+      className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/60 bg-white/70 px-6 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#07111F]/95"
     >
       {/* Left — Event + Live indicator */}
       <div className="flex items-center gap-4">

@@ -54,9 +54,7 @@ export function StatCard({
 
   return (
     <LiquidGlassCard
-      initial={{ opacity: 0, y: 20, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      noEntrance
       className={cn("group p-5", colors.ring)}
     >
       <div className="flex items-start justify-between gap-3">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Users, Plus } from "lucide-react";
+import { Users, Plus, Sparkles } from "lucide-react";
 import { AccountStats } from "@/features/mahasiswa/components/account-stats";
 import { AccountToolbar } from "@/features/mahasiswa/components/account-toolbar";
 import { StudentTable } from "@/features/mahasiswa/components/student-table";
@@ -13,102 +13,113 @@ import { ResetPasswordModal } from "@/features/mahasiswa/components/reset-passwo
 import { ImportExportButtons } from "@/features/mahasiswa/components/import-export-buttons";
 import { useWisudawan } from "@/hooks/use-wisudawan";
 import type { WisudawanRow } from "@/services/wisudawan.service";
+import { LiquidGlassAmbient, glassBtnPrimary } from "@/components/ui/liquid-glass";
+import { cn } from "@/lib/utils";
 
 export default function MahasiswaPage() {
   const { data, total, totalPages, isLoading, fetchAll } = useWisudawan();
 
-  const [page, setPage]                   = useState(1);
-  const [search, setSearch]               = useState("");
-  const [statusFilter, setStatusFilter]   = useState("");
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [fakultasFilter, setFakultasFilter] = useState("");
 
-  const [editTarget, setEditTarget]           = useState<WisudawanRow | null>(null);
-  const [deleteTarget, setDeleteTarget]       = useState<WisudawanRow | null>(null);
-  const [resetTarget, setResetTarget]         = useState<WisudawanRow | null>(null);
-  const [createOpen, setCreateOpen]           = useState(false);
+  const [editTarget, setEditTarget] = useState<WisudawanRow | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<WisudawanRow | null>(null);
+  const [resetTarget, setResetTarget] = useState<WisudawanRow | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const load = useCallback(() => {
-    fetchAll({ search: search || undefined, fakultas: fakultasFilter || undefined, status: statusFilter || undefined }, page, 15);
+    fetchAll(
+      {
+        search: search || undefined,
+        fakultas: fakultasFilter || undefined,
+        status: statusFilter || undefined,
+      },
+      page,
+      15,
+    );
   }, [fetchAll, search, statusFilter, fakultasFilter, page]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
-    <div className="space-y-4">
-      {/* -- Header ---------------------------------------------------- */}
-      <motion.div
-        initial={{ opacity: 0, y: -6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex items-start justify-between gap-4"
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-white/[0.04]">
-            <Users className="size-4 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-[1.1rem] font-bold tracking-tight text-slate-900 dark:text-white/90 leading-tight">
-                Akun Wisudawan
-              </h1>
-              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/[0.18] bg-emerald-500/[0.07] px-1.5 py-px">
-                <span className="size-1 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                <span className="text-[0.55rem] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400/80">
-                  Live
-                </span>
-              </span>
+    <div className="dashboard-mesh relative -m-4 min-h-full overflow-hidden rounded-none p-4 sm:-m-6 sm:p-6 sm:rounded-3xl">
+      <LiquidGlassAmbient />
+
+      <div className="relative z-10 space-y-5">
+        {/* Header */}
+        <motion.header
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/90 bg-white/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_16px_rgba(59,130,246,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-none">
+              <Users className="size-5 text-blue-600 dark:text-blue-300" />
             </div>
-            <p className="text-[0.68rem] text-slate-500 dark:text-white/28 mt-0.5 leading-tight">
-              Kelola akun dan data wisudawan
-            </p>
+            <div>
+              <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/65 px-2.5 py-0.5 text-[10px] font-semibold text-blue-800 shadow-[0_2px_12px_rgba(59,130,246,0.1)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:text-white/50 dark:shadow-none">
+                <Sparkles className="size-3 text-blue-600 dark:text-blue-400" />
+                Kelola wisudawan
+              </div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+                  <span className="bg-gradient-to-br from-slate-900 via-blue-900 to-violet-800 bg-clip-text text-transparent dark:hidden">
+                    Akun Wisudawan
+                  </span>
+                  <span className="hidden dark:inline">Akun Wisudawan</span>
+                </h1>
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 backdrop-blur-md dark:border-emerald-500/25 dark:bg-emerald-500/10">
+                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse dark:bg-emerald-400" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                    Live
+                  </span>
+                </span>
+              </div>
+              <p className="mt-0.5 text-sm font-medium text-slate-600 dark:text-white/40">
+                Kelola akun dan data wisudawan
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <ImportExportButtons onImportSuccess={load} />
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-600 dark:bg-blue-500/[0.08] px-2.5 text-[0.68rem] font-semibold text-white dark:text-blue-400 transition-all duration-150 hover:bg-blue-700 dark:hover:border-blue-500/40 dark:hover:bg-blue-500/[0.14] active:scale-[0.97] cursor-pointer"
-          >
-            <Plus className="size-3" />
-            Tambah
-          </button>
-        </div>
-      </motion.div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <ImportExportButtons onImportSuccess={load} />
+            <button
+              type="button"
+              onClick={() => setCreateOpen(true)}
+              className={cn(glassBtnPrimary, "h-9 px-4")}
+            >
+              <Plus className="size-3.5" />
+              Tambah
+            </button>
+          </div>
+        </motion.header>
 
-      {/* -- Stats ----------------------------------------------------- */}
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.04 }}
-      >
         <AccountStats data={data} total={total} />
-      </motion.div>
 
-      {/* -- Toolbar --------------------------------------------------- */}
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.08 }}
-      >
         <AccountToolbar
           search={search}
-          onSearchChange={(v) => { setSearch(v); setPage(1); }}
+          onSearchChange={(v) => {
+            setSearch(v);
+            setPage(1);
+          }}
           statusFilter={statusFilter}
-          onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
+          onStatusFilterChange={(v) => {
+            setStatusFilter(v);
+            setPage(1);
+          }}
           fakultasFilter={fakultasFilter}
-          onFakultasFilterChange={(v) => { setFakultasFilter(v); setPage(1); }}
+          onFakultasFilterChange={(v) => {
+            setFakultasFilter(v);
+            setPage(1);
+          }}
           onCreateClick={() => setCreateOpen(true)}
         />
-      </motion.div>
 
-      {/* -- Table ----------------------------------------------------- */}
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.12 }}
-      >
         <StudentTable
           data={data}
           isLoading={isLoading}
@@ -120,33 +131,40 @@ export default function MahasiswaPage() {
           onEdit={(s) => setEditTarget(s)}
           onDelete={(s) => setDeleteTarget(s)}
         />
-      </motion.div>
 
-      {/* -- Overlays -------------------------------------------------- */}
-      <EditModal
-        student={editTarget}
-        open={!!editTarget}
-        onClose={() => setEditTarget(null)}
-        onUpdated={(updated) => setEditTarget(updated)}
-        onSuccess={() => { load(); }}
-      />
+        <EditModal
+          student={editTarget}
+          open={!!editTarget}
+          onClose={() => setEditTarget(null)}
+          onUpdated={(updated) => setEditTarget(updated)}
+          onSuccess={() => {
+            load();
+          }}
+        />
 
-      <CreateAccountModal
-        open={createOpen}
-        onClose={() => { setCreateOpen(false); load(); }}
-      />
+        <CreateAccountModal
+          open={createOpen}
+          onClose={() => {
+            setCreateOpen(false);
+            load();
+          }}
+        />
 
-      <DeleteConfirmModal
-        open={!!deleteTarget}
-        target={deleteTarget}
-        onClose={() => { setDeleteTarget(null); load(); }}
-      />
+        <DeleteConfirmModal
+          open={!!deleteTarget}
+          target={deleteTarget}
+          onClose={() => {
+            setDeleteTarget(null);
+            load();
+          }}
+        />
 
-      <ResetPasswordModal
-        open={!!resetTarget}
-        target={resetTarget}
-        onClose={() => setResetTarget(null)}
-      />
+        <ResetPasswordModal
+          open={!!resetTarget}
+          target={resetTarget}
+          onClose={() => setResetTarget(null)}
+        />
+      </div>
     </div>
   );
 }

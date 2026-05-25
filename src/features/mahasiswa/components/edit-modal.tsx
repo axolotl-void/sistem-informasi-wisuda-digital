@@ -20,6 +20,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  glassBtnGhost,
+  glassBtnPrimary,
+  glassInput,
+} from "@/components/ui/liquid-glass";
 
 // --- Types --------------------------------------------------------------------
 
@@ -93,83 +98,73 @@ const CURRENT_YEAR = new Date().getFullYear();
 const STATUS_CFG: Record<string, {
   label: string;
   dot: string;
-  textLight: string;
-  textDark: string;
-  bgLight: string;
-  bgDark: string;
-  borderLight: string;
-  borderDark: string;
-  glow: string;
+  text: string;
+  banner: string;
+  iconBox: string;
+  badge: string;
 }> = {
   AKTIF: {
     label: "Aktif",
     dot: "bg-blue-500",
-    textLight: "text-blue-700",   textDark: "dark:text-blue-300",
-    bgLight: "bg-blue-50",        bgDark: "dark:bg-blue-500/10",
-    borderLight: "border-blue-200", borderDark: "dark:border-blue-500/30",
-    glow: "",
+    text: "text-blue-800 dark:text-blue-300",
+    banner:
+      "border-blue-400/35 bg-blue-500/12 backdrop-blur-xl dark:border-blue-500/25 dark:bg-blue-500/10",
+    iconBox:
+      "border-blue-400/40 bg-blue-500/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-blue-500/30 dark:bg-blue-500/15",
+    badge:
+      "border-blue-400/30 bg-blue-500/15 text-blue-800 dark:border-blue-500/25 dark:bg-blue-500/12 dark:text-blue-300",
   },
   LULUS: {
     label: "Terverifikasi",
     dot: "bg-emerald-500",
-    textLight: "text-emerald-700",  textDark: "dark:text-emerald-300",
-    bgLight: "bg-emerald-50",       bgDark: "dark:bg-emerald-500/10",
-    borderLight: "border-emerald-200", borderDark: "dark:border-emerald-500/40",
-    glow: "dark:shadow-[0_0_16px_rgba(34,197,94,0.2)]",
+    text: "text-emerald-800 dark:text-emerald-300",
+    banner:
+      "border-emerald-400/40 bg-emerald-500/15 backdrop-blur-xl shadow-[0_0_24px_rgba(16,185,129,0.08)] dark:border-emerald-500/30 dark:bg-emerald-500/10",
+    iconBox:
+      "border-emerald-400/40 bg-emerald-500/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-emerald-500/30 dark:bg-emerald-500/15",
+    badge:
+      "border-emerald-400/35 bg-emerald-500/15 text-emerald-800 dark:border-emerald-500/25 dark:bg-emerald-500/12 dark:text-emerald-300",
   },
   CUTI: {
     label: "Cuti",
-    dot: "bg-yellow-500",
-    textLight: "text-yellow-700",  textDark: "dark:text-yellow-300",
-    bgLight: "bg-yellow-50",       bgDark: "dark:bg-yellow-500/10",
-    borderLight: "border-yellow-200", borderDark: "dark:border-yellow-500/30",
-    glow: "",
+    dot: "bg-amber-500",
+    text: "text-amber-800 dark:text-amber-300",
+    banner:
+      "border-amber-400/35 bg-amber-500/12 backdrop-blur-xl dark:border-amber-500/25 dark:bg-amber-500/10",
+    iconBox:
+      "border-amber-400/40 bg-amber-500/20 dark:border-amber-500/30 dark:bg-amber-500/15",
+    badge:
+      "border-amber-400/30 bg-amber-500/15 text-amber-800 dark:border-amber-500/25 dark:bg-amber-500/12 dark:text-amber-300",
   },
   DROPOUT: {
     label: "Ditolak",
     dot: "bg-red-500",
-    textLight: "text-red-700",  textDark: "dark:text-red-300",
-    bgLight: "bg-red-50",       bgDark: "dark:bg-red-500/10",
-    borderLight: "border-red-200", borderDark: "dark:border-red-500/30",
-    glow: "",
+    text: "text-red-800 dark:text-red-300",
+    banner:
+      "border-red-400/35 bg-red-500/12 backdrop-blur-xl dark:border-red-500/25 dark:bg-red-500/10",
+    iconBox:
+      "border-red-400/40 bg-red-500/20 dark:border-red-500/30 dark:bg-red-500/15",
+    badge:
+      "border-red-400/30 bg-red-500/15 text-red-800 dark:border-red-500/25 dark:bg-red-500/12 dark:text-red-300",
   },
 };
 
 // --- Shared class strings -----------------------------------------------------
 
-// Input field — bersih, putih, kontras tinggi
-const inputCls = cn(
-  "w-full px-4 py-2.5 rounded-xl transition-all duration-200",
-  "bg-white",
-  "border border-slate-200",
-  "text-slate-900",
-  "placeholder:text-slate-400",
-  "outline-none ring-offset-0",
-  "focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20",
-  "disabled:opacity-50 disabled:cursor-not-allowed",
+const inputCls = cn(glassInput, "h-auto w-full px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed");
+const selectTriggerCls = cn(glassInput, "h-auto w-full px-4 py-2.5 [&>span]:text-slate-900 dark:[&>span]:text-white/90");
+const detailFieldCls = cn(
+  "rounded-2xl border p-3 backdrop-blur-md",
+  "border-white/80 bg-white/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]",
+  "dark:border-white/[0.08] dark:bg-white/[0.04] dark:shadow-none",
 );
-
-const selectTriggerCls = cn(
-  "w-full px-4 py-2.5 rounded-xl transition-all duration-200",
-  "bg-white",
-  "border border-slate-200",
-  "text-slate-900",
-  "outline-none ring-offset-0",
-  "focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20",
-);
-
-// Section heading
-const sectionHeading = "text-[10px] font-black uppercase tracking-[0.16em] text-blue-600 mb-3";
-
-// Field label
-function FL({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
-  return (
-    <Label className="text-sm font-semibold mb-1.5 block text-slate-700 flex items-center gap-1.5">
-      <Icon className="size-3 shrink-0 text-blue-500/70" />
-      {children}
-    </Label>
-  );
-}
+const detailLabelCls = "text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/35 mb-1";
+const detailValueCls = "text-sm font-semibold text-slate-800 dark:text-white/90";
+const sectionHeading =
+  "text-[10px] font-black uppercase tracking-[0.16em] text-blue-700 dark:text-blue-400/90 mb-3";
+const fieldLabelCls = "text-sm font-semibold mb-1.5 block text-slate-700 dark:text-white/75";
+const selectContentCls =
+  "border-white/80 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-[#0f172a]/95";
 
 // --- Tab 1: Detail & Status ---------------------------------------------------
 
@@ -188,33 +183,31 @@ function TabDetail({
     <div className="space-y-5">
 
       {/* -- Status Banner ----------------------------------------- */}
-      <div className={cn(
-        "flex items-center gap-4 rounded-2xl border p-4",
-        sc.bgLight, sc.borderLight,
-      )}>
-        <div className={cn(
-          "flex size-11 shrink-0 items-center justify-center rounded-xl",
-          "bg-white border", sc.borderLight,
-        )}>
-          <ShieldCheck className={cn("size-5", sc.textLight)} />
+      <div className={cn("flex items-center gap-4 rounded-2xl border p-4", sc.banner)}>
+        <div className={cn("flex size-11 shrink-0 items-center justify-center rounded-xl border", sc.iconBox)}>
+          <ShieldCheck className={cn("size-5", sc.text)} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/35 mb-0.5">
             Status Verifikasi
           </p>
           <div className="flex items-center gap-2">
-            <span className={cn("size-2 rounded-full shrink-0", sc.dot)} />
-            <span className={cn("text-sm font-bold", sc.textLight)}>{sc.label}</span>
+            <span className={cn("size-2 shrink-0 rounded-full", sc.dot)} />
+            <span className={cn("text-sm font-bold", sc.text)}>{sc.label}</span>
           </div>
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">
+        <div className="shrink-0 text-right">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/35 mb-0.5">
             Kehadiran
           </p>
-          <span className={cn(
-            "text-sm font-bold",
-            student.kehadiranStatus ? "text-emerald-600" : "text-slate-400",
-          )}>
+          <span
+            className={cn(
+              "text-sm font-bold",
+              student.kehadiranStatus
+                ? "text-emerald-700 dark:text-emerald-300"
+                : "text-slate-500 dark:text-white/40",
+            )}
+          >
             {student.kehadiranStatus ?? "Belum Hadir"}
           </span>
         </div>
@@ -222,79 +215,69 @@ function TabDetail({
 
       {/* -- Sesi Wisuda Banner (jika ada) -------------------------- */}
       {student.sesiWisuda && (
-        <div className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 border border-blue-200">
-            <GraduationCap className="size-4 text-blue-600" />
+        <div className="flex items-center gap-3 rounded-2xl border border-blue-400/35 bg-blue-500/12 px-4 py-3 backdrop-blur-xl dark:border-blue-500/25 dark:bg-blue-500/10">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-blue-400/40 bg-blue-500/20 dark:border-blue-500/30 dark:bg-blue-500/15">
+            <GraduationCap className="size-4 text-blue-700 dark:text-blue-300" />
           </div>
           <div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/35 mb-0.5">
               Sesi Wisuda
             </p>
-            <p className="text-sm font-bold text-blue-700">{student.sesiWisuda}</p>
+            <p className="text-sm font-bold text-blue-800 dark:text-blue-300">{student.sesiWisuda}</p>
           </div>
         </div>
       )}
 
       {/* -- Data Grid 2 kolom -------------------------------------- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* Nama */}
-        <div className="md:col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Nama Lengkap</p>
-          <p className="text-sm font-semibold text-slate-800">{student.nama}</p>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className={cn(detailFieldCls, "md:col-span-2")}>
+          <p className={detailLabelCls}>Nama Lengkap</p>
+          <p className={detailValueCls}>{student.nama}</p>
         </div>
-        {/* NIM */}
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">NIM</p>
-          <p className="text-sm font-semibold font-mono text-slate-800">{student.nim}</p>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>NIM</p>
+          <p className={cn(detailValueCls, "font-mono")}>{student.nim}</p>
         </div>
-        {/* Angkatan */}
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Angkatan</p>
-          <p className="text-sm font-semibold text-slate-800">{student.angkatan}</p>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Angkatan</p>
+          <p className={detailValueCls}>{student.angkatan}</p>
         </div>
-        {/* Email */}
-        <div className="md:col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Email</p>
-          <p className="text-sm font-semibold text-slate-800 break-all">{student.email}</p>
+        <div className={cn(detailFieldCls, "md:col-span-2")}>
+          <p className={detailLabelCls}>Email</p>
+          <p className={cn(detailValueCls, "break-all")}>{student.email}</p>
         </div>
-        {/* Fakultas */}
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Fakultas</p>
-          <p className="text-sm font-semibold text-slate-800">{student.fakultas}</p>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Fakultas</p>
+          <p className={detailValueCls}>{student.fakultas}</p>
         </div>
-        {/* Prodi */}
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Program Studi</p>
-          <p className="text-sm font-semibold text-slate-800">{student.prodi}</p>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Program Studi</p>
+          <p className={detailValueCls}>{student.prodi}</p>
         </div>
-        {/* Undangan */}
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Kode Undangan</p>
-          <p className="text-sm font-semibold font-mono text-slate-800">
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Kode Undangan</p>
+          <p className={cn(detailValueCls, "font-mono")}>
             {student.hasUndangan ? (student.undanganKode ?? "Ada") : "Belum Generate"}
           </p>
         </div>
-        {/* Status Undangan */}
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Status Undangan</p>
-          <p className="text-sm font-semibold text-slate-800">{student.undanganStatus ?? "—"}</p>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Status Undangan</p>
+          <p className={detailValueCls}>{student.undanganStatus ?? "-"}</p>
         </div>
-        {/* Sesi Wisuda */}
-        <div className="md:col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Sesi Wisuda</p>
+        <div className={cn(detailFieldCls, "md:col-span-2")}>
+          <p className={detailLabelCls}>Sesi Wisuda</p>
           {student.sesiWisuda ? (
             <div className="flex items-center gap-2">
-              <GraduationCap className="size-3.5 text-blue-500 shrink-0" />
-              <p className="text-sm font-semibold text-slate-800">{student.sesiWisuda}</p>
+              <GraduationCap className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+              <p className={detailValueCls}>{student.sesiWisuda}</p>
             </div>
           ) : (
-            <p className="text-sm font-semibold text-slate-400">Belum Ditentukan</p>
+            <p className="text-sm font-semibold text-slate-400 dark:text-white/35">Belum Ditentukan</p>
           )}
         </div>
       </div>
 
-      {/* -- Divider ----------------------------------------------- */}
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-white/60 dark:bg-white/[0.08]" />
 
       {/* -- Verifikasi Actions ------------------------------------- */}
       {student.status !== "LULUS" ? (
@@ -306,19 +289,22 @@ function TabDetail({
                 action: "approve" as const,
                 icon: CheckCircle2,
                 label: "Setujui",
-                cls: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100",
+                cls:
+                  "border-emerald-400/40 bg-emerald-500/15 text-emerald-800 hover:bg-emerald-500/25 dark:border-emerald-500/30 dark:bg-emerald-500/12 dark:text-emerald-300",
               },
               {
                 action: "revision" as const,
                 icon: RotateCcw,
                 label: "Revisi",
-                cls: "bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100",
+                cls:
+                  "border-amber-400/40 bg-amber-500/15 text-amber-800 hover:bg-amber-500/25 dark:border-amber-500/30 dark:bg-amber-500/12 dark:text-amber-300",
               },
               {
                 action: "reject" as const,
                 icon: XCircle,
                 label: "Tolak",
-                cls: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100",
+                cls:
+                  "border-red-400/40 bg-red-500/15 text-red-800 hover:bg-red-500/25 dark:border-red-500/30 dark:bg-red-500/12 dark:text-red-300",
               },
             ]).map((btn) => (
               <button
@@ -327,7 +313,7 @@ function TabDetail({
                 onClick={() => onVerify(btn.action)}
                 disabled={!!isVerifying}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 rounded-xl border py-2.5",
+                  "flex items-center justify-center gap-1.5 rounded-xl border py-2.5 backdrop-blur-md",
                   "text-[12px] font-bold transition-all duration-200 active:scale-95",
                   "disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
                   btn.cls,
@@ -343,9 +329,9 @@ function TabDetail({
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-          <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
-          <p className="text-sm font-semibold text-emerald-700">
+        <div className="flex items-center gap-3 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-3 backdrop-blur-xl dark:border-emerald-500/30 dark:bg-emerald-500/10">
+          <CheckCircle2 className="size-5 shrink-0 text-emerald-700 dark:text-emerald-300" />
+          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
             Mahasiswa ini sudah terverifikasi dan siap wisuda.
           </p>
         </div>
@@ -383,7 +369,7 @@ function TabEdit({
 
           {/* Nama */}
           <div className="space-y-1.5">
-            <label htmlFor="nama" className="text-sm font-semibold mb-1.5 block text-slate-700">
+            <label htmlFor="nama" className={fieldLabelCls}>
               Nama Lengkap
             </label>
             <Input
@@ -398,7 +384,7 @@ function TabEdit({
 
           {/* NIM */}
           <div className="space-y-1.5">
-            <label htmlFor="nim" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="nim" className={fieldLabelCls}>
               NIM
             </label>
             <Input
@@ -413,7 +399,7 @@ function TabEdit({
 
           {/* Angkatan */}
           <div className="space-y-1.5">
-            <label htmlFor="angkatan" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="angkatan" className={fieldLabelCls}>
               Tahun Angkatan
             </label>
             <Input
@@ -431,7 +417,7 @@ function TabEdit({
 
           {/* Fakultas */}
           <div className="space-y-1.5">
-            <label htmlFor="fakultas-trigger" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="fakultas-trigger" className={fieldLabelCls}>
               Fakultas
             </label>
             <Select
@@ -445,9 +431,9 @@ function TabEdit({
               >
                 <SelectValue placeholder="Pilih fakultas…" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={selectContentCls}>
                 {FAKULTAS_OPTIONS.map((f) => (
-                  <SelectItem key={f} value={f} className="cursor-pointer text-sm">{f}</SelectItem>
+                  <SelectItem key={f} value={f} className="cursor-pointer text-sm dark:focus:bg-white/10">{f}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -455,7 +441,7 @@ function TabEdit({
 
           {/* Prodi */}
           <div className="space-y-1.5">
-            <label htmlFor="prodi-trigger" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="prodi-trigger" className={fieldLabelCls}>
               Program Studi
             </label>
             <Select
@@ -469,9 +455,9 @@ function TabEdit({
               >
                 <SelectValue placeholder={form.fakultas ? "Pilih prodi…" : "Pilih fakultas dulu"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={selectContentCls}>
                 {availableProdi.map((p) => (
-                  <SelectItem key={p} value={p} className="cursor-pointer text-sm">{p}</SelectItem>
+                  <SelectItem key={p} value={p} className="cursor-pointer text-sm dark:focus:bg-white/10">{p}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -484,7 +470,7 @@ function TabEdit({
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="email" className={fieldLabelCls}>
               Email
             </label>
             <Input
@@ -500,7 +486,7 @@ function TabEdit({
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="password" className={fieldLabelCls}>
               Password Baru
             </label>
             <div className="relative">
@@ -516,19 +502,19 @@ function TabEdit({
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-blue-600 dark:text-white/35 dark:hover:text-blue-400"
               >
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="mt-1 text-xs text-slate-500 dark:text-white/35">
               Min. 8 karakter. Kosongkan jika tidak ingin mengubah.
             </p>
           </div>
 
           {/* Sesi Wisuda */}
           <div className="space-y-1.5">
-            <label htmlFor="sesi-trigger" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="sesi-trigger" className={fieldLabelCls}>
               Sesi Wisuda
             </label>
             <Select
@@ -542,9 +528,9 @@ function TabEdit({
               >
                 <SelectValue placeholder="Pilih sesi…" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={selectContentCls}>
                 {SESI_OPTIONS.map((s) => (
-                  <SelectItem key={s.value} value={s.value} className="cursor-pointer text-sm">{s.label}</SelectItem>
+                  <SelectItem key={s.value} value={s.value} className="cursor-pointer text-sm dark:focus:bg-white/10">{s.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -552,7 +538,7 @@ function TabEdit({
 
           {/* Status Verifikasi */}
           <div className="space-y-1.5">
-            <label htmlFor="status-trigger" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="status-trigger" className={fieldLabelCls}>
               Status Verifikasi
             </label>
             <Select value={form.status} onValueChange={(v) => setField("status", v)} disabled={isLoading}>
@@ -562,9 +548,9 @@ function TabEdit({
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className={selectContentCls}>
                 {STATUS_OPTIONS.map((s) => (
-                  <SelectItem key={s.value} value={s.value} className="cursor-pointer text-sm font-medium">
+                  <SelectItem key={s.value} value={s.value} className="cursor-pointer text-sm font-medium dark:focus:bg-white/10">
                     {s.label}
                   </SelectItem>
                 ))}
@@ -574,7 +560,7 @@ function TabEdit({
 
           {/* Kuota Keluarga */}
           <div className="space-y-1.5">
-            <label htmlFor="kuota" className="text-sm font-semibold block text-slate-700">
+            <label htmlFor="kuota" className={fieldLabelCls}>
               Kuota Keluarga
             </label>
             <Input
@@ -590,50 +576,43 @@ function TabEdit({
               disabled={isLoading}
               className={inputCls}
             />
-            <p className="text-xs text-slate-500 mt-1">Maks. 5 orang</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-white/35">Maks. 5 orang</p>
           </div>
         </div>
       </div>
 
-      {/* -- Footer Buttons ----------------------------------------- */}
-      <div className="flex gap-3 mt-7 pt-5 border-t border-slate-100">
-        {/* Batal */}
+      <div className="mt-7 flex gap-3 border-t border-white/60 pt-5 dark:border-white/[0.08]">
         <button
           type="button"
           onClick={onClose}
           disabled={isLoading}
           className={cn(
-            "flex-1 h-10 rounded-xl border text-sm font-semibold",
-            "bg-white border-slate-200 text-slate-700",
-            "hover:bg-slate-50",
-            "transition-all duration-200 active:scale-95",
-            "disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
+            glassBtnGhost,
+            "h-10 flex-1 justify-center text-sm disabled:opacity-40 disabled:cursor-not-allowed",
           )}
         >
           Batal
         </button>
-
-        {/* Simpan */}
         <button
           type="submit"
           form="edit-form"
           disabled={isLoading}
           className={cn(
-            "flex-1 h-10 rounded-xl text-sm font-bold",
-            "inline-flex items-center justify-center gap-2",
-            "bg-gradient-to-r from-blue-500 to-indigo-600",
-            "text-white",
-            "shadow-[0_4px_14px_rgba(59,130,246,0.35)]",
-            "hover:from-blue-600 hover:to-indigo-700",
-            "hover:shadow-[0_4px_20px_rgba(59,130,246,0.5)]",
-            "transition-all duration-200 active:scale-95",
-            "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
+            glassBtnPrimary,
+            "h-10 flex-1 justify-center text-sm disabled:opacity-50 disabled:cursor-not-allowed",
           )}
         >
-          {isLoading
-            ? <><Loader2 className="size-4 animate-spin" />Menyimpan…</>
-            : <><Save className="size-4" />Simpan Perubahan</>
-          }
+          {isLoading ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Menyimpan…
+            </>
+          ) : (
+            <>
+              <Save className="size-4" />
+              Simpan Perubahan
+            </>
+          )}
         </button>
       </div>
     </form>
@@ -745,20 +724,16 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
       <DialogContent
         showCloseButton={false}
         className={cn(
-          // -- Size --------------------------------------------------
-          "w-[95vw] sm:max-w-3xl md:max-w-4xl",
+          "w-[95vw] gap-0 rounded-3xl p-0 sm:max-w-3xl md:max-w-4xl",
           "max-h-[90vh] overflow-y-auto",
-          "p-0 gap-0",
-          "rounded-2xl",
-          // -- Selalu putih/terang — tidak ikut dark mode ------------
-          "bg-white",
-          "border border-slate-200",
-          "shadow-[0_20px_60px_rgba(0,0,0,0.15),0_4px_16px_rgba(0,0,0,0.08)]",
-          "text-slate-900",
+          "border border-white/90 bg-gradient-to-br from-white/92 via-white/78 to-white/65",
+          "text-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.18)] backdrop-blur-xl",
+          "ring-1 ring-slate-900/[0.04]",
+          "dark:border-white/15 dark:from-white/[0.12] dark:via-white/[0.08] dark:to-white/[0.04]",
+          "dark:text-white dark:shadow-[0_24px_80px_rgba(0,0,0,0.55)] dark:ring-white/10",
         )}
       >
-        {/* -- Header ----------------------------------------------- */}
-        <DialogHeader className="px-6 pt-5 pb-4 border-b border-slate-100 bg-slate-50/80">
+        <DialogHeader className="border-b border-white/60 bg-white/40 px-6 pb-4 pt-5 backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.03]">
           <div className="flex items-center gap-4">
             {/* Avatar */}
             <div className={cn(
@@ -771,21 +746,20 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
             </div>
 
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-base font-black text-slate-900 leading-tight truncate">
-                {student?.nama ?? "—"}
+              <DialogTitle className="truncate text-base font-black leading-tight text-slate-900 dark:text-white">
+                {student?.nama ?? "-"}
               </DialogTitle>
-              <div className="flex items-center gap-2 mt-1">
-                <DialogDescription className="text-[11px] text-slate-500 font-mono tracking-wide">
-                  {student?.nim ?? "—"}
+              <div className="mt-1 flex items-center gap-2">
+                <DialogDescription className="font-mono text-[11px] tracking-wide text-slate-500 dark:text-white/40">
+                  {student?.nim ?? "-"}
                 </DialogDescription>
                 {student && (
-                  <span className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5",
-                    "text-[9px] font-black tracking-wide",
-                    sc.bgLight,
-                    sc.borderLight,
-                    sc.textLight,
-                  )}>
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-bold tracking-wide backdrop-blur-md",
+                      sc.badge,
+                    )}
+                  >
                     <span className={cn("size-1.5 rounded-full", sc.dot)} />
                     {sc.label}
                   </span>
@@ -797,20 +771,22 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
 
         {/* -- Tabs — pill style, full width ------------------------ */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col">
-          <div className="flex justify-center px-6 py-3 border-b border-slate-100 bg-white">
-            <TabsList className={cn(
-              "h-9 rounded-full p-1 gap-1 w-full max-w-sm",
-              "bg-slate-100",
-              "border border-slate-200",
-            )}>
+          <div className="flex justify-center border-b border-white/60 bg-white/30 px-6 py-3 backdrop-blur-md dark:border-white/[0.08] dark:bg-white/[0.02]">
+            <TabsList
+              className={cn(
+                "h-10 w-full max-w-sm gap-1 rounded-full border p-1",
+                "border-white/80 bg-white/50 backdrop-blur-xl",
+                "dark:border-white/10 dark:bg-white/[0.06]",
+              )}
+            >
               <TabsTrigger
                 value="detail"
                 className={cn(
-                  "flex-1 h-7 rounded-full text-[12px] font-semibold gap-1.5",
-                  "transition-all duration-200",
-                  "text-slate-500",
-                  "data-[state=active]:bg-white data-[state=active]:text-blue-600",
-                  "data-[state=active]:shadow-sm",
+                  "flex h-8 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-semibold transition-all",
+                  "text-slate-500 dark:text-white/40",
+                  "data-[state=active]:border data-[state=active]:border-white/90 data-[state=active]:bg-white/80",
+                  "data-[state=active]:text-blue-700 data-[state=active]:shadow-[0_2px_12px_rgba(59,130,246,0.12)]",
+                  "dark:data-[state=active]:border-white/15 dark:data-[state=active]:bg-white/12 dark:data-[state=active]:text-blue-300",
                 )}
               >
                 <ShieldCheck className="size-3" />
@@ -819,11 +795,11 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
               <TabsTrigger
                 value="edit"
                 className={cn(
-                  "flex-1 h-7 rounded-full text-[12px] font-semibold gap-1.5",
-                  "transition-all duration-200",
-                  "text-slate-500",
-                  "data-[state=active]:bg-white data-[state=active]:text-blue-600",
-                  "data-[state=active]:shadow-sm",
+                  "flex h-8 flex-1 items-center justify-center gap-1.5 rounded-full text-[12px] font-semibold transition-all",
+                  "text-slate-500 dark:text-white/40",
+                  "data-[state=active]:border data-[state=active]:border-white/90 data-[state=active]:bg-white/80",
+                  "data-[state=active]:text-blue-700 data-[state=active]:shadow-[0_2px_12px_rgba(59,130,246,0.12)]",
+                  "dark:data-[state=active]:border-white/15 dark:data-[state=active]:bg-white/12 dark:data-[state=active]:text-blue-300",
                 )}
               >
                 <Pencil className="size-3" />

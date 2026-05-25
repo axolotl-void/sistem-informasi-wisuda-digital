@@ -6,6 +6,7 @@ import { Upload, Download, Loader2, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import { glassBtnGhost } from "@/components/ui/liquid-glass";
 
 // --- Types --------------------------------------------------------------------
 
@@ -222,17 +223,9 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
 
   // -- Render -------------------------------------------------------------------
 
-  const btnBase = cn(
-    "inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5",
-    "text-[0.68rem] font-medium transition-all duration-150",
-    "active:scale-[0.97] cursor-pointer",
-    "disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
-  );
-
   const btnGhost = cn(
-    btnBase,
-    "border-white/[0.07] bg-transparent text-white/38",
-    "hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white/60"
+    glassBtnGhost,
+    "h-9 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
   );
 
   return (
