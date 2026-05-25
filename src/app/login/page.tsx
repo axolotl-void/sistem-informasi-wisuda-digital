@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, useRef, type FormEvent } from "react";
+import axios from "axios";
 import { useTheme } from "next-themes";
 import {
   GraduationCap,
@@ -23,22 +24,40 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => setMounted(true), []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    if (!email || !password) {
+
+    const form = formRef.current ?? e.currentTarget;
+    const fd = new FormData(form);
+    const emailVal = String(fd.get("email") ?? email).trim();
+    const passwordVal = String(fd.get("password") ?? password);
+
+    if (!emailVal || !passwordVal) {
       setError("Email dan password wajib diisi");
       return;
     }
+
+    setEmail(emailVal);
+    setPassword(passwordVal);
+
     try {
-      await login({ email, password });
+      await login({ email: emailVal, password: passwordVal });
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Email atau password salah",
-      );
+      if (axios.isAxiosError(err)) {
+        const msg =
+          (err.response?.data as { message?: string })?.message ??
+          "Email atau password salah";
+        setError(msg);
+      } else {
+        setError(
+          err instanceof Error ? err.message : "Email atau password salah",
+        );
+      }
     }
   }
 
@@ -136,7 +155,12 @@ export default function LoginPage() {
         </div>
 
         {/* -- Form ---------------------------------------------------- */}
-        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit}
+          noValidate
+          className="space-y-5"
+        >
           {/* Error banner */}
           {error && (
             <div className="animate-in fade-in duration-300 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-500/20 dark:bg-red-500/10">
@@ -162,11 +186,17 @@ export default function LoginPage() {
               <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-[17px] -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-blue-500 dark:text-zinc-500 dark:group-focus-within:text-orange-400" />
               <input
                 id="login-email"
+                name="email"
                 type="email"
+                inputMode="email"
+                autoCapitalize="none"
+                autoCorrect="off"
                 placeholder="nama@kampus.ac.id"
-                autoComplete="email"
+                autoComplete="username"
+                enterKeyHint="next"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onInput={(e) => setEmail(e.currentTarget.value)}
                 disabled={isLoading}
                 className={[
                   "h-12 w-full rounded-xl pl-11 pr-4 text-sm outline-none",
@@ -199,11 +229,14 @@ export default function LoginPage() {
               <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-[17px] -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-blue-500 dark:text-zinc-500 dark:group-focus-within:text-orange-400" />
               <input
                 id="login-password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 autoComplete="current-password"
+                enterKeyHint="go"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onInput={(e) => setPassword(e.currentTarget.value)}
                 disabled={isLoading}
                 className={[
                   "h-12 w-full rounded-xl pl-11 pr-12 text-sm outline-none",
@@ -230,12 +263,12 @@ export default function LoginPage() {
               </button>
             </div>
             <div className="flex justify-end">
-              <a
-                href="#"
+              <button
+                type="button"
                 className="text-xs text-slate-400 underline-offset-4 transition-colors duration-200 hover:text-blue-600 hover:underline dark:text-zinc-500 dark:hover:text-orange-400"
               >
                 Lupa password?
-              </a>
+              </button>
             </div>
           </div>
 
@@ -251,6 +284,7 @@ export default function LoginPage() {
               type="submit"
               disabled={isLoading}
               className={[
+                "touch-manipulation",
                 "flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-sm font-semibold",
                 // Light — Blue gradient + blue drop shadow
                 "bg-gradient-to-r from-blue-600 to-blue-500 text-white",

@@ -504,7 +504,7 @@ export default function ProfilPage() {
           </div>
           <Link
             href="/portal/tiket"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-500/25 bg-cyan-500/[0.08] py-3 text-xs font-bold text-cyan-400 hover:bg-cyan-500/[0.14] hover:border-cyan-500/40 transition-all active:scale-[0.98]"
+            className="flex min-h-[48px] w-full touch-manipulation items-center justify-center gap-2 rounded-2xl border border-cyan-500/25 bg-cyan-500/[0.08] py-3.5 text-xs font-bold text-cyan-400 transition-all hover:border-cyan-500/40 hover:bg-cyan-500/[0.14] active:scale-[0.98]"
           >
             <QrCode className="size-3.5" />
             Lihat E-Ticket

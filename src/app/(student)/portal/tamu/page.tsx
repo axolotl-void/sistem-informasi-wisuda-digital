@@ -8,6 +8,7 @@ import {
   Ticket, RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PortalPageHeader } from "../_components/portal-page-header";
 
 // --- Types --------------------------------------------------------------------
 
@@ -227,26 +228,23 @@ export default function TamuPage() {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
-            <Users className="size-5 text-indigo-400" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white/90">Pengajuan Tamu</h1>
-            <p className="text-xs text-white/30">Ajukan jumlah tamu untuk wisuda Anda</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={fetchData}
-          className="flex size-8 items-center justify-center rounded-xl text-white/25 hover:bg-white/[0.06] hover:text-white/50 transition-colors"
-          title="Refresh"
-        >
-          <RefreshCw className="size-4" />
-        </button>
-      </div>
+      <PortalPageHeader
+        icon={Users}
+        iconClassName="text-indigo-400"
+        title="Pengajuan Tamu"
+        subtitle="Ajukan jumlah tamu untuk wisuda Anda"
+        action={
+          <button
+            type="button"
+            onClick={fetchData}
+            className="flex size-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/40 transition-colors touch-manipulation active:bg-white/[0.08]"
+            title="Refresh"
+            aria-label="Muat ulang"
+          >
+            <RefreshCw className="size-4" />
+          </button>
+        }
+      />
 
       {/* Status card */}
       <AnimatePresence mode="wait">
@@ -287,7 +285,7 @@ export default function TamuPage() {
                   type="button"
                   onClick={() => setJumlahTamu((v) => Math.max(1, v - 1))}
                   disabled={isFormDisabled || jumlahTamu <= 1}
-                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-xl font-bold text-white/50 hover:bg-white/[0.08] hover:text-white/80 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-xl font-bold text-white/50 transition-all touch-manipulation hover:bg-white/[0.08] hover:text-white/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   −
                 </button>
@@ -310,7 +308,7 @@ export default function TamuPage() {
                   type="button"
                   onClick={() => setJumlahTamu((v) => Math.min(10, v + 1))}
                   disabled={isFormDisabled || jumlahTamu >= 10}
-                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-xl font-bold text-white/50 hover:bg-white/[0.08] hover:text-white/80 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-xl font-bold text-white/50 transition-all touch-manipulation hover:bg-white/[0.08] hover:text-white/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   +
                 </button>
@@ -346,7 +344,7 @@ export default function TamuPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting || isFormDisabled}
-                  className="flex-1 h-12 rounded-2xl border border-indigo-500/30 bg-indigo-500/15 text-sm font-bold text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98]"
+                  className="flex h-12 min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl border border-indigo-500/30 bg-indigo-500/15 text-sm font-bold text-indigo-400 transition-all touch-manipulation hover:border-indigo-500/50 hover:bg-indigo-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <><Loader2 className="size-4 animate-spin" /> Mengirim...</>

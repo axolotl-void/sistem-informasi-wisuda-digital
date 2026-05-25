@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
+import { PortalPageHeader } from "../_components/portal-page-header";
 
 // --- Types --------------------------------------------------------------------
 
@@ -142,7 +143,13 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
           <div className="absolute inset-0 rounded-2xl bg-blue-500/20 blur-2xl scale-110" />
           <div className="relative rounded-2xl bg-white p-4 shadow-2xl">
             {qrDataUrl ? (
-              <img src={qrDataUrl} alt="QR Code" width={180} height={180} className="block" />
+              <img
+                src={qrDataUrl}
+                alt="QR Code undangan wisuda"
+                width={200}
+                height={200}
+                className="block h-auto w-full max-w-[200px]"
+              />
             ) : (
               <div className="size-[180px] flex items-center justify-center">
                 <Loader2 className="size-8 text-gray-300 animate-spin" />
@@ -181,7 +188,7 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
           <p className="text-[0.7rem] text-white/35">{mahasiswa.nim} · {mahasiswa.prodi}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {[
             { icon: Clock, label: "Sesi", value: mahasiswa.sesiWisuda ?? "—" },
             { icon: CalendarDays, label: "Tanggal", value: formatTanggal(undangan.tanggalWisuda) },
@@ -380,16 +387,12 @@ export default function TiketPage() {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04]">
-          <Ticket className="size-5 text-violet-400" />
-        </div>
-        <div>
-          <h1 className="text-lg font-bold text-white/90">E-Ticket</h1>
-          <p className="text-xs text-white/30">Undangan digital wisuda Anda</p>
-        </div>
-      </div>
+      <PortalPageHeader
+        icon={Ticket}
+        iconClassName="text-violet-400"
+        title="E-Ticket"
+        subtitle="Undangan digital wisuda Anda — siap discan di gate"
+      />
 
       {/* Ticket atau empty state */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
@@ -406,7 +409,7 @@ export default function TiketPage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="grid grid-cols-3 gap-2.5"
+          className="grid grid-cols-1 gap-2.5 sm:grid-cols-3"
         >
           {[
             { icon: isDownloading ? Loader2 : Download, label: isDownloading ? "Mengunduh..." : "Download", onClick: handleDownload, variant: "primary", disabled: isDownloading, spin: isDownloading },
@@ -418,7 +421,7 @@ export default function TiketPage() {
               type="button"
               onClick={onClick}
               disabled={disabled}
-              className={`flex flex-col items-center justify-center gap-1.5 rounded-2xl border py-3.5 text-[0.7rem] font-semibold transition-all active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed ${
+              className={`flex min-h-[52px] flex-col items-center justify-center gap-1.5 rounded-2xl border py-3.5 text-[0.75rem] font-semibold transition-all touch-manipulation active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0 ${
                 variant === "primary" ? "border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/15"
                 : variant === "success" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                 : "border-white/[0.08] bg-white/[0.04] text-white/40 hover:bg-white/[0.07] hover:text-white/60"

@@ -88,12 +88,6 @@ export const glassBtnPrimary = cn(
   "dark:border-blue-500/30 dark:from-blue-500/90 dark:to-blue-600/80",
 );
 
-export const glassBtnDanger = cn(
-  "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-semibold transition-colors active:scale-[0.97] cursor-pointer",
-  "border-red-400/40 bg-red-500/15 text-red-800 hover:bg-red-500/25",
-  "dark:border-red-500/30 dark:bg-red-500/12 dark:text-red-300 dark:hover:bg-red-500/20",
-);
-
 export const glassInput = cn(
   "rounded-xl border outline-none transition-[border-color,box-shadow]",
   "border-white/80 bg-white/70 text-slate-900 placeholder:text-slate-400",

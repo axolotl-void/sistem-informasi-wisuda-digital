@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import axios from "axios";
-import { useAuthStore } from "@/store/auth.store";
+import { useAuthStore, writeAuthStorage } from "@/store/auth.store";
 import { API_ROUTES, ROUTES } from "@/utils/constants";
 import type { LoginCredentials } from "@/types/auth.type";
 
@@ -17,13 +17,12 @@ export function useAuth() {
         const { data } = await axios.post(API_ROUTES.AUTH.LOGIN, credentials, {
           withCredentials: true,
         });
-        setAuth(data.data.user, data.data.token);
+        const { user, token } = data.data;
+        setAuth(user, token);
+        // Tulis langsung ke localStorage (Safari mobile kadang belum selesai persist Zustand)
+        writeAuthStorage(user, token);
 
-        // Beri waktu Zustand persist untuk menyimpan ke localStorage
-        // sebelum navigasi — PortalAuthWrapper membaca dari localStorage
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        const role = data.data.user.role;
+        const role = user.role;
         if (role === "SUPER_ADMIN" || role === "ADMIN_FAKULTAS") {
           window.location.replace(ROUTES.ADMIN.DASHBOARD);
         } else if (role === "PETUGAS_SCAN") {

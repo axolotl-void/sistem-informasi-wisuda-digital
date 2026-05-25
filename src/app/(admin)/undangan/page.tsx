@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { Mail, Sparkles } from "lucide-react";
 import { useUndanganStore } from "@/features/undangan/store";
 import { InvitationStatsCards } from "@/features/undangan/components/stats-cards";
@@ -11,7 +12,6 @@ import { QRDrawer } from "@/features/undangan/components/qr-drawer";
 import { GenerateInvitationModal } from "@/features/undangan/components/generate-modal";
 import { MassGenerateModal } from "@/features/undangan/components/mass-generate-modal";
 import { TamuRequestsPanel } from "@/features/undangan/components/tamu-requests-panel";
-import { LiquidGlassAmbient } from "@/components/ui/liquid-glass";
 
 export default function UndanganPage() {
   const { init, stats } = useUndanganStore();
@@ -19,53 +19,86 @@ export default function UndanganPage() {
   useEffect(() => {
     init();
   }, [init]);
-
   return (
     <>
-      <div className="dashboard-mesh relative -m-4 min-h-full overflow-hidden rounded-none p-4 sm:-m-6 sm:p-6 sm:rounded-3xl">
-        <LiquidGlassAmbient />
+      {/* Ambient background glow */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 50% at 20% 10%, rgba(59,130,246,0.06) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(99,102,241,0.05) 0%, transparent 60%)",
+        }}
+      />
 
-        <div className="relative z-10 space-y-5">
-          <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/90 bg-white/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_16px_rgba(59,130,246,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-none">
-                <Mail className="size-5 text-blue-600 dark:text-blue-300" />
-              </div>
-              <div>
-                <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/65 px-2.5 py-0.5 text-[10px] font-semibold text-blue-800 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:text-white/50 dark:shadow-none">
-                  <Sparkles className="size-3 text-blue-600 dark:text-blue-400" />
-                  Kelola undangan
-                </div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-                  <span className="bg-gradient-to-br from-slate-900 via-blue-900 to-violet-800 bg-clip-text text-transparent dark:hidden">
-                    Undangan Digital
-                  </span>
-                  <span className="hidden dark:inline">Undangan Digital</span>
-                </h1>
-                <p className="mt-0.5 text-sm font-medium text-slate-600 dark:text-white/40">
-                  Generate dan kelola undangan wisuda digital
-                </p>
-              </div>
+      <div className="relative z-10 space-y-6">
+        {/* -- Page Header ----------------------------------------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex items-start justify-between gap-4"
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex size-11 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/[0.08] dark:bg-white/[0.04]">
+              <Mail className="size-5 text-blue-500 dark:text-blue-400" />
             </div>
-
-            <div className="flex items-center gap-2 rounded-2xl border border-white/90 bg-white/60 px-4 py-2.5 shadow-[0_4px_20px_rgba(16,185,129,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-none">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-              </span>
-              <span className="text-xs font-semibold text-slate-700 dark:text-white/70">
-                {stats.total} Total
-              </span>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white/90">
+                Undangan Digital
+              </h1>
+              <p className="mt-0.5 text-sm text-gray-400 dark:text-white/30">
+                Generate dan kelola undangan wisuda digital
+              </p>
             </div>
-          </header>
+          </div>
 
+          {/* Live indicator */}
+          <div className="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:flex dark:border-emerald-500/20 dark:bg-emerald-500/8">
+            <span className="size-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+            <span className="text-[0.72rem] font-semibold text-emerald-600 dark:text-emerald-400">
+              {stats.total} Total
+            </span>
+          </div>
+        </motion.div>
+
+        {/* -- Stats ----------------------------------------------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
+        >
           <InvitationStatsCards stats={stats} />
+        </motion.div>
+
+        {/* -- Toolbar --------------------------------------------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+        >
           <InvitationToolbar />
+        </motion.div>
+
+        {/* -- Request Tamu Panel ------------------------------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
+        >
           <TamuRequestsPanel onRefreshUndangan={() => init()} />
+        </motion.div>
+
+        {/* -- Table ----------------------------------------------------- */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
+        >
           <InvitationTable />
-        </div>
+        </motion.div>
       </div>
 
+      {/* -- Modals & Drawers ------------------------------------------ */}
       <InvitationPreviewModal />
       <QRDrawer />
       <GenerateInvitationModal />

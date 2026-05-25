@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -165,4 +165,39 @@
     radial-gradient(ellipse 90% 60% at 10% -5%, rgba(59, 130, 246, 0.18), transparent 55%),
     radial-gradient(ellipse 70% 50% at 95% 15%, rgba(139, 92, 246, 0.14), transparent 50%),
     radial-gradient(ellipse 60% 45% at 50% 100%, rgba(16, 185, 129, 0.12), transparent 55%);
+}
+
+/* -- Portal mahasiswa: web mobile -- */
+.portal-root {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.portal-main {
+  padding: 1rem 1rem 1.25rem;
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 1024px) {
+  .portal-main {
+    padding: 2rem;
+    padding-bottom: 2rem;
+    max-width: 48rem;
+  }
+}
+
+.portal-bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.portal-mobile-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@supports (padding: max(0px)) {
+  .portal-main {
+    padding-bottom: max(5.75rem, calc(5.75rem + env(safe-area-inset-bottom)));
+  }
+  .portal-bottom-nav {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
 }

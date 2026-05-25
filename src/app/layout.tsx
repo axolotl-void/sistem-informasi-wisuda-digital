@@ -22,6 +22,16 @@ export const metadata: Metadata = {
   description: "Sistem validasi undangan wisuda digital kampus berbasis QR Code",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#e4ecf8" },
+    { media: "(prefers-color-scheme: dark)", color: "#060d1a" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

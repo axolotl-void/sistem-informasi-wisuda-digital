@@ -1,7 +1,7 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { AuthService } from "@/services/auth.service";
-import { apiSuccess, apiError } from "@/lib/utils";
+import { apiError } from "@/lib/utils";
 import { AUTH_COOKIE_NAME } from "@/lib/auth";
 
 const loginSchema = z.object({
@@ -20,17 +20,19 @@ export async function POST(request: NextRequest) {
 
     const result = await AuthService.login(parsed.data);
 
-    const response = apiSuccess(result, "Login berhasil");
-
-    // Set HTTP-only cookie — SameSite=None agar kompatibel dengan akses via IP/network
-    const cookieResponse = new Response(response.body, response);
-    const isProduction = process.env.NODE_ENV === "production";
-    cookieResponse.headers.set(
-      "Set-Cookie",
-      `${AUTH_COOKIE_NAME}=${result.token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}${isProduction ? "; Secure" : ""}`
+    const response = NextResponse.json(
+      { success: true, message: "Login berhasil", data: result },
+      { status: 200 },
     );
+    response.cookies.set(AUTH_COOKIE_NAME, result.token, {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
+      secure: process.env.NODE_ENV === "production",
+    });
 
-    return cookieResponse;
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Login gagal";
     return apiError(message, 401);
