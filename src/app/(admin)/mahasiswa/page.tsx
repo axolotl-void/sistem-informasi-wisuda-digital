@@ -16,9 +16,8 @@ import { glassBtnPrimary } from "@/components/ui/liquid-glass";
 import { cn } from "@/lib/utils";
 
 export default function MahasiswaPage() {
-  const { data, total, totalPages, isLoading, fetchAll } = useWisudawan();
+  const { data, total, isLoading, fetchAll } = useWisudawan();
 
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [fakultasFilter, setFakultasFilter] = useState("");
@@ -28,6 +27,8 @@ export default function MahasiswaPage() {
   const [resetTarget, setResetTarget] = useState<WisudawanRow | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
+  const listKey = [search, statusFilter, fakultasFilter].join("|");
+
   const load = useCallback(() => {
     fetchAll(
       {
@@ -35,10 +36,10 @@ export default function MahasiswaPage() {
         fakultas: fakultasFilter || undefined,
         status: statusFilter || undefined,
       },
-      page,
-      15,
+      1,
+      500,
     );
-  }, [fetchAll, search, statusFilter, fakultasFilter, page]);
+  }, [fetchAll, search, statusFilter, fakultasFilter]);
 
   useEffect(() => {
     load();
@@ -94,30 +95,19 @@ export default function MahasiswaPage() {
 
         <AccountToolbar
           search={search}
-          onSearchChange={(v) => {
-            setSearch(v);
-            setPage(1);
-          }}
+          onSearchChange={setSearch}
           statusFilter={statusFilter}
-          onStatusFilterChange={(v) => {
-            setStatusFilter(v);
-            setPage(1);
-          }}
+          onStatusFilterChange={setStatusFilter}
           fakultasFilter={fakultasFilter}
-          onFakultasFilterChange={(v) => {
-            setFakultasFilter(v);
-            setPage(1);
-          }}
+          onFakultasFilterChange={setFakultasFilter}
           onCreateClick={() => setCreateOpen(true)}
         />
 
         <StudentTable
           data={data}
           isLoading={isLoading}
-          page={page}
-          totalPages={totalPages}
           total={total}
-          onPageChange={setPage}
+          listKey={listKey}
           onSelect={(s) => setEditTarget(s)}
           onEdit={(s) => setEditTarget(s)}
           onDelete={(s) => setDeleteTarget(s)}

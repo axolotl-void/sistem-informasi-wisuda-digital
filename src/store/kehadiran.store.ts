@@ -20,6 +20,9 @@ interface KehadiranState {
   totalPages: number;
 }
 
+/** Batas fetch untuk list scroll (tanpa pagination UI) */
+export const KEHADIRAN_SCROLL_LIMIT = 500;
+
 interface KehadiranActions {
   setSearch: (search: string) => void;
   setStatusFilter: (status: string) => void;
@@ -27,16 +30,10 @@ interface KehadiranActions {
   setSesiFilter: (sesi: string) => void;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
-  
-  // Data Fetching
   fetchData: () => Promise<void>;
   fetchStats: () => Promise<void>;
-  
-  // Manual Overrides
   manualCheckIn: (mahasiswaId: string, status?: "HADIR" | "TERLAMBAT") => Promise<void>;
   resetCheckIn: (mahasiswaId: string) => Promise<void>;
-  
-  // Update state locally
   updateLocalRow: (mahasiswaId: string, updates: Partial<Kehadiran>) => void;
 }
 
@@ -59,22 +56,21 @@ export const useKehadiranStore = create<KehadiranStore>((set, get) => ({
   totalPages: 1,
 
   // Setters
-  setSearch: (search) => set({ search, page: 1 }),
-  setStatusFilter: (statusFilter) => set({ statusFilter, page: 1 }),
-  setFakultasFilter: (fakultasFilter) => set({ fakultasFilter, page: 1 }),
-  setSesiFilter: (sesiFilter) => set({ sesiFilter, page: 1 }),
+  setSearch: (search) => set({ search }),
+  setStatusFilter: (statusFilter) => set({ statusFilter }),
+  setFakultasFilter: (fakultasFilter) => set({ fakultasFilter }),
+  setSesiFilter: (sesiFilter) => set({ sesiFilter }),
   setPage: (page) => set({ page }),
-  setLimit: (limit) => set({ limit, page: 1 }),
+  setLimit: (limit) => set({ limit }),
 
-  // Data Fetching
   fetchData: async () => {
     set({ isLoading: true });
     try {
-      const { search, statusFilter, fakultasFilter, sesiFilter, page, limit } = get();
-      
-      const params: Record<string, any> = {
-        page,
-        limit,
+      const { search, statusFilter, fakultasFilter, sesiFilter } = get();
+
+      const params: Record<string, string | number> = {
+        page: 1,
+        limit: KEHADIRAN_SCROLL_LIMIT,
       };
       
       if (search) params.search = search;
