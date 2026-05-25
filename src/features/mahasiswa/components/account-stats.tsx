@@ -96,7 +96,7 @@ export function AccountStats({ data, total }: AccountStatsProps) {
           >
             <div
               className={cn(
-                "mb-2.5 flex size-8 items-center justify-center rounded-xl backdrop-blur-md",
+                "mb-2.5 flex size-8 items-center justify-center rounded-xl",
                 c.iconBg,
               )}
             >

@@ -57,7 +57,7 @@ export function ActivityTable() {
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/80 bg-white/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl dark:border-white/[0.06] dark:bg-white/[0.02] dark:shadow-none">
+      <div className="overflow-x-auto rounded-2xl border border-white/80 bg-white/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] dark:border-white/[0.06] dark:bg-white/[0.04] dark:shadow-none">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200/80 bg-white/30 dark:border-white/[0.08] dark:bg-transparent">
@@ -103,7 +103,7 @@ export function ActivityTable() {
                   <td className="px-4 py-3">
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold backdrop-blur-md",
+                        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold",
                         cfg.bg,
                         cfg.chip,
                       )}

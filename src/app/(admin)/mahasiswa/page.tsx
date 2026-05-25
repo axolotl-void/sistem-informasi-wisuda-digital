@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
 import { Users, Plus, Sparkles } from "lucide-react";
 import { AccountStats } from "@/features/mahasiswa/components/account-stats";
 import { AccountToolbar } from "@/features/mahasiswa/components/account-toolbar";
@@ -13,7 +12,7 @@ import { ResetPasswordModal } from "@/features/mahasiswa/components/reset-passwo
 import { ImportExportButtons } from "@/features/mahasiswa/components/import-export-buttons";
 import { useWisudawan } from "@/hooks/use-wisudawan";
 import type { WisudawanRow } from "@/services/wisudawan.service";
-import { LiquidGlassAmbient, glassBtnPrimary } from "@/components/ui/liquid-glass";
+import { glassBtnPrimary } from "@/components/ui/liquid-glass";
 import { cn } from "@/lib/utils";
 
 export default function MahasiswaPage() {
@@ -47,22 +46,14 @@ export default function MahasiswaPage() {
 
   return (
     <div className="dashboard-mesh relative -m-4 min-h-full overflow-hidden rounded-none p-4 sm:-m-6 sm:p-6 sm:rounded-3xl">
-      <LiquidGlassAmbient />
-
       <div className="relative z-10 space-y-5">
-        {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
-        >
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/90 bg-white/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_16px_rgba(59,130,246,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:shadow-none">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/90 bg-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_16px_rgba(59,130,246,0.1)] dark:border-white/10 dark:bg-white/[0.08]">
               <Users className="size-5 text-blue-600 dark:text-blue-300" />
             </div>
             <div>
-              <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/65 px-2.5 py-0.5 text-[10px] font-semibold text-blue-800 shadow-[0_2px_12px_rgba(59,130,246,0.1)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] dark:text-white/50 dark:shadow-none">
+              <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/90 px-2.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:border-white/10 dark:bg-white/[0.08] dark:text-white/50">
                 <Sparkles className="size-3 text-blue-600 dark:text-blue-400" />
                 Kelola wisudawan
               </div>
@@ -73,8 +64,8 @@ export default function MahasiswaPage() {
                   </span>
                   <span className="hidden dark:inline">Akun Wisudawan</span>
                 </h1>
-                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 backdrop-blur-md dark:border-emerald-500/25 dark:bg-emerald-500/10">
-                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse dark:bg-emerald-400" />
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 dark:border-emerald-500/25 dark:bg-emerald-500/10">
+                  <span className="size-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
                   <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                     Live
                   </span>
@@ -97,7 +88,7 @@ export default function MahasiswaPage() {
               Tambah
             </button>
           </div>
-        </motion.header>
+        </header>
 
         <AccountStats data={data} total={total} />
 

@@ -55,6 +55,7 @@ export function StatCard({
   return (
     <LiquidGlassCard
       noEntrance
+      hover={false}
       className={cn("group p-5", colors.ring)}
     >
       <div className="flex items-start justify-between gap-3">
@@ -62,7 +63,7 @@ export function StatCard({
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-slate-600 dark:text-white/40">
             {label}
           </p>
-          <p className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white dark:drop-shadow-[0_0_24px_rgba(255,255,255,0.12)]">
+          <p className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
             <span className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-600 bg-clip-text text-transparent dark:hidden">
               {value}
             </span>
@@ -76,7 +77,7 @@ export function StatCard({
           {trend && (
             <p
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold backdrop-blur-md",
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
                 trend.positive
                   ? "border-emerald-400/30 bg-emerald-500/15 text-emerald-800 dark:border-transparent dark:bg-emerald-500/10 dark:text-emerald-300"
                   : "border-red-400/30 bg-red-500/15 text-red-800 dark:border-transparent dark:bg-red-500/10 dark:text-red-300",
@@ -88,7 +89,7 @@ export function StatCard({
         </div>
         <div
           className={cn(
-            "flex size-11 shrink-0 items-center justify-center rounded-2xl backdrop-blur-md",
+            "flex size-11 shrink-0 items-center justify-center rounded-2xl",
             colors.iconBg,
           )}
         >

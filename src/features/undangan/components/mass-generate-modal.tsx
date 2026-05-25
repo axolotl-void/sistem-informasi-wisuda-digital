@@ -170,7 +170,7 @@ export function MassGenerateModal() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/65"
             onClick={step === "config" ? handleClose : undefined}
           />
 
@@ -450,7 +450,7 @@ export function MassGenerateModal() {
                   >
                     {/* Success icon */}
                     <div className="relative">
-                      <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl scale-150" />
+                      <div className="absolute inset-0 rounded-full bg-emerald-500/15 scale-150" />
                       <div className="relative flex size-18 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10 p-4">
                         <CheckCircle2 className="size-9 text-emerald-500 dark:text-emerald-400" />
                       </div>

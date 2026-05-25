@@ -139,7 +139,7 @@ export function InvitationPreviewModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/65"
             onClick={closePreview}
           />
 
@@ -156,7 +156,7 @@ export function InvitationPreviewModal() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal header */}
-              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white/95 px-6 py-4 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#080f1e]/95">
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white/98 px-6 py-4 dark:border-white/[0.06] dark:bg-[#080f1e]/98">
                 <div>
                   <h2 className="text-base font-semibold text-gray-900 dark:text-white/90">Preview Undangan</h2>
                   <p className="text-xs text-gray-400 dark:text-white/30 mt-0.5">{inv.kode}</p>
@@ -198,7 +198,6 @@ export function InvitationPreviewModal() {
                   {/* QR Code */}
                   <div className="flex flex-col items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/[0.07] dark:bg-white/[0.03] p-5">
                     <div className="relative">
-                      <div className="absolute inset-0 rounded-2xl bg-blue-500/10 blur-xl" />
                       <div className="relative rounded-2xl bg-white p-3 shadow-2xl">
                         {qrDataUrl ? (
                           <img src={qrDataUrl} alt="QR Code" width={140} height={140} />

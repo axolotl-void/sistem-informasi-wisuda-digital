@@ -121,18 +121,40 @@ export function QrScannerView() {
           {/* Scan frame */}
           {isScanning && (
             <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
-              <div className="relative w-[55%] h-[55%]">
-                {[
-                  "top-0 left-0 border-t-2 border-l-2 rounded-tl-lg",
-                  "top-0 right-0 border-t-2 border-r-2 rounded-tr-lg",
-                  "bottom-0 left-0 border-b-2 border-l-2 rounded-bl-lg",
-                  "bottom-0 right-0 border-b-2 border-r-2 rounded-br-lg",
-                ].map((cls, i) => (
-                  <div key={i} className={cn(
-                    "absolute size-5 transition-colors duration-300", cls,
-                    localLoading ? "border-amber-400" : "border-blue-400"
-                  )} />
-                ))}
+              {/* Panduan visual saja — decode memakai seluruh frame (tanpa overlay hitam library) */}
+              <div className="relative h-[65%] w-[65%]">
+                {(
+                  [
+                    { h: "top-0 left-0", v: "top-0 left-0" },
+                    { h: "top-0 right-0", v: "top-0 right-0" },
+                    { h: "bottom-0 left-0", v: "bottom-0 left-0" },
+                    { h: "bottom-0 right-0", v: "bottom-0 right-0" },
+                  ] as const
+                ).map((corner, i) => {
+                  const bar = localLoading ? "bg-amber-400" : "bg-blue-400";
+                  return (
+                    <div key={i}>
+                      <span
+                        className={cn(
+                          "absolute h-[2px] w-7 rounded-full",
+                          bar,
+                          corner.h,
+                          corner.h.includes("right") && "right-0",
+                          corner.h.includes("bottom") && "bottom-0",
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "absolute h-7 w-[2px] rounded-full",
+                          bar,
+                          corner.v,
+                          corner.v.includes("right") && "right-0",
+                          corner.v.includes("bottom") && "bottom-0",
+                        )}
+                      />
+                    </div>
+                  );
+                })}
                 {!localLoading && (
                   <motion.div
                     className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-80"
@@ -144,11 +166,16 @@ export function QrScannerView() {
             </div>
           )}
 
-          {/* Camera feed */}
-          <div id={containerId} className={cn(
-            "w-full h-full transition-opacity duration-300",
-            (localLoading || !isScanning) ? "opacity-0 pointer-events-none absolute" : "opacity-100"
-          )} />
+          {/* Camera feed — absolute inset agar mengisi kotak 4:3 tanpa strip hitam */}
+          <div
+            id={containerId}
+            className={cn(
+              "absolute inset-0 transition-opacity duration-300",
+              localLoading || !isScanning
+                ? "pointer-events-none opacity-0"
+                : "opacity-100",
+            )}
+          />
 
           {/* Idle placeholder */}
           {!isScanning && (

@@ -49,7 +49,7 @@ function StatusPill({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
         c.light,
         c.dark,
       )}
@@ -247,7 +247,7 @@ export function StudentTable({
         </table>
       </div>
 
-      <div className="flex items-center justify-between border-t border-white/50 bg-white/25 px-4 py-3 backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.02]">
+      <div className="flex items-center justify-between border-t border-white/50 bg-white/40 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
         <p className="text-[11px] font-medium text-slate-500 dark:text-white/35">
           {data.length} dari {total}
         </p>

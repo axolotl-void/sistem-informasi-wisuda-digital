@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Clock, CheckCircle2, XCircle,
   Loader2, RefreshCw, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { LiquidGlassCard, GlassChip } from "@/components/ui/liquid-glass";
+import { cn } from "@/lib/utils";
 
 // --- Types --------------------------------------------------------------------
 
@@ -69,13 +70,12 @@ function RequestRow({
   }
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -20, height: 0 }}
-      transition={{ duration: 0.2 }}
-      className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-500/15 dark:bg-amber-500/[0.04] p-3.5"
+    <div
+      className={cn(
+        "flex items-center gap-3 rounded-2xl border p-3.5",
+        "border-amber-400/35 bg-amber-500/10",
+        "dark:border-amber-500/20 dark:bg-amber-500/[0.06]",
+      )}
     >
       {/* Avatar */}
       <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-blue-100 border border-indigo-200 dark:from-indigo-500/20 dark:to-blue-500/20 dark:border-indigo-500/15 overflow-hidden">
@@ -88,8 +88,10 @@ function RequestRow({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-800 dark:text-white/80 truncate">{req.nama}</p>
-        <p className="text-[0.65rem] text-gray-400 dark:text-white/30 truncate">{req.nim} · {req.sesiWisuda ?? "Sesi belum ditentukan"}</p>
+        <p className="truncate text-sm font-semibold text-slate-800 dark:text-white/80">{req.nama}</p>
+        <p className="truncate text-[0.65rem] text-slate-500 dark:text-white/30">
+          {req.nim} · {req.sesiWisuda ?? "Sesi belum ditentukan"}
+        </p>
       </div>
 
       {/* Jumlah tamu badge */}
@@ -131,7 +133,7 @@ function RequestRow({
           )}
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -204,25 +206,22 @@ export function TamuRequestsPanel({ onRefreshUndangan }: { onRefreshUndangan?: (
   if (!isLoading && requests.length === 0) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-amber-200 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/[0.04] overflow-hidden"
-    >
-      {/* Header */}
+    <LiquidGlassCard noEntrance hover={false} className="overflow-hidden p-0">
       <button
         type="button"
         onClick={() => setIsCollapsed((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-amber-100/50 dark:hover:bg-white/[0.02] transition-colors"
+        className="flex w-full items-center justify-between px-4 py-3 transition-colors hover:bg-white/30 dark:hover:bg-white/[0.03]"
       >
         <div className="flex items-center gap-2.5">
-          <div className="flex size-7 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-500/15">
+          <GlassChip className="flex size-8 items-center justify-center p-0">
             <Clock className="size-3.5 text-amber-600 dark:text-amber-400" />
-          </div>
+          </GlassChip>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-gray-800 dark:text-white/80">Request Tamu Pending</span>
+            <span className="text-sm font-bold text-slate-800 dark:text-white/80">
+              Request Tamu Pending
+            </span>
             {!isLoading && requests.length > 0 && (
-              <span className="flex size-5 items-center justify-center rounded-full bg-amber-500 text-[0.6rem] font-black text-white">
+              <span className="flex size-5 items-center justify-center rounded-full border border-amber-400/40 bg-amber-500/20 text-[0.6rem] font-black text-amber-800 dark:text-amber-300">
                 {requests.length}
               </span>
             )}
@@ -231,50 +230,40 @@ export function TamuRequestsPanel({ onRefreshUndangan }: { onRefreshUndangan?: (
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); fetchRequests(); }}
-            className="flex size-6 items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 dark:text-white/25 dark:hover:text-white/50 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              fetchRequests();
+            }}
+            className="flex size-6 items-center justify-center rounded-lg text-slate-400 transition-colors hover:text-slate-600 dark:text-white/25 dark:hover:text-white/50"
           >
-            <RefreshCw className={`size-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={cn("size-3.5", isLoading && "animate-spin")} />
           </button>
           {isCollapsed ? (
-            <ChevronDown className="size-4 text-gray-400 dark:text-white/30" />
+            <ChevronDown className="size-4 text-slate-400 dark:text-white/30" />
           ) : (
-            <ChevronUp className="size-4 text-gray-400 dark:text-white/30" />
+            <ChevronUp className="size-4 text-slate-400 dark:text-white/30" />
           )}
         </div>
       </button>
 
-      {/* Content */}
-      <AnimatePresence>
-        {!isCollapsed && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 space-y-2.5 border-t border-amber-200 dark:border-amber-500/10 pt-3">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="size-5 text-amber-500 dark:text-amber-400/50 animate-spin" />
-                </div>
-              ) : (
-                <AnimatePresence mode="popLayout">
-                  {requests.map((req) => (
-                    <RequestRow
-                      key={req.id}
-                      req={req}
-                      onApprove={handleApprove}
-                      onReject={handleReject}
-                    />
-                  ))}
-                </AnimatePresence>
-              )}
+      {!isCollapsed && (
+        <div className="space-y-2.5 border-t border-white/60 px-4 pb-4 pt-3 dark:border-white/[0.08]">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="size-5 animate-spin text-amber-500 dark:text-amber-400/50" />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+          ) : (
+            requests.map((req) => (
+              <RequestRow
+                key={req.id}
+                req={req}
+                onApprove={handleApprove}
+                onReject={handleReject}
+              />
+            ))
+          )}
+        </div>
+      )}
+    </LiquidGlassCard>
   );
 }

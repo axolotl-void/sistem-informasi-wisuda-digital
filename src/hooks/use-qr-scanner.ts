@@ -3,18 +3,40 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
 
+type QrBoxFn = (
+  viewfinderWidth: number,
+  viewfinderHeight: number,
+) => { width: number; height: number };
+
+/**
+ * Opsional: qrbox kecil memicu overlay hitam (#qr-shaded-region) dari library.
+ * Default: tidak set qrbox → scan seluruh frame, tanpa garis hitam, jarak jauh OK.
+ */
+export const DEFAULT_SCAN_QRBOX_RATIO = 0.92;
+
+export function defaultScanQrbox(
+  viewfinderWidth: number,
+  viewfinderHeight: number,
+): { width: number; height: number } {
+  return {
+    width: Math.floor(viewfinderWidth * DEFAULT_SCAN_QRBOX_RATIO),
+    height: Math.floor(viewfinderHeight * DEFAULT_SCAN_QRBOX_RATIO),
+  };
+}
+
 interface UseQrScannerOptions {
   onScan: (decodedText: string) => void;
   onError?: (error: string) => void;
+  /** Frame per detik — lebih tinggi = deteksi lebih responsif */
   fps?: number;
-  qrbox?: number;
+  qrbox?: number | QrBoxFn;
 }
 
 export function useQrScanner({
   onScan,
   onError,
-  fps = 10,
-  qrbox = 250,
+  fps = 18,
+  qrbox,
 }: UseQrScannerOptions) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -104,12 +126,38 @@ export function useQrScanner({
     }
 
     try {
-      const scanner = new Html5Qrcode(containerId);
+      const scanner = new Html5Qrcode(containerId, {
+        verbose: false,
+        useBarCodeDetectorIfSupported: true,
+      });
       scannerRef.current = scanner;
+
+      const scanConfig: {
+        fps: number;
+        disableFlip: boolean;
+        videoConstraints: MediaTrackConstraints;
+        qrbox?: number | { width: number; height: number } | QrBoxFn;
+      } = {
+        fps,
+        disableFlip: false,
+        videoConstraints: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      };
+
+      // Hanya kirim qrbox jika diminta eksplisit — kalau tidak, library scan full frame tanpa overlay hitam
+      if (qrbox !== undefined) {
+        scanConfig.qrbox =
+          typeof qrbox === "number"
+            ? { width: qrbox, height: qrbox }
+            : qrbox;
+      }
 
       await scanner.start(
         { facingMode: "environment" },
-        { fps, qrbox: { width: qrbox, height: qrbox } },
+        scanConfig,
         (decodedText) => {
           onScanRef.current(decodedText);
         },

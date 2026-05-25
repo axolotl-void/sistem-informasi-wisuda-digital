@@ -7,6 +7,13 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
 import { useUndanganStore } from "../store";
+import {
+  LiquidGlassCard,
+  glassBtnGhost,
+  glassBtnPrimary,
+  glassInput,
+} from "@/components/ui/liquid-glass";
+import { cn } from "@/lib/utils";
 
 const statusOptions = [
   { value: "all", label: "Semua Status" },
@@ -32,6 +39,12 @@ const attendanceOptions = [
   { value: "tidak_hadir", label: "Tidak Hadir" },
 ];
 
+const glassBtnDanger = cn(
+  glassBtnGhost,
+  "border-red-400/35 bg-red-500/10 text-red-700 hover:bg-red-500/15",
+  "dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/18",
+);
+
 function GlassSelect({
   value,
   onChange,
@@ -46,54 +59,22 @@ function GlassSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 appearance-none rounded-xl border border-gray-200 bg-white text-gray-700 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 pl-3 pr-8 text-[0.78rem] font-medium outline-none transition-all hover:border-gray-300 dark:hover:border-white/[0.12] dark:hover:bg-white/[0.06] focus:border-blue-400 dark:focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 cursor-pointer shadow-sm dark:shadow-none"
+        className={cn(glassInput, "h-9 cursor-pointer appearance-none pl-3 pr-8 text-[11px] font-semibold")}
       >
         {options.map((o) => (
-          <option key={o.value} value={o.value} className="bg-white text-gray-800 dark:bg-[#0F172A] dark:text-white">
+          <option
+            key={o.value}
+            value={o.value}
+            className="bg-white text-slate-800 dark:bg-[#0B1424] dark:text-white"
+          >
             {o.label}
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-gray-400 dark:text-white/30" />
+      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-slate-400 dark:text-white/30" />
     </div>
   );
 }
-
-function GlassButton({
-  onClick,
-  icon: Icon,
-  label,
-  variant = "default",
-}: {
-  onClick?: () => void;
-  icon: React.ElementType;
-  label: string;
-  variant?: "default" | "primary" | "ghost" | "danger";
-}) {
-  const styles = {
-    default:
-      "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 dark:hover:border-white/[0.12] dark:hover:bg-white/[0.07] dark:hover:text-white/80 shadow-sm dark:shadow-none",
-    primary:
-      "border-blue-300 bg-blue-50 text-blue-600 hover:border-blue-400 hover:bg-blue-100 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:border-blue-500/50 dark:hover:bg-blue-500/15",
-    ghost:
-      "border-transparent bg-transparent text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-white/40 dark:hover:bg-white/[0.04] dark:hover:text-white/60",
-    danger:
-      "border-red-200 bg-red-50 text-red-600 hover:border-red-300 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:border-red-500/50 dark:hover:bg-red-500/15",
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-[0.78rem] font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${styles[variant]}`}
-    >
-      <Icon className="size-3.5" />
-      <span className="hidden sm:inline">{label}</span>
-    </button>
-  );
-}
-
-// --- Delete All Confirmation Dialog ------------------------------------------
 
 function DeleteAllDialog({
   open,
@@ -113,21 +94,21 @@ function DeleteAllDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/55"
         onClick={!isDeleting ? onCancel : undefined}
       />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#0F172A] p-6 shadow-2xl">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-200 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10">
-          <Trash2 className="size-5 text-red-500 dark:text-red-400" />
+      <LiquidGlassCard hover={false} className="relative z-10 w-full max-w-md p-6">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-400/30 bg-red-500/10 dark:border-red-500/25 dark:bg-red-500/10">
+          <Trash2 className="size-5 text-red-600 dark:text-red-400" />
         </div>
 
-        <h2 className="text-base font-bold text-gray-900 dark:text-white/90">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white/90">
           Hapus Semua Undangan?
         </h2>
-        <p className="mt-2 text-[0.82rem] leading-relaxed text-gray-500 dark:text-white/40">
+        <p className="mt-2 text-[0.82rem] leading-relaxed text-slate-600 dark:text-white/45">
           Anda akan menghapus{" "}
-          <span className="font-semibold text-red-500 dark:text-red-400">{count} undangan</span>.
-          Tindakan ini tidak dapat dibatalkan dan semua data QR code akan hilang permanen dari database.
+          <span className="font-semibold text-red-600 dark:text-red-400">{count} undangan</span>.
+          Tindakan ini tidak dapat dibatalkan dan semua data QR code akan hilang permanen.
         </p>
 
         <div className="mt-6 flex gap-3">
@@ -135,7 +116,7 @@ function DeleteAllDialog({
             type="button"
             onClick={onCancel}
             disabled={isDeleting}
-            className="flex-1 h-10 rounded-xl border border-gray-200 bg-gray-50 text-[0.82rem] font-semibold text-gray-600 transition-all hover:bg-gray-100 hover:text-gray-800 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/60 dark:hover:bg-white/[0.07] dark:hover:text-white/80"
+            className={cn(glassBtnGhost, "h-10 flex-1 justify-center disabled:opacity-40")}
           >
             Batal
           </button>
@@ -143,36 +124,30 @@ function DeleteAllDialog({
             type="button"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex-1 h-10 rounded-xl border border-red-300 bg-red-50 text-[0.82rem] font-bold text-red-600 transition-all hover:border-red-400 hover:bg-red-100 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-400 dark:hover:border-red-500/50 dark:hover:bg-red-500/25"
+            className={cn(glassBtnDanger, "h-10 flex-1 justify-center font-bold disabled:opacity-60")}
           >
-            {isDeleting ? (
-              <>
-                <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Menghapus...
-              </>
-            ) : (
-              "Ya, Hapus Semua"
-            )}
+            {isDeleting ? "Menghapus..." : "Ya, Hapus Semua"}
           </button>
         </div>
-      </div>
+      </LiquidGlassCard>
     </div>
   );
 }
 
-// --- Toolbar -----------------------------------------------------------------
-
 export function InvitationToolbar() {
   const {
-    searchQuery, setSearch,
-    filterStatus, setFilterStatus,
-    filterSesi, setFilterSesi,
-    filterAttendance, setFilterAttendance,
-    openGenerateModal, openMassGenerate,
-    invitations, deleteAll,
+    searchQuery,
+    setSearch,
+    filterStatus,
+    setFilterStatus,
+    filterSesi,
+    setFilterSesi,
+    filterAttendance,
+    setFilterAttendance,
+    openGenerateModal,
+    openMassGenerate,
+    invitations,
+    deleteAll,
   } = useUndanganStore();
 
   const filtered = (invitations || []).filter((inv) => {
@@ -197,6 +172,7 @@ export function InvitationToolbar() {
     }
     return true;
   });
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -205,9 +181,10 @@ export function InvitationToolbar() {
     try {
       await deleteAll();
       setShowDeleteDialog(false);
-      toast.success(`Semua undangan berhasil dihapus dari database`);
+      toast.success("Semua undangan berhasil dihapus dari database");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Gagal menghapus semua undangan";
+      const message =
+        error instanceof Error ? error.message : "Gagal menghapus semua undangan";
       toast.error(message);
     } finally {
       setIsDeleting(false);
@@ -223,28 +200,42 @@ export function InvitationToolbar() {
     try {
       const dataToExport = filtered.map((inv) => ({
         "Kode Undangan": inv.kode,
-        "NIM": inv.nim,
+        NIM: inv.nim,
         "Nama Mahasiswa": inv.mahasiswaNama,
-        "Fakultas": inv.fakultas,
-        "Prodi": inv.prodi,
+        Fakultas: inv.fakultas,
+        Prodi: inv.prodi,
         "Sesi Wisuda": inv.sesi,
         "Tempat/Gedung": inv.gedung,
         "Nomor Kursi": inv.nomorKursi,
         "Kuota Tamu": inv.kuotaTamu,
         "Tamu Hadir": inv.tamuHadir,
-        "Status Undangan": inv.status === "qr_aktif" ? "QR Aktif" :
-                           inv.status === "sudah_download" ? "Sudah Download" :
-                           inv.status === "sudah_hadir" ? "Sudah Hadir" :
-                           inv.status === "expired" ? "Expired" : "Belum Generate",
-        "Status Kehadiran": inv.attendance === "hadir" ? "Hadir" :
-                            inv.attendance === "terlambat" ? "Terlambat" :
-                            inv.attendance === "tidak_hadir" ? "Tidak Hadir" : "Belum Hadir",
+        "Status Undangan":
+          inv.status === "qr_aktif"
+            ? "QR Aktif"
+            : inv.status === "sudah_download"
+              ? "Sudah Download"
+              : inv.status === "sudah_hadir"
+                ? "Sudah Hadir"
+                : inv.status === "expired"
+                  ? "Expired"
+                  : "Belum Generate",
+        "Status Kehadiran":
+          inv.attendance === "hadir"
+            ? "Hadir"
+            : inv.attendance === "terlambat"
+              ? "Terlambat"
+              : inv.attendance === "tidak_hadir"
+                ? "Tidak Hadir"
+                : "Belum Hadir",
       }));
 
       const worksheet = XLSX.utils.json_to_sheet(dataToExport);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Daftar Undangan");
-      XLSX.writeFile(workbook, `Daftar_Undangan_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      XLSX.writeFile(
+        workbook,
+        `Daftar_Undangan_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      );
       toast.success("Data berhasil diekspor ke Excel");
     } catch (error) {
       console.error("Export Excel error:", error);
@@ -265,8 +256,8 @@ export function InvitationToolbar() {
       const canvas = await html2canvas(input, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#080f1e",
-      } as any);
+        backgroundColor: "#07111F",
+      } as Parameters<typeof html2canvas>[1]);
       const imgData = canvas.toDataURL("image/png");
 
       const pdf = new jsPDF("p", "mm", "a4");
@@ -298,44 +289,75 @@ export function InvitationToolbar() {
 
   return (
     <>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Left — Search + Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Search */}
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-gray-400 dark:text-white/25" />
-            <input
-              type="text"
-              placeholder="Cari nama, NIM, kode..."
-              value={searchQuery}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-9 w-56 rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-[0.78rem] text-gray-700 placeholder-gray-400 outline-none transition-all hover:border-gray-300 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-500/10 shadow-sm dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/70 dark:placeholder-white/20 dark:hover:border-white/[0.12] dark:focus:border-blue-500/40 dark:focus:bg-white/[0.06] dark:shadow-none"
+      <LiquidGlassCard noEntrance hover={false} className="p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-0 flex-1 sm:max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400 dark:text-white/25" />
+              <input
+                type="text"
+                placeholder="Cari nama, NIM, kode..."
+                value={searchQuery}
+                onChange={(e) => setSearch(e.target.value)}
+                className={cn(glassInput, "h-9 w-full min-w-[200px] pl-9 pr-3 text-[13px] font-medium")}
+              />
+            </div>
+            <GlassSelect value={filterStatus} onChange={setFilterStatus} options={statusOptions} />
+            <GlassSelect value={filterSesi} onChange={setFilterSesi} options={sesiOptions} />
+            <GlassSelect
+              value={filterAttendance}
+              onChange={setFilterAttendance}
+              options={attendanceOptions}
             />
           </div>
 
-          <GlassSelect value={filterStatus} onChange={setFilterStatus} options={statusOptions} />
-          <GlassSelect value={filterSesi} onChange={setFilterSesi} options={sesiOptions} />
-          <GlassSelect value={filterAttendance} onChange={setFilterAttendance} options={attendanceOptions} />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className={cn(glassBtnGhost, "h-9 gap-2 px-3")}
+            >
+              <FileSpreadsheet className="size-3.5" />
+              <span className="hidden sm:inline">Export Excel</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              className={cn(glassBtnGhost, "h-9 gap-2 px-3")}
+            >
+              <FileDown className="size-3.5" />
+              <span className="hidden sm:inline">Export PDF</span>
+            </button>
+            <button
+              type="button"
+              onClick={openMassGenerate}
+              className={cn(glassBtnGhost, "h-9 gap-2 px-3")}
+            >
+              <Zap className="size-3.5" />
+              <span className="hidden sm:inline">Generate Massal</span>
+            </button>
+            <button
+              type="button"
+              onClick={openGenerateModal}
+              className={cn(glassBtnPrimary, "h-9 gap-2 px-3")}
+            >
+              <Plus className="size-3.5" />
+              <span className="hidden sm:inline">Generate Undangan</span>
+            </button>
+            {invitations.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteDialog(true)}
+                className={cn(glassBtnDanger, "h-9 gap-2 px-3")}
+              >
+                <Trash2 className="size-3.5" />
+                <span className="hidden sm:inline">Hapus Semua</span>
+              </button>
+            )}
+          </div>
         </div>
+      </LiquidGlassCard>
 
-        {/* Right — Actions */}
-        <div className="flex items-center gap-2">
-          <GlassButton icon={FileSpreadsheet} label="Export Excel" onClick={handleExportExcel} />
-          <GlassButton icon={FileDown} label="Export PDF" onClick={handleExportPDF} />
-          <GlassButton icon={Zap} label="Generate Massal" onClick={openMassGenerate} />
-          <GlassButton icon={Plus} label="Generate Undangan" variant="primary" onClick={openGenerateModal} />
-          {invitations.length > 0 && (
-            <GlassButton
-              icon={Trash2}
-              label="Hapus Semua"
-              variant="danger"
-              onClick={() => setShowDeleteDialog(true)}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Delete All Confirmation Dialog */}
       <DeleteAllDialog
         open={showDeleteDialog}
         count={invitations.length}

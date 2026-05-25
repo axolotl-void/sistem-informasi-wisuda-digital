@@ -1,60 +1,40 @@
 "use client";
 
+import { LiquidGlassCard } from "@/components/ui/liquid-glass";
+
 export function LoadingSkeleton() {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white dark:border-white/[0.07] dark:bg-white/[0.02] overflow-hidden shadow-sm dark:shadow-none">
+    <LiquidGlassCard hover={false} className="overflow-hidden p-0">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px]">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50 dark:border-white/[0.06] dark:bg-white/[0.02]">
-              {["QR", "Kode", "Mahasiswa", "Fakultas", "Sesi", "Kursi", "Tamu", "Status", "Kehadiran", ""].map((h) => (
-                <th key={h} className="py-3 pl-4 text-left">
-                  <div className="h-2.5 w-16 rounded-full bg-gray-200 dark:bg-white/[0.05] animate-pulse" />
+            <tr className="border-b border-white/60 bg-white/30 dark:border-white/[0.08] dark:bg-white/[0.03]">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <th key={i} className="py-3 pl-4 text-left">
+                  <div className="h-2.5 w-16 rounded-full bg-white/60 dark:bg-white/[0.06]" />
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {Array.from({ length: 8 }).map((_, i) => (
-              <tr key={i} className="border-b border-gray-100 dark:border-white/[0.03]">
+              <tr
+                key={i}
+                className="border-b border-white/40 dark:border-white/[0.04]"
+              >
                 <td className="py-3 pl-4 pr-3">
-                  <div className="size-9 rounded-md bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
+                  <div className="size-9 rounded-md bg-white/50 dark:bg-white/[0.06]" />
                 </td>
-                <td className="py-3 pr-4">
-                  <div className="h-2.5 w-24 rounded-full bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
-                </td>
-                <td className="py-3 pr-4">
-                  <div className="space-y-1.5">
-                    <div className="h-2.5 w-32 rounded-full bg-gray-200 dark:bg-white/[0.05] animate-pulse" />
-                    <div className="h-2 w-20 rounded-full bg-gray-100 dark:bg-white/[0.03] animate-pulse" />
-                  </div>
-                </td>
-                <td className="py-3 pr-4 hidden lg:table-cell">
-                  <div className="h-2.5 w-28 rounded-full bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
-                </td>
-                <td className="py-3 pr-4 hidden md:table-cell">
-                  <div className="h-2.5 w-20 rounded-full bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
-                </td>
-                <td className="py-3 pr-4 hidden xl:table-cell">
-                  <div className="h-2.5 w-12 rounded-full bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
-                </td>
-                <td className="py-3 pr-4 hidden xl:table-cell">
-                  <div className="h-2.5 w-10 rounded-full bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
-                </td>
-                <td className="py-3 pr-4">
-                  <div className="h-5 w-20 rounded-full bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
-                </td>
-                <td className="py-3 pr-4 hidden sm:table-cell">
-                  <div className="h-5 w-16 rounded-full bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
-                </td>
-                <td className="py-3 pr-4">
-                  <div className="h-5 w-16 rounded-full bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
-                </td>
+                {Array.from({ length: 9 }).map((_, j) => (
+                  <td key={j} className="py-3 pr-4">
+                    <div className="h-2.5 w-24 rounded-full bg-white/45 dark:bg-white/[0.05]" />
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </LiquidGlassCard>
   );
 }
