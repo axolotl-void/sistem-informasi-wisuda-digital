@@ -14,7 +14,12 @@ import {
   Moon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-
+import {
+  readAuthStorage,
+  syncAuthFromSession,
+  fetchWithAuth,
+  clearClientAuth,
+} from "@/lib/client-auth";
 export default function LoginPage() {
   const { theme, setTheme } = useTheme();
   const { login, isLoading } = useAuth();
@@ -27,6 +32,36 @@ export default function LoginPage() {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => setMounted(true), []);
+
+  // Redirect otomatis hanya dari callback middleware (?callbackUrl=) — hindari loop spam
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const callbackUrl = params.get("callbackUrl");
+    if (!callbackUrl) return;
+
+    let cancelled = false;
+    async function resumeSession() {
+      let { token, role } = readAuthStorage();
+      if (!token) {
+        await syncAuthFromSession();
+        ({ token, role } = readAuthStorage());
+      }
+      if (cancelled || !token || !role) return;
+
+      const verifyUrl = role === "MAHASISWA" ? "/api/portal/me" : "/api/auth/me";
+      const meRes = await fetchWithAuth(verifyUrl);
+      if (!meRes.ok) {
+        clearClientAuth();
+        return;
+      }
+
+      window.location.replace(callbackUrl);
+    }
+    void resumeSession();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

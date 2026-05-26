@@ -11,23 +11,35 @@ import { cn } from "@/lib/utils";
 const statusCfg: Record<string, { label: string; pill: string; dot: string }> = {
   HADIR: {
     label: "Hadir",
-    pill: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 ring-1 ring-emerald-500/10",
-    dot: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]",
+    pill:
+      "border-emerald-200 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/10",
+    dot: "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.35)] dark:bg-emerald-400 dark:shadow-[0_0_8px_rgba(52,211,153,0.4)]",
   },
   TERLAMBAT: {
     label: "Terlambat",
-    pill: "bg-amber-500/10 text-amber-400 border-amber-500/20 ring-1 ring-amber-500/10",
-    dot: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]",
+    pill:
+      "border-amber-200 bg-amber-50 text-amber-800 ring-1 ring-amber-100 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/10",
+    dot: "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.35)] dark:bg-amber-400 dark:shadow-[0_0_8px_rgba(251,191,36,0.4)]",
   },
   TIDAK_HADIR: {
     label: "Belum Hadir",
-    pill: "bg-rose-500/10 text-rose-400 border-rose-500/20 ring-1 ring-rose-500/10",
-    dot: "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.4)]",
+    pill:
+      "border-rose-200 bg-rose-50 text-rose-700 ring-1 ring-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/10",
+    dot: "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.35)] dark:bg-rose-400 dark:shadow-[0_0_8px_rgba(244,63,94,0.4)]",
   },
 };
 
-const ROW_FLEX =
-  "flex w-full min-w-[800px] items-center border-b border-white/[0.03] transition-colors hover:bg-white/[0.015]";
+const ROW_FLEX = cn(
+  "flex w-full min-w-[800px] items-center border-b transition-colors",
+  "border-slate-200/70 hover:bg-slate-50/90",
+  "dark:border-white/[0.03] dark:hover:bg-white/[0.015]",
+);
+
+const tableShell = cn(
+  "relative z-10 overflow-hidden rounded-2xl border backdrop-blur-xl",
+  "border-slate-200/90 bg-white/95 shadow-[0_4px_24px_rgba(59,130,246,0.06)]",
+  "dark:border-white/[0.06] dark:bg-white/[0.02] dark:shadow-2xl",
+);
 
 const TABLE_HEADERS: { label: string; cls: string }[] = [
   { label: "NIM", cls: "w-[100px] shrink-0 py-3.5 pl-5 pr-3" },
@@ -65,35 +77,35 @@ function shortFakultas(fakultas?: string) {
 
 function TableSkeleton() {
   return (
-    <div className="divide-y divide-white/[0.03]">
+    <div className="divide-y divide-slate-200/60 dark:divide-white/[0.03]">
       {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
-          className={cn(ROW_FLEX, "animate-pulse bg-white/[0.005]")}
+          className={cn(ROW_FLEX, "animate-pulse bg-slate-50/80 dark:bg-white/[0.005]")}
         >
           <div className="w-[100px] shrink-0 py-4 pl-5 pr-3">
-            <div className="h-3 w-16 rounded bg-white/10" />
+            <div className="h-3 w-16 rounded bg-slate-200 dark:bg-white/10" />
           </div>
           <div className="min-w-[140px] flex-1 py-4 px-4">
-            <div className="h-3.5 w-32 rounded bg-white/10" />
+            <div className="h-3.5 w-32 rounded bg-slate-200 dark:bg-white/10" />
           </div>
           <div className="w-20 shrink-0 py-4 px-4">
-            <div className="h-3 w-12 rounded bg-white/10" />
+            <div className="h-3 w-12 rounded bg-slate-200 dark:bg-white/10" />
           </div>
           <div className="w-28 shrink-0 py-4 px-4">
-            <div className="h-3 w-16 rounded bg-white/10" />
+            <div className="h-3 w-16 rounded bg-slate-200 dark:bg-white/10" />
           </div>
           <div className="w-28 shrink-0 py-4 px-4">
-            <div className="h-3 w-16 rounded bg-white/10" />
+            <div className="h-3 w-16 rounded bg-slate-200 dark:bg-white/10" />
           </div>
           <div className="w-24 shrink-0 py-4 px-4">
-            <div className="h-3 w-12 rounded bg-white/10" />
+            <div className="h-3 w-12 rounded bg-slate-200 dark:bg-white/10" />
           </div>
           <div className="w-28 shrink-0 py-4 px-4">
-            <div className="h-5 w-20 rounded-full bg-white/10" />
+            <div className="h-5 w-20 rounded-full bg-slate-200 dark:bg-white/10" />
           </div>
           <div className="w-32 shrink-0 py-4 pr-5 pl-4">
-            <div className="mx-auto h-7 w-24 rounded-lg bg-white/10" />
+            <div className="mx-auto h-7 w-24 rounded-lg bg-slate-200 dark:bg-white/10" />
           </div>
         </div>
       ))}
@@ -109,12 +121,16 @@ function EmptyState() {
         animate={{ opacity: 1, scale: 1 }}
         className="flex flex-col items-center justify-center space-y-3"
       >
-        <div className="flex size-12 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.02] text-white/15">
+        <div className="flex size-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-400 dark:border-white/[0.06] dark:bg-white/[0.02] dark:text-white/15">
           <ClipboardList className="size-6" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-white/60">Tidak Ada Data Kehadiran</p>
-          <p className="mt-0.5 text-xs text-white/30">Silakan sesuaikan filter pencarian Anda</p>
+          <p className="text-sm font-semibold text-slate-700 dark:text-white/60">
+            Tidak Ada Data Kehadiran
+          </p>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-white/30">
+            Silakan sesuaikan filter pencarian Anda
+          </p>
         </div>
       </motion.div>
     </div>
@@ -139,36 +155,37 @@ const KehadiranRow = memo(function KehadiranRow({
       role="row"
       className={cn(
         ROW_FLEX,
-        k.statusKehadiran !== "TIDAK_HADIR" && "bg-white/[0.005]",
+        k.statusKehadiran !== "TIDAK_HADIR" &&
+          "bg-emerald-50/40 dark:bg-white/[0.005]",
       )}
     >
       <div className="w-[100px] shrink-0 py-3.5 pl-5 pr-3">
-        <span className="font-mono text-xs font-semibold tracking-wider text-white/40">
+        <span className="font-mono text-xs font-semibold tracking-wider text-slate-500 dark:text-white/40">
           {k.mahasiswa?.nim ?? "—"}
         </span>
       </div>
 
       <div className="min-w-[140px] flex-1 py-3.5 px-4">
-        <span className="text-xs font-bold text-white/80">
+        <span className="text-xs font-bold text-slate-800 dark:text-white/80">
           {k.mahasiswa?.nama ?? "—"}
         </span>
       </div>
 
-      <div className="w-20 shrink-0 py-3.5 px-4 text-xs font-semibold text-white/50">
+      <div className="w-20 shrink-0 py-3.5 px-4 text-xs font-semibold text-slate-600 dark:text-white/50">
         {shortFakultas(k.mahasiswa?.fakultas)}
       </div>
 
       <div className="w-28 shrink-0 py-3.5 px-4">
-        <span className="rounded-md border border-white/[0.06] bg-white/[0.02] px-2 py-0.5 text-[0.68rem] font-semibold text-white/40">
+        <span className="rounded-md border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[0.68rem] font-semibold text-slate-600 dark:border-white/[0.06] dark:bg-white/[0.02] dark:text-white/40">
           {k.mahasiswa?.sesiWisuda ?? "Sesi 1"}
         </span>
       </div>
 
-      <div className="w-28 shrink-0 py-3.5 px-4 font-mono text-xs font-semibold tabular-nums text-white/40">
+      <div className="w-28 shrink-0 py-3.5 px-4 font-mono text-xs font-semibold tabular-nums text-slate-500 dark:text-white/40">
         {formatTime(k.waktuScan)}
       </div>
 
-      <div className="w-24 shrink-0 py-3.5 px-4 text-xs font-semibold text-white/50">
+      <div className="w-24 shrink-0 py-3.5 px-4 text-xs font-semibold text-slate-600 dark:text-white/50">
         {k.petugasId ?? "—"}
       </div>
 
@@ -190,10 +207,14 @@ const KehadiranRow = memo(function KehadiranRow({
             type="button"
             onClick={() => onCheckIn(k.mahasiswaId)}
             disabled={isRowLoading}
-            className="inline-flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/[0.08] px-2.5 text-[0.68rem] font-bold text-emerald-400 transition-all duration-150 hover:border-emerald-500/40 hover:bg-emerald-500/[0.15] hover:text-emerald-300 active:scale-[0.96] disabled:opacity-50"
+            className={cn(
+              "inline-flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-2.5 text-[0.68rem] font-bold transition-all duration-150 active:scale-[0.96] disabled:opacity-50",
+              "border-emerald-300/80 bg-emerald-50 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100",
+              "dark:border-emerald-500/25 dark:bg-emerald-500/[0.08] dark:text-emerald-400 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/[0.15] dark:hover:text-emerald-300",
+            )}
           >
             {isRowLoading ? (
-              <Loader2 className="size-3 animate-spin text-emerald-400" />
+              <Loader2 className="size-3 animate-spin text-emerald-600 dark:text-emerald-400" />
             ) : (
               <UserCheck className="size-3" />
             )}
@@ -204,10 +225,14 @@ const KehadiranRow = memo(function KehadiranRow({
             type="button"
             onClick={() => onReset(k.mahasiswaId)}
             disabled={isRowLoading}
-            className="inline-flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-white/[0.05] bg-white/[0.04] px-2.5 text-[0.68rem] font-bold text-white/40 transition-all duration-150 hover:border-rose-500/20 hover:bg-rose-500/[0.1] hover:text-rose-400 active:scale-[0.96] disabled:opacity-50"
+            className={cn(
+              "inline-flex h-7 cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-2.5 text-[0.68rem] font-bold transition-all duration-150 active:scale-[0.96] disabled:opacity-50",
+              "border-slate-200/80 bg-slate-50 text-slate-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600",
+              "dark:border-white/[0.05] dark:bg-white/[0.04] dark:text-white/40 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/[0.1] dark:hover:text-rose-400",
+            )}
           >
             {isRowLoading ? (
-              <Loader2 className="size-3 animate-spin text-rose-400" />
+              <Loader2 className="size-3 animate-spin text-rose-500 dark:text-rose-400" />
             ) : (
               <RotateCcw className="size-3" />
             )}
@@ -281,14 +306,15 @@ export function KehadiranTable() {
     <div
       className={cn(
         ROW_FLEX,
-        "border-b border-white/[0.06] bg-[#0a1220]/95 backdrop-blur-sm",
+        "border-b border-slate-200/80 bg-slate-50/95 backdrop-blur-sm",
+        "dark:border-white/[0.06] dark:bg-[#0f1a2e]/98",
       )}
     >
       {TABLE_HEADERS.map((h) => (
         <div
           key={h.label}
           className={cn(
-            "text-left text-[0.68rem] font-bold uppercase tracking-wider text-white/30",
+            "text-left text-[0.68rem] font-bold uppercase tracking-wider text-slate-500 dark:text-white/30",
             h.cls,
             h.label === "Aksi" && "text-center",
           )}
@@ -300,7 +326,7 @@ export function KehadiranTable() {
   );
 
   return (
-    <div className="relative z-10 overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] shadow-2xl backdrop-blur-xl">
+    <div className={tableShell}>
       <div className="overflow-x-auto">
         {isLoading && data.length === 0 ? (
           <TableSkeleton />
@@ -319,22 +345,27 @@ export function KehadiranTable() {
             inViewAmount={0.35}
             maxHeight="min(72vh, 680px)"
             itemClassName="!m-0 !rounded-none"
-            className="min-w-0 [&_.pointer-events-none]:from-[#07111f]"
+            className="min-w-0"
           />
         )}
       </div>
 
       {data.length > 0 && (
-        <div className="border-t border-white/[0.06] bg-white/[0.01] px-5 py-3.5">
-          <p className="text-xs font-semibold text-white/30">
+        <div className="border-t border-slate-200/70 bg-slate-50/50 px-5 py-3.5 dark:border-white/[0.06] dark:bg-white/[0.01]">
+          <p className="text-xs font-semibold text-slate-500 dark:text-white/30">
             Menampilkan{" "}
-            <strong className="tabular-nums text-white/60">{data.length}</strong>
+            <strong className="tabular-nums text-slate-700 dark:text-white/60">
+              {data.length}
+            </strong>
             {total > data.length ? (
               <span> dari {total} wisudawan</span>
             ) : (
               <span> wisudawan</span>
             )}
-            <span className="text-white/20"> · scroll untuk melihat semua</span>
+            <span className="text-slate-400 dark:text-white/20">
+              {" "}
+              · scroll untuk melihat semua
+            </span>
           </p>
         </div>
       )}

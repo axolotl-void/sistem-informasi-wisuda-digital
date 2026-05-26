@@ -51,7 +51,11 @@ export async function getTokenFromRequest(request: Request): Promise<JwtPayload 
     const authHeader = request.headers.get("Authorization");
     const bearerToken = extractBearerToken(authHeader);
     if (bearerToken) {
-      return verifyToken(bearerToken);
+      try {
+        return verifyToken(bearerToken);
+      } catch {
+        // Bearer kadaluarsa/invalid — lanjut cek cookie (hindari loop redirect di mobile)
+      }
     }
 
     // 2. Fallback ke cookie (desktop/localhost)

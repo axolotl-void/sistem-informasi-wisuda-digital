@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import { PortalPageHeader } from "../_components/portal-page-header";
+import { fetchWithAuth } from "@/lib/client-auth";
 
 // --- Types --------------------------------------------------------------------
 
@@ -35,15 +36,6 @@ interface MahasiswaData {
 }
 
 // --- Helpers ------------------------------------------------------------------
-
-function getToken(): string | null {
-  try {
-    const raw = localStorage.getItem("wisuda-auth");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { state?: { token?: string } };
-    return parsed?.state?.token ?? null;
-  } catch { return null; }
-}
 
 function formatTanggal(iso: string): string {
   return new Date(iso).toLocaleDateString("id-ID", {
@@ -257,11 +249,7 @@ export default function TiketPage() {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const token = getToken();
-    fetch("/api/portal/me", {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      credentials: "include",
-    })
+    fetchWithAuth("/api/portal/me")
       .then((r) => r.json())
       .then((result) => {
         if (result.data) {

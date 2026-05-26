@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { fetchWithAuth, getAuthHeaders } from "@/lib/client-auth";
 
 // --- Types --------------------------------------------------------------------
 
@@ -280,21 +281,8 @@ export default function ProfilPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function getToken(): string | null {
-    try {
-      const raw = localStorage.getItem("wisuda-auth");
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as { state?: { token?: string } };
-      return parsed?.state?.token ?? null;
-    } catch { return null; }
-  }
-
   useEffect(() => {
-    const token = getToken();
-    fetch("/api/portal/me", {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      credentials: "include",
-    })
+    fetchWithAuth("/api/portal/me")
       .then((r) => r.json())
       .then((result) => {
         if (result.data) {
@@ -338,13 +326,9 @@ export default function ProfilPage() {
       });
 
       // Kirim ke API
-      const token = getToken();
       const res = await fetch("/api/portal/profile", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         credentials: "include",
         body: JSON.stringify({ foto: base64 }),
       });
@@ -384,13 +368,9 @@ export default function ProfilPage() {
     if (!data || !validate()) return;
     setIsSaving(true);
     try {
-      const token = getToken();
       const res = await fetch("/api/portal/profile", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         credentials: "include",
         body: JSON.stringify({
           fakultas: form.fakultas,

@@ -32,6 +32,7 @@ export const API_ROUTES = {
     LOGIN: "/api/auth/login",
     LOGOUT: "/api/auth/logout",
     ME: "/api/auth/me",
+    SESSION: "/api/auth/session",
     REFRESH: "/api/auth/refresh",
   },
   MAHASISWA: {

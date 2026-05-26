@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PortalPageHeader } from "../_components/portal-page-header";
+import { fetchWithAuth, getAuthHeaders } from "@/lib/client-auth";
 
 // --- Types --------------------------------------------------------------------
 
@@ -24,22 +25,6 @@ interface TamuData {
     statusUndangan: string;
     kuotaTamu: number;
   } | null;
-}
-
-// --- Helpers ------------------------------------------------------------------
-
-function getToken(): string | null {
-  try {
-    const raw = localStorage.getItem("wisuda-auth");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { state?: { token?: string } };
-    return parsed?.state?.token ?? null;
-  } catch { return null; }
-}
-
-function authHeaders() {
-  const token = getToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 // --- Status UI configs --------------------------------------------------------
@@ -149,10 +134,7 @@ export default function TamuPage() {
   async function fetchData() {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/portal/tamu", {
-        headers: authHeaders(),
-        credentials: "include",
-      });
+      const res = await fetchWithAuth("/api/portal/tamu");
       const result = await res.json();
       if (result.data) {
         setTamuData(result.data);
@@ -175,10 +157,9 @@ export default function TamuPage() {
     }
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/portal/tamu", {
+      const res = await fetchWithAuth("/api/portal/tamu", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
-        credentials: "include",
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ jumlahTamu }),
       });
       const result = await res.json();
@@ -195,11 +176,7 @@ export default function TamuPage() {
   async function handleCancel() {
     setIsCancelling(true);
     try {
-      const res = await fetch("/api/portal/tamu", {
-        method: "DELETE",
-        headers: authHeaders(),
-        credentials: "include",
-      });
+      const res = await fetchWithAuth("/api/portal/tamu", { method: "DELETE" });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Gagal membatalkan");
       toast.success("Pengajuan berhasil dibatalkan");

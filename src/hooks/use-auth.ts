@@ -1,12 +1,15 @@
 "use client";
 
 import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useAuthStore, writeAuthStorage } from "@/store/auth.store";
+import { useAuthStore } from "@/store/auth.store";
+import { persistAuth } from "@/lib/client-auth";
 import { API_ROUTES, ROUTES } from "@/utils/constants";
 import type { LoginCredentials } from "@/types/auth.type";
 
 export function useAuth() {
+  const router = useRouter();
   const { user, token, isAuthenticated, isLoading, setAuth, clearAuth, setLoading } =
     useAuthStore();
 
@@ -19,23 +22,31 @@ export function useAuth() {
         });
         const { user, token } = data.data;
         setAuth(user, token);
-        // Tulis langsung ke localStorage (Safari mobile kadang belum selesai persist Zustand)
-        writeAuthStorage(user, token);
+        persistAuth(user, token);
 
         const role = user.role;
+
+        // Portal mahasiswa: navigasi penuh agar storage + cookie stabil di mobile Safari / preview
+        if (role === "MAHASISWA") {
+          setLoading(false);
+          window.location.assign(ROUTES.PORTAL.HOME);
+          return;
+        }
+
+        setLoading(false);
         if (role === "SUPER_ADMIN" || role === "ADMIN_FAKULTAS") {
-          window.location.replace(ROUTES.ADMIN.DASHBOARD);
+          router.replace(ROUTES.ADMIN.DASHBOARD);
         } else if (role === "PETUGAS_SCAN") {
-          window.location.replace(ROUTES.SCANNER.SCAN);
+          router.replace(ROUTES.SCANNER.SCAN);
         } else {
-          window.location.replace(ROUTES.PORTAL.HOME);
+          router.replace(ROUTES.LOGIN);
         }
       } catch (error) {
         setLoading(false);
         throw error;
       }
     },
-    [setAuth, setLoading]
+    [router, setAuth, setLoading],
   );
 
   const logout = useCallback(async () => {

@@ -7,6 +7,9 @@ import type { UserRole } from "@/types/auth.type";
 // Route yang tidak perlu auth
 const PUBLIC_ROUTES = ["/login", "/api/auth/login", "/api/auth/logout"];
 
+/** Portal mahasiswa — auth di client (Bearer + cookie opsional), jangan redirect loop ke login */
+const CLIENT_AUTH_ROUTES = ["/portal"];
+
 // Role-based route access
 const ROLE_ROUTES: Record<string, UserRole[]> = {
   "/dashboard": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
@@ -22,6 +25,7 @@ export function proxy(request: NextRequest) {
   // Bypass public routes, static files, dan semua API routes
   if (
     PUBLIC_ROUTES.some((route) => pathname.startsWith(route)) ||
+    CLIENT_AUTH_ROUTES.some((route) => pathname.startsWith(route)) ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/api/socket") ||
@@ -72,7 +76,7 @@ function getDefaultRouteForRole(role: UserRole): string {
     case "PETUGAS_SCAN":
       return "/scan";
     case "MAHASISWA":
-      return "/mahasiswa/dashboard";
+      return "/portal";
     default:
       return "/login";
   }

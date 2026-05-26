@@ -10,6 +10,7 @@ import {
 } from "@/features/pengaturan";
 import { Settings, Clock, DoorOpen, Armchair } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 type TabId = "identitas" | "sesi" | "gate" | "kuota";
 
@@ -21,11 +22,22 @@ interface TabItem {
   component: React.ReactNode;
 }
 
+const navShell = cn(
+  "flex w-full shrink-0 flex-row gap-1.5 overflow-x-auto rounded-2xl border p-2 backdrop-blur-xl lg:w-72 lg:flex-col lg:overflow-visible",
+  "border-slate-200/90 bg-white/90 shadow-sm",
+  "dark:border-white/[0.06] dark:bg-white/[0.01] dark:shadow-none",
+);
+
+const contentShell = cn(
+  "relative flex flex-1 flex-col justify-between overflow-hidden rounded-2xl border p-6 backdrop-blur-xl sm:p-8",
+  "border-slate-200/90 bg-white/95 shadow-[0_4px_20px_rgba(59,130,246,0.06)]",
+  "dark:border-white/[0.06] dark:bg-white/[0.01] dark:shadow-none",
+);
+
 export default function PengaturanPage() {
   const fetchSettings = usePengaturanStore((state) => state.fetchSettings);
   const [activeTab, setActiveTab] = useState<TabId>("identitas");
 
-  // Load settings on mount
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]);
@@ -64,19 +76,18 @@ export default function PengaturanPage() {
   const currentTab = tabs.find((t) => t.id === activeTab) || tabs[0];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-4xl font-semibold tracking-tight text-white">Pengaturan</h1>
-        <p className="mt-2 text-sm font-medium text-white/35">
+    <div className="dashboard-mesh relative -m-4 min-h-full space-y-6 overflow-hidden rounded-none p-4 sm:-m-6 sm:rounded-3xl sm:p-6">
+      <div className="relative z-10">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+          Pengaturan
+        </h1>
+        <p className="mt-2 text-sm font-medium text-slate-600 dark:text-white/35">
           Pusat Kontrol & Konfigurasi Sistem Informasi Wisuda Digital (Super Admin)
         </p>
       </div>
 
-      {/* Main Glassmorphic Container with Internal Sidebar/Tabs */}
-      <div className="flex flex-col lg:flex-row gap-6 items-stretch min-h-[500px]">
-        {/* Left Navigation Sidebar / Mobile Top bar */}
-        <div className="w-full lg:w-72 shrink-0 flex flex-row lg:flex-col overflow-x-auto lg:overflow-visible gap-1.5 p-2 rounded-2xl border border-white/[0.06] bg-white/[0.01] backdrop-blur-xl no-scrollbar">
+      <div className="relative z-10 flex min-h-[500px] flex-col items-stretch gap-6 lg:flex-row">
+        <div className={navShell}>
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -84,40 +95,48 @@ export default function PengaturanPage() {
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-3.5 px-4 py-3 rounded-xl text-left transition-all duration-200 cursor-pointer group shrink-0 lg:shrink-1 ${
+                className={cn(
+                  "group relative flex shrink-0 cursor-pointer items-center gap-3.5 rounded-xl px-4 py-3 text-left transition-all duration-200 lg:shrink",
                   isActive
-                    ? "text-blue-400"
-                    : "text-white/40 hover:text-white/70 hover:bg-white/[0.02]"
-                }`}
+                    ? "text-blue-700 dark:text-blue-400"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-white/40 dark:hover:bg-white/[0.02] dark:hover:text-white/70",
+                )}
               >
-                {/* Active Sliding Background Pill */}
                 {isActive && (
                   <motion.div
                     layoutId="activeTabIndicator"
-                    className="absolute inset-0 rounded-xl bg-blue-500/[0.06] border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.06)]"
+                    className="absolute inset-0 rounded-xl border border-blue-300/60 bg-blue-50 shadow-sm dark:border-blue-500/20 dark:bg-blue-500/[0.06] dark:shadow-[0_0_15px_rgba(59,130,246,0.06)]"
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
 
                 <div
-                  className={`relative flex size-9 items-center justify-center rounded-lg border transition-all duration-200 ${
+                  className={cn(
+                    "relative flex size-9 items-center justify-center rounded-lg border transition-all duration-200",
                     isActive
-                      ? "border-blue-500/20 bg-blue-500/10 text-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.2)]"
-                      : "border-white/[0.06] bg-white/[0.02] text-white/30 group-hover:border-white/[0.12] group-hover:text-white/50"
-                  }`}
+                      ? "border-blue-300/70 bg-blue-100 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400 dark:shadow-[0_0_8px_rgba(59,130,246,0.2)]"
+                      : "border-slate-200/80 bg-slate-50 text-slate-500 group-hover:border-slate-300 group-hover:text-slate-700 dark:border-white/[0.06] dark:bg-white/[0.02] dark:text-white/30 dark:group-hover:border-white/[0.12] dark:group-hover:text-white/50",
+                  )}
                 >
                   <Icon className="size-4.5" />
                 </div>
 
-                <div className="relative text-left hidden sm:block">
+                <div className="relative hidden text-left sm:block">
                   <p className="text-xs font-bold tracking-wide">{tab.label}</p>
-                  <p className="text-[10px] font-medium text-white/20 mt-0.5 group-hover:text-white/30 transition-colors">
+                  <p
+                    className={cn(
+                      "mt-0.5 text-[10px] font-medium transition-colors",
+                      isActive
+                        ? "text-blue-600/80 dark:text-blue-400/60"
+                        : "text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-white/30",
+                    )}
+                  >
                     {tab.sublabel}
                   </p>
                 </div>
 
-                {/* Mobile-only compact text label */}
                 <div className="relative text-left sm:hidden">
                   <p className="text-xs font-bold tracking-wide">{tab.label}</p>
                 </div>
@@ -126,11 +145,9 @@ export default function PengaturanPage() {
           })}
         </div>
 
-        {/* Content View Panel */}
-        <div className="flex-1 rounded-2xl border border-white/[0.06] bg-white/[0.01] p-6 sm:p-8 backdrop-blur-xl relative overflow-hidden flex flex-col justify-between">
-          {/* Subtle Ambient Decorative Glowing Accent (Inner Core shadow) */}
-          <div className="absolute -right-24 -top-24 size-48 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
-          <div className="absolute -left-24 -bottom-24 size-48 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+        <div className={contentShell}>
+          <div className="pointer-events-none absolute -right-24 -top-24 size-48 rounded-full bg-blue-400/10 blur-3xl dark:bg-blue-500/5" />
+          <div className="pointer-events-none absolute -bottom-24 -left-24 size-48 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-500/5" />
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -139,7 +156,7 @@ export default function PengaturanPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15, ease: "easeInOut" }}
-              className="relative h-full flex flex-col"
+              className="relative flex h-full flex-col"
             >
               {currentTab.component}
             </motion.div>

@@ -207,44 +207,42 @@ export function TamuRequestsPanel({ onRefreshUndangan }: { onRefreshUndangan?: (
 
   return (
     <LiquidGlassCard noEntrance hover={false} className="overflow-hidden p-0">
-      <button
-        type="button"
-        onClick={() => setIsCollapsed((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-3 transition-colors hover:bg-white/30 dark:hover:bg-white/[0.03]"
-      >
-        <div className="flex items-center gap-2.5">
-          <GlassChip className="flex size-8 items-center justify-center p-0">
-            <Clock className="size-3.5 text-amber-600 dark:text-amber-400" />
-          </GlassChip>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-800 dark:text-white/80">
-              Request Tamu Pending
-            </span>
-            {!isLoading && requests.length > 0 && (
-              <span className="flex size-5 items-center justify-center rounded-full border border-amber-400/40 bg-amber-500/20 text-[0.6rem] font-black text-amber-800 dark:text-amber-300">
-                {requests.length}
+      <div className="flex w-full items-center justify-between gap-2 px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setIsCollapsed((v) => !v)}
+          className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-xl py-0.5 text-left transition-colors hover:bg-white/30 dark:hover:bg-white/[0.03]"
+        >
+          <div className="flex min-w-0 items-center gap-2.5">
+            <GlassChip className="flex size-8 shrink-0 items-center justify-center p-0">
+              <Clock className="size-3.5 text-amber-600 dark:text-amber-400" />
+            </GlassChip>
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="truncate text-sm font-bold text-slate-800 dark:text-white/80">
+                Request Tamu Pending
               </span>
-            )}
+              {!isLoading && requests.length > 0 && (
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-amber-400/40 bg-amber-500/20 text-[0.6rem] font-black text-amber-800 dark:text-amber-300">
+                  {requests.length}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              fetchRequests();
-            }}
-            className="flex size-6 items-center justify-center rounded-lg text-slate-400 transition-colors hover:text-slate-600 dark:text-white/25 dark:hover:text-white/50"
-          >
-            <RefreshCw className={cn("size-3.5", isLoading && "animate-spin")} />
-          </button>
           {isCollapsed ? (
-            <ChevronDown className="size-4 text-slate-400 dark:text-white/30" />
+            <ChevronDown className="size-4 shrink-0 text-slate-400 dark:text-white/30" />
           ) : (
-            <ChevronUp className="size-4 text-slate-400 dark:text-white/30" />
+            <ChevronUp className="size-4 shrink-0 text-slate-400 dark:text-white/30" />
           )}
-        </div>
-      </button>
+        </button>
+        <button
+          type="button"
+          onClick={() => fetchRequests()}
+          aria-label="Muat ulang daftar request"
+          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/40 hover:text-slate-600 dark:text-white/25 dark:hover:bg-white/[0.06] dark:hover:text-white/50"
+        >
+          <RefreshCw className={cn("size-3.5", isLoading && "animate-spin")} />
+        </button>
+      </div>
 
       {!isCollapsed && (
         <div className="space-y-2.5 border-t border-white/60 px-4 pb-4 pt-3 dark:border-white/[0.08]">

@@ -4,6 +4,24 @@ import React, { useState } from "react";
 import { usePengaturanStore } from "@/store/pengaturan.store";
 import { Clock, DoorOpen, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import {
+  pengaturanPanel,
+  pengaturanInput,
+  pengaturanHeading,
+  pengaturanSubheading,
+  pengaturanBtnEmerald,
+  pengaturanListItem,
+  pengaturanEmptyList,
+} from "../pengaturan-ui";
+
+const listBtn = cn(
+  "flex size-8 cursor-pointer items-center justify-center rounded-lg border transition-all disabled:opacity-50",
+  "border-slate-200/80 bg-slate-50 text-slate-500 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600",
+  "dark:border-white/[0.04] dark:bg-white/[0.02] dark:text-white/30 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/[0.08] dark:hover:text-rose-400",
+);
+
+const sectionTitle = "text-sm font-bold text-slate-800 flex items-center gap-2 dark:text-white/70";
 
 export function SesiTab() {
   const { sesiList, addSesi, deleteSesi, isLoading } = usePengaturanStore();
@@ -19,30 +37,27 @@ export function SesiTab() {
     try {
       await addSesi(val);
       setNewSesi("");
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menambahkan sesi");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menambahkan sesi");
     }
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold text-white/90 flex items-center gap-2">
-          <Clock className="size-4.5 text-emerald-400" />
+        <h2 className={cn(pengaturanHeading)}>
+          <Clock className="size-4.5 text-emerald-600 dark:text-emerald-400" />
           Manajemen Sesi
         </h2>
-        <p className="text-xs text-white/30 mt-0.5">
-          Atur daftar pembagian sesi upacara wisuda yang aktif
-        </p>
+        <p className={pengaturanSubheading}>Atur daftar pembagian sesi upacara wisuda yang aktif</p>
       </div>
 
-      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.01] p-6 backdrop-blur-xl space-y-4">
-        <h3 className="text-sm font-bold text-white/70 flex items-center gap-2">
-          <Clock className="size-4 text-emerald-400/80" />
+      <div className={cn(pengaturanPanel, "space-y-4 p-6")}>
+        <h3 className={cn(sectionTitle)}>
+          <Clock className="size-4 text-emerald-600 dark:text-emerald-400/80" />
           Daftar Sesi Wisuda
         </h3>
 
-        {/* Form Tambah Sesi */}
         <form onSubmit={handleAddSesi} className="flex gap-2">
           <input
             type="text"
@@ -50,30 +65,25 @@ export function SesiTab() {
             value={newSesi}
             onChange={(e) => setNewSesi(e.target.value)}
             disabled={isLoading}
-            className="h-10 flex-1 rounded-xl border border-white/[0.08] bg-[#07111F]/40 px-3.5 text-xs text-white/80 placeholder-white/15 outline-none transition-all hover:border-white/[0.15] focus:border-emerald-500/50 focus:bg-white/[0.04] focus:ring-4 focus:ring-emerald-500/5"
+            className={cn(pengaturanInput, "flex-1 focus:border-emerald-500/50 focus:ring-emerald-500/10")}
           />
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="inline-flex h-10 w-12 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-400 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/[0.15] hover:text-emerald-300 active:scale-[0.96] disabled:opacity-50 cursor-pointer"
-          >
+          <button type="submit" disabled={isLoading} className={cn(pengaturanBtnEmerald, "w-12")}>
             {isLoading ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-5" />}
           </button>
         </form>
 
-        {/* List Sesi */}
-        <div className="divide-y divide-white/[0.04] max-h-80 overflow-y-auto pr-1">
+        <div className="max-h-80 divide-y divide-slate-200/70 overflow-y-auto pr-1 dark:divide-white/[0.04]">
           {sesiList.length === 0 ? (
-            <p className="text-[11px] text-white/20 py-6 text-center">Belum ada sesi dikonfigurasi</p>
+            <p className={pengaturanEmptyList}>Belum ada sesi dikonfigurasi</p>
           ) : (
             sesiList.map((sesi) => (
               <div key={sesi} className="flex items-center justify-between py-3">
-                <span className="text-xs font-semibold text-white/70">{sesi}</span>
+                <span className={pengaturanListItem}>{sesi}</span>
                 <button
                   type="button"
                   onClick={() => deleteSesi(sesi)}
                   disabled={isLoading}
-                  className="flex size-8 items-center justify-center rounded-lg border border-white/[0.04] bg-white/[0.02] text-white/30 hover:border-rose-500/20 hover:bg-rose-500/[0.08] hover:text-rose-400 transition-all cursor-pointer disabled:opacity-50"
+                  className={listBtn}
                 >
                   <Trash2 className="size-4" />
                 </button>
@@ -100,30 +110,29 @@ export function GateTab() {
     try {
       await addGate(val);
       setNewGate("");
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menambahkan gate");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal menambahkan gate");
     }
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-bold text-white/90 flex items-center gap-2">
-          <DoorOpen className="size-4.5 text-blue-400" />
+        <h2 className={cn(pengaturanHeading)}>
+          <DoorOpen className="size-4.5 text-blue-600 dark:text-blue-400" />
           Manajemen Gate
         </h2>
-        <p className="text-xs text-white/30 mt-0.5">
+        <p className={pengaturanSubheading}>
           Atur daftar gerbang pemindai kode yang aktif untuk verifikasi kehadiran
         </p>
       </div>
 
-      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.01] p-6 backdrop-blur-xl space-y-4">
-        <h3 className="text-sm font-bold text-white/70 flex items-center gap-2">
-          <DoorOpen className="size-4 text-blue-400/80" />
+      <div className={cn(pengaturanPanel, "space-y-4 p-6")}>
+        <h3 className={cn(sectionTitle)}>
+          <DoorOpen className="size-4 text-blue-600 dark:text-blue-400/80" />
           Daftar Pintu (Gate) Scanner
         </h3>
 
-        {/* Form Tambah Gate */}
         <form onSubmit={handleAddGate} className="flex gap-2">
           <input
             type="text"
@@ -131,30 +140,33 @@ export function GateTab() {
             value={newGate}
             onChange={(e) => setNewGate(e.target.value)}
             disabled={isLoading}
-            className="h-10 flex-1 rounded-xl border border-white/[0.08] bg-[#07111F]/40 px-3.5 text-xs text-white/80 placeholder-white/15 outline-none transition-all hover:border-white/[0.15] focus:border-blue-500/50 focus:bg-white/[0.04] focus:ring-4 focus:ring-blue-500/5"
+            className={cn(pengaturanInput, "flex-1")}
           />
           <button
             type="submit"
             disabled={isLoading}
-            className="inline-flex h-10 w-12 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/[0.08] text-blue-400 transition-all hover:border-blue-500/40 hover:bg-blue-500/[0.15] hover:text-blue-300 active:scale-[0.96] disabled:opacity-50 cursor-pointer"
+            className={cn(
+              pengaturanBtnEmerald,
+              "w-12 border-blue-300/80 bg-blue-50 text-blue-700 hover:bg-blue-100",
+              "dark:border-blue-500/25 dark:bg-blue-500/[0.08] dark:text-blue-400",
+            )}
           >
             {isLoading ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-5" />}
           </button>
         </form>
 
-        {/* List Gate */}
-        <div className="divide-y divide-white/[0.04] max-h-80 overflow-y-auto pr-1">
+        <div className="max-h-80 divide-y divide-slate-200/70 overflow-y-auto pr-1 dark:divide-white/[0.04]">
           {gateList.length === 0 ? (
-            <p className="text-[11px] text-white/20 py-6 text-center">Belum ada gate dikonfigurasi</p>
+            <p className={pengaturanEmptyList}>Belum ada gate dikonfigurasi</p>
           ) : (
             gateList.map((gate) => (
               <div key={gate} className="flex items-center justify-between py-3">
-                <span className="text-xs font-semibold text-white/70">{gate}</span>
+                <span className={pengaturanListItem}>{gate}</span>
                 <button
                   type="button"
                   onClick={() => deleteGate(gate)}
                   disabled={isLoading}
-                  className="flex size-8 items-center justify-center rounded-lg border border-white/[0.04] bg-white/[0.02] text-white/30 hover:border-rose-500/20 hover:bg-rose-500/[0.08] hover:text-rose-400 transition-all cursor-pointer disabled:opacity-50"
+                  className={listBtn}
                 >
                   <Trash2 className="size-4" />
                 </button>
@@ -167,10 +179,9 @@ export function GateTab() {
   );
 }
 
-// Kept for backward compatibility
 export function SesiGateTab() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <SesiTab />
       <GateTab />
     </div>
