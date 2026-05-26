@@ -1,28 +1,13 @@
 "use client";
 
-import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassChip, LiquidGlassCard } from "@/components/ui/liquid-glass";
-
-interface Activity {
-  id: string;
-  time: string;
-  name: string;
-  seat: string;
-  gate: string;
-  status: "success" | "failed" | "pending";
-}
-
-const activities: Activity[] = [
-  { id: "1", time: "09:45:12", name: "Ahmad Pratama", seat: "A-5", gate: "Gate 1", status: "success" },
-  { id: "2", time: "09:44:58", name: "Siti Lestari", seat: "B-12", gate: "Gate 2", status: "success" },
-  { id: "3", time: "09:44:30", name: "Budi Hidayat", seat: "C-8", gate: "Gate 1", status: "failed" },
-  { id: "4", time: "09:43:55", name: "Rina Wati", seat: "D-22", gate: "Gate 3", status: "success" },
-  { id: "5", time: "09:43:20", name: "Dimas Nugroho", seat: "E-15", gate: "Gate 2", status: "success" },
-  { id: "6", time: "09:42:45", name: "Putri Sari", seat: "F-3", gate: "Gate 4", status: "pending" },
-  { id: "7", time: "09:42:10", name: "Rizky Ramadhan", seat: "G-18", gate: "Gate 1", status: "success" },
-  { id: "8", time: "09:41:30", name: "Ayu Utami", seat: "H-10", gate: "Gate 3", status: "success" },
-];
+import { fetchWithAuth } from "@/lib/client-auth";
+import { useSocket } from "@/hooks/use-socket";
+import { useScannerStore } from "@/store/scanner.store";
+import type { DashboardActivityItem } from "@/types/dashboard.type";
 
 const statusConfig = {
   success: {
@@ -46,6 +31,36 @@ const statusConfig = {
 };
 
 export function ActivityTable() {
+  const [activities, setActivities] = useState<DashboardActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useSocket("admin");
+  const { lastResult } = useScannerStore();
+
+  const fetchActivities = useCallback(async () => {
+    try {
+      const res = await fetchWithAuth("/api/dashboard/activity?limit=10");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setActivities(json.data as DashboardActivityItem[]);
+      }
+    } catch (err) {
+      console.error("Gagal memuat aktivitas:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchActivities();
+  }, [fetchActivities]);
+
+  useEffect(() => {
+    if (lastResult?.success) {
+      void fetchActivities();
+    }
+  }, [lastResult, fetchActivities]);
+
   return (
     <LiquidGlassCard noEntrance hover={false} className="p-6">
       <div className="mb-5">
@@ -58,65 +73,76 @@ export function ActivityTable() {
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-white/80 bg-white/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] dark:border-white/[0.06] dark:bg-white/[0.04] dark:shadow-none">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200/80 bg-white/30 dark:border-white/[0.08] dark:bg-transparent">
-              {["Waktu", "Nama", "Kursi", "Gate", "Status"].map((h) => (
-                <th
-                  key={h}
-                  className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/30"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {activities.map((a) => {
-              const cfg = statusConfig[a.status];
-              const Icon = cfg.icon;
-              return (
-                <tr
-                  key={a.id}
-                  className="border-t border-slate-200/60 transition-colors hover:bg-white/55 dark:border-white/[0.05] dark:hover:bg-white/[0.04]"
-                >
-                  <td className="px-4 py-3">
-                    <span className="font-mono text-xs tabular-nums text-slate-500 dark:text-white/45">
-                      {a.time}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="font-medium text-slate-800 dark:text-white/85">
-                      {a.name}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <GlassChip className="inline-block px-2 py-0.5">
-                      <span className="font-mono text-xs text-slate-600 dark:text-white/55">
-                        {a.seat}
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500 dark:text-white/35">
+            <Loader2 className="size-5 animate-spin" />
+            Memuat aktivitas…
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="py-16 text-center text-sm text-slate-500 dark:text-white/35">
+            Belum ada aktivitas scan. Data akan muncul setelah wisudawan discan di gate.
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200/80 bg-white/30 dark:border-white/[0.08] dark:bg-transparent">
+                {["Waktu", "Nama", "Kursi", "Gate", "Status"].map((h) => (
+                  <th
+                    key={h}
+                    className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/30"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {activities.map((a) => {
+                const cfg = statusConfig[a.status];
+                const Icon = cfg.icon;
+                return (
+                  <tr
+                    key={a.id}
+                    className="border-t border-slate-200/60 transition-colors hover:bg-white/55 dark:border-white/[0.05] dark:hover:bg-white/[0.04]"
+                  >
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs tabular-nums text-slate-500 dark:text-white/45">
+                        {a.time}
                       </span>
-                    </GlassChip>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-slate-500 dark:text-white/40">
-                    {a.gate}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold",
-                        cfg.bg,
-                        cfg.chip,
-                      )}
-                    >
-                      <Icon className="size-3.5" />
-                      {cfg.text}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-medium text-slate-800 dark:text-white/85">
+                        {a.name}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <GlassChip className="inline-block px-2 py-0.5">
+                        <span className="font-mono text-xs text-slate-600 dark:text-white/55">
+                          {a.seat}
+                        </span>
+                      </GlassChip>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-500 dark:text-white/40">
+                      {a.gate}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold",
+                          cfg.bg,
+                          cfg.chip,
+                        )}
+                      >
+                        <Icon className="size-3.5" />
+                        {cfg.text}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
     </LiquidGlassCard>
   );

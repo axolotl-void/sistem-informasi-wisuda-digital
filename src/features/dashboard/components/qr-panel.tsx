@@ -1,30 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo } from "react";
 import { ScanLine, ShieldCheck, ShieldX, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiquidGlassCard } from "@/components/ui/liquid-glass";
-
-type ScanState = "idle" | "valid" | "invalid";
-
-const scanResults = {
-  valid: {
-    name: "Ayu Lestari",
-    seat: "C-12",
-    gate: "Gate 2",
-  },
-  invalid: {
-    reason: "Undangan tidak ditemukan atau sudah digunakan",
-  },
-};
+import { useScannerStore } from "@/store/scanner.store";
+import { useSocket } from "@/hooks/use-socket";
 
 export function QrPanel() {
-  const [state, setState] = useState<ScanState>("idle");
+  const { status, lastResult, isConnected } = useScannerStore();
 
-  function simulateScan(result: "valid" | "invalid") {
-    setState(result);
-    setTimeout(() => setState("idle"), 4000);
-  }
+  // Pastikan dashboard juga join room untuk menerima event scan/stats
+  useSocket("admin");
+
+  const state: "idle" | "valid" | "invalid" = useMemo(() => {
+    if (!lastResult) return "idle";
+    return lastResult.success ? "valid" : "invalid";
+  }, [lastResult]);
+
+  const subtitle = useMemo(() => {
+    if (!lastResult) return "Scanner Gate aktif";
+    if (lastResult.success) return "QR Code valid, akses diizinkan";
+    return "QR Code tidak valid / sudah digunakan";
+  }, [lastResult]);
+
+  useEffect(() => {
+    if (!lastResult) return;
+    // Bisa ditambahkan efek suara di sini (mis. Audio API) jika dibutuhkan.
+  }, [lastResult]);
 
   return (
     <LiquidGlassCard noEntrance hover={false} className="p-6">
@@ -34,13 +37,27 @@ export function QrPanel() {
             QR Validation
           </h2>
           <p className="text-sm font-medium text-slate-500 dark:text-white/35">
-            Scanner Gate aktif
+            {subtitle}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-3 py-1 backdrop-blur-md">
-          <div className="size-1.5 rounded-full bg-emerald-500 animate-pulse dark:bg-emerald-400" />
+        <div
+          className={cn(
+            "flex items-center gap-1.5 rounded-full border px-3 py-1 backdrop-blur-md",
+            isConnected
+              ? "border-emerald-500/30 bg-emerald-500/15"
+              : "border-slate-400/40 bg-slate-200/40 dark:border-white/20 dark:bg-white/[0.06]",
+          )}
+        >
+          <div
+            className={cn(
+              "size-1.5 rounded-full",
+              isConnected
+                ? "bg-emerald-500 animate-pulse dark:bg-emerald-400"
+                : "bg-slate-400 dark:bg-white/30",
+            )}
+          />
           <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
-            Online
+            {isConnected ? "Online" : "Offline"}
           </span>
         </div>
       </div>
@@ -65,28 +82,28 @@ export function QrPanel() {
             </p>
           </>
         )}
-        {state === "valid" && (
+        {state === "valid" && lastResult && lastResult.mahasiswa && (
           <div className="relative text-center">
             <ShieldCheck className="mx-auto mb-2 size-10 text-emerald-600 dark:text-emerald-400" />
             <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
               VALID
             </p>
             <p className="mt-1 text-xs font-medium text-slate-700 dark:text-white/70">
-              {scanResults.valid.name}
+              {lastResult.mahasiswa.nama}
             </p>
             <p className="text-[11px] text-slate-500 dark:text-white/40">
-              {scanResults.valid.seat} · {scanResults.valid.gate}
+              NIM {lastResult.mahasiswa.nim}
             </p>
           </div>
         )}
-        {state === "invalid" && (
+        {state === "invalid" && lastResult && (
           <div className="relative px-4 text-center">
             <ShieldX className="mx-auto mb-2 size-10 text-red-500 dark:text-red-400" />
             <p className="text-sm font-bold text-red-600 dark:text-red-400">
               INVALID
             </p>
             <p className="mt-1 text-xs text-slate-500 dark:text-white/45">
-              {scanResults.invalid.reason}
+              {lastResult.message}
             </p>
           </div>
         )}
@@ -95,25 +112,6 @@ export function QrPanel() {
       <div className="mt-4 flex items-center gap-2 text-slate-400 dark:text-white/25">
         <Volume2 className="size-3.5" />
         <span className="text-[11px] font-medium">Notifikasi suara aktif</span>
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => simulateScan("valid")}
-          disabled={state !== "idle"}
-          className="cursor-pointer rounded-xl border border-emerald-500/25 bg-emerald-500/15 py-2.5 text-xs font-semibold text-emerald-800 backdrop-blur-md transition-colors hover:bg-emerald-500/25 disabled:opacity-30 dark:text-emerald-300"
-        >
-          Demo Valid
-        </button>
-        <button
-          type="button"
-          onClick={() => simulateScan("invalid")}
-          disabled={state !== "idle"}
-          className="cursor-pointer rounded-xl border border-red-500/25 bg-red-500/15 py-2.5 text-xs font-semibold text-red-800 backdrop-blur-md transition-colors hover:bg-red-500/25 disabled:opacity-30 dark:text-red-300"
-        >
-          Demo Invalid
-        </button>
       </div>
     </LiquidGlassCard>
   );

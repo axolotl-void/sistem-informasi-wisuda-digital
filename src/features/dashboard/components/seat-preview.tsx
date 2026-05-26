@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useSocket } from "@/hooks/use-socket";
 import { useScannerStore } from "@/store/scanner.store";
 import { ROUTES } from "@/utils/constants";
+import { fetchWithAuth } from "@/lib/client-auth";
 import {
   GlassChip,
   LiquidGlassCard,
@@ -47,7 +48,7 @@ export function SeatPreview() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/dashboard/seats");
+      const res = await fetchWithAuth("/api/dashboard/seats");
       const data = await res.json();
       if (data.success && data.data) {
         const invitations = data.data as {

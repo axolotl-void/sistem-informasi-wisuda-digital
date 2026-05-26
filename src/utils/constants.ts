@@ -51,6 +51,11 @@ export const API_ROUTES = {
     STATS: "/api/kehadiran/stats",
     EXPORT: "/api/kehadiran/export",
   },
+  DASHBOARD: {
+    STATS: "/api/dashboard/stats",
+    ACTIVITY: "/api/dashboard/activity",
+    SEATS: "/api/dashboard/seats",
+  },
 } as const;
 
 export const PAGINATION = {

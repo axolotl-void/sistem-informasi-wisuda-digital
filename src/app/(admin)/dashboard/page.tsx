@@ -1,65 +1,10 @@
 "use client";
 
-import {
-  Mail,
-  Users,
-  UserCheck,
-  DoorOpen,
-  Armchair,
-  Crown,
-  Sparkles,
-} from "lucide-react";
-import { StatCard } from "@/features/dashboard/components/stat-card";
+import { Sparkles } from "lucide-react";
+import { DashboardOverviewCards } from "@/features/dashboard/components/dashboard-overview";
 import { SeatPreview } from "@/features/dashboard/components/seat-preview";
 import { QrPanel } from "@/features/dashboard/components/qr-panel";
 import { ActivityTable } from "@/features/dashboard/components/activity-table";
-const stats = [
-  {
-    label: "Total Undangan",
-    value: "1,248",
-    icon: Mail,
-    accent: "blue" as const,
-    subtitle: "Terkirim semua",
-    trend: { value: "100%", positive: true },
-  },
-  {
-    label: "Total Kehadiran",
-    value: "847",
-    icon: UserCheck,
-    accent: "emerald" as const,
-    subtitle: "67.8% hadir",
-    trend: { value: "+12", positive: true },
-  },
-  {
-    label: "Belum Hadir",
-    value: "371",
-    icon: Users,
-    accent: "orange" as const,
-    subtitle: "Menunggu kedatangan",
-  },
-  {
-    label: "Gate Aktif",
-    value: "4",
-    icon: DoorOpen,
-    accent: "violet" as const,
-    subtitle: "Semua gate online",
-  },
-  {
-    label: "Kursi Terisi",
-    value: "164/200",
-    icon: Armchair,
-    accent: "blue" as const,
-    subtitle: "Auditorium utama",
-    trend: { value: "82%", positive: true },
-  },
-  {
-    label: "Tamu VIP",
-    value: "24",
-    icon: Crown,
-    accent: "orange" as const,
-    subtitle: "Hadir 20 orang",
-  },
-];
 
 export default function DashboardPage() {
   const dateLabel = new Date().toLocaleDateString("id-ID", {
@@ -70,7 +15,7 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="dashboard-mesh relative -m-4 min-h-full overflow-hidden rounded-none p-4 sm:-m-6 sm:p-6 sm:rounded-3xl">
+    <div className="dashboard-mesh relative -m-4 min-h-full overflow-hidden rounded-none p-4 sm:-m-6 sm:rounded-3xl sm:p-6">
       <div className="relative z-10 space-y-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -96,13 +41,8 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Stat cards */}
         <section>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {stats.map((s, i) => (
-              <StatCard key={s.label} {...s} delay={i * 0.06} />
-            ))}
-          </div>
+          <DashboardOverviewCards />
         </section>
 
         <SeatPreview />
