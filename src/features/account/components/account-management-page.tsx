@@ -1,11 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, ShieldCheck, Trash2, UserCog, UserRoundSearch } from "lucide-react";
+import { toast } from "sonner";
+import { Pencil, Plus, ShieldCheck, Trash2, UserCog, UserRoundSearch } from "lucide-react";
 import { API_ROUTES, FAKULTAS_LIST } from "@/utils/constants";
 import { fetchWithAuth } from "@/lib/client-auth";
 import { cn } from "@/lib/utils";
 import { glassBtnPrimary } from "@/components/ui/liquid-glass";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type StaffRole = "SUPER_ADMIN" | "ADMIN_FAKULTAS" | "PETUGAS_SCAN";
 
@@ -26,6 +36,14 @@ type CreatePayload = {
   fakultas?: string;
 };
 
+type EditPayload = {
+  name: string;
+  email: string;
+  role: "ADMIN_FAKULTAS" | "PETUGAS_SCAN";
+  fakultas?: string;
+  password?: string;
+};
+
 const roleLabel: Record<StaffRole, string> = {
   SUPER_ADMIN: "Super Admin",
   ADMIN_FAKULTAS: "Admin",
@@ -36,9 +54,13 @@ export function AccountManagementPage() {
   const [accounts, setAccounts] = useState<StaffAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [query, setQuery] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<StaffAccount | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<StaffAccount | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const [form, setForm] = useState<CreatePayload>({
     name: "",
@@ -47,10 +69,16 @@ export function AccountManagementPage() {
     role: "ADMIN_FAKULTAS",
     fakultas: "",
   });
+  const [editForm, setEditForm] = useState<EditPayload>({
+    name: "",
+    email: "",
+    role: "ADMIN_FAKULTAS",
+    fakultas: "",
+    password: "",
+  });
 
   const loadAccounts = useCallback(async () => {
     setIsLoading(true);
-    setError("");
     try {
       const res = await fetchWithAuth(API_ROUTES.ADMIN.ACCOUNTS);
       const body = await res.json();
@@ -59,7 +87,7 @@ export function AccountManagementPage() {
       }
       setAccounts(body.data as StaffAccount[]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal memuat data akun");
+      toast.error(err instanceof Error ? err.message : "Gagal memuat data akun");
     } finally {
       setIsLoading(false);
     }
@@ -83,11 +111,10 @@ export function AccountManagementPage() {
 
   async function submitCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
-    setSuccess("");
     setIsSaving(true);
 
     try {
+      const loadingId = toast.loading("Menyimpan akun...");
       const payload: CreatePayload = {
         ...form,
         email: form.email.trim(),
@@ -105,7 +132,8 @@ export function AccountManagementPage() {
         throw new Error(body?.message ?? "Gagal menambahkan akun");
       }
 
-      setSuccess("Akun berhasil ditambahkan");
+      toast.success("Akun berhasil ditambahkan");
+      toast.dismiss(loadingId);
       setForm({
         name: "",
         email: "",
@@ -115,31 +143,85 @@ export function AccountManagementPage() {
       });
       await loadAccounts();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menambahkan akun");
+      toast.error(err instanceof Error ? err.message : "Gagal menambahkan akun");
     } finally {
       setIsSaving(false);
     }
   }
 
-  async function removeAccount(target: StaffAccount) {
+  function requestDelete(target: StaffAccount) {
     if (target.role === "SUPER_ADMIN") return;
-    if (!confirm(`Hapus akun ${target.name}?`)) return;
+    setDeleteTarget(target);
+    setDeleteOpen(true);
+  }
 
-    setError("");
-    setSuccess("");
-
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      const res = await fetchWithAuth(`${API_ROUTES.ADMIN.ACCOUNTS}/${target.id}`, {
+      const loadingId = toast.loading("Menghapus akun...");
+      const res = await fetchWithAuth(`${API_ROUTES.ADMIN.ACCOUNTS}/${deleteTarget.id}`, {
         method: "DELETE",
       });
       const body = await res.json();
       if (!res.ok || !body?.success) {
         throw new Error(body?.message ?? "Gagal menghapus akun");
       }
-      setSuccess("Akun berhasil dihapus");
+      toast.success("Akun berhasil dihapus");
+      toast.dismiss(loadingId);
       await loadAccounts();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menghapus akun");
+      toast.error(err instanceof Error ? err.message : "Gagal menghapus akun");
+    } finally {
+      setIsDeleting(false);
+      setDeleteOpen(false);
+      setDeleteTarget(null);
+    }
+  }
+
+  function requestEdit(target: StaffAccount) {
+    if (target.role === "SUPER_ADMIN") return;
+    setEditTarget(target);
+    setEditForm({
+      name: target.name,
+      email: target.email,
+      role: target.role as "ADMIN_FAKULTAS" | "PETUGAS_SCAN",
+      fakultas: target.fakultas ?? "",
+      password: "",
+    });
+    setEditOpen(true);
+  }
+
+  async function submitEdit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!editTarget) return;
+    setIsUpdating(true);
+    try {
+      const loadingId = toast.loading("Memperbarui akun...");
+      const res = await fetchWithAuth(`${API_ROUTES.ADMIN.ACCOUNTS}/${editTarget.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editForm.name.trim(),
+          email: editForm.email.trim(),
+          role: editForm.role,
+          fakultas: editForm.fakultas?.trim() || undefined,
+          password: editForm.password?.trim() || undefined,
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok || !body?.success) {
+        throw new Error(body?.message ?? "Gagal memperbarui akun");
+      }
+      toast.success("Akun berhasil diperbarui");
+      toast.dismiss(loadingId);
+      setEditOpen(false);
+      setEditTarget(null);
+      await loadAccounts();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Gagal memperbarui akun");
+    } finally {
+      setIsUpdating(false);
     }
   }
 
@@ -162,10 +244,10 @@ export function AccountManagementPage() {
           </div>
         </header>
 
-        <section className="grid gap-4 lg:grid-cols-[1.1fr_1.4fr]">
+        <section className="grid gap-4 lg:grid-cols-[1.05fr_1.55fr]">
           <form
             onSubmit={submitCreate}
-            className="rounded-2xl border border-white/90 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.04]"
+            className="rounded-2xl border border-white/90 bg-white/80 p-5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/10 dark:bg-white/[0.04] dark:shadow-none"
           >
             <div className="mb-3 flex items-center gap-2">
               <Plus className="size-4 text-blue-600 dark:text-blue-300" />
@@ -223,13 +305,17 @@ export function AccountManagementPage() {
                 ))}
               </select>
 
-              <button type="submit" disabled={isSaving} className={cn(glassBtnPrimary, "h-10 w-full")}>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className={cn(glassBtnPrimary, "h-10 w-full justify-center")}
+              >
                 {isSaving ? "Menyimpan..." : "Tambah Akun"}
               </button>
             </div>
           </form>
 
-          <section className="rounded-2xl border border-white/90 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.04]">
+          <section className="rounded-2xl border border-white/90 bg-white/80 p-5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur dark:border-white/10 dark:bg-white/[0.04] dark:shadow-none">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-white/85">
                 <UserCog className="size-4 text-blue-600 dark:text-blue-300" />
@@ -255,7 +341,7 @@ export function AccountManagementPage() {
                 filtered.map((acc) => (
                   <div
                     key={acc.id}
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/80 px-3 py-2 dark:border-white/10 dark:bg-white/[0.03]"
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/85 px-3.5 py-2.5 transition-colors hover:bg-white dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.05]"
                   >
                     <div>
                       <p className="text-sm font-medium text-slate-800 dark:text-white/85">{acc.name}</p>
@@ -271,14 +357,24 @@ export function AccountManagementPage() {
                         Protected
                       </span>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => void removeAccount(acc)}
-                        className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-500"
-                        aria-label={`Hapus akun ${acc.name}`}
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => requestEdit(acc)}
+                          className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-blue-500/10 hover:text-blue-500 dark:text-white/45 dark:hover:text-blue-300"
+                          aria-label={`Edit akun ${acc.name}`}
+                        >
+                          <Pencil className="size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => requestDelete(acc)}
+                          className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-500 dark:text-white/45 dark:hover:text-red-400"
+                          aria-label={`Hapus akun ${acc.name}`}
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))
@@ -286,20 +382,112 @@ export function AccountManagementPage() {
             </div>
           </section>
         </section>
-
-        {(error || success) && (
-          <div
-            className={cn(
-              "rounded-xl border px-4 py-3 text-sm",
-              error
-                ? "border-red-200 bg-red-50 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300"
-                : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300",
-            )}
-          >
-            {error || success}
-          </div>
-        )}
       </div>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          setDeleteOpen(open);
+          if (!open) setDeleteTarget(null);
+        }}
+        title="Hapus akun?"
+        description={
+          deleteTarget
+            ? `Akun ${deleteTarget.name} (${deleteTarget.email}) akan dihapus permanen.`
+            : "Akun akan dihapus permanen."
+        }
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        variant="destructive"
+        onConfirm={() => void confirmDelete()}
+        isLoading={isDeleting}
+      />
+
+      <Dialog
+        open={editOpen}
+        onOpenChange={(open) => {
+          setEditOpen(open);
+          if (!open) setEditTarget(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit akun</DialogTitle>
+            <DialogDescription>
+              Perbarui data akun admin/pengawas. Isi password hanya jika ingin mengganti password.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={submitEdit} className="space-y-3">
+            <input
+              value={editForm.name}
+              onChange={(e) => setEditForm((v) => ({ ...v, name: e.target.value }))}
+              placeholder="Nama lengkap"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-zinc-100"
+              required
+            />
+            <input
+              type="email"
+              value={editForm.email}
+              onChange={(e) => setEditForm((v) => ({ ...v, email: e.target.value }))}
+              placeholder="Email"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-zinc-100"
+              required
+            />
+            <select
+              value={editForm.role}
+              onChange={(e) =>
+                setEditForm((v) => ({
+                  ...v,
+                  role: e.target.value as EditPayload["role"],
+                }))
+              }
+              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-zinc-100"
+            >
+              <option value="ADMIN_FAKULTAS">Admin</option>
+              <option value="PETUGAS_SCAN">Pengawas</option>
+            </select>
+            <select
+              value={editForm.fakultas ?? ""}
+              onChange={(e) => setEditForm((v) => ({ ...v, fakultas: e.target.value }))}
+              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-zinc-100"
+            >
+              <option value="">Semua fakultas (opsional)</option>
+              {FAKULTAS_LIST.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+            <input
+              type="password"
+              value={editForm.password ?? ""}
+              onChange={(e) => setEditForm((v) => ({ ...v, password: e.target.value }))}
+              placeholder="Password baru (opsional)"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/[0.05] dark:text-zinc-100"
+              minLength={8}
+            />
+
+            <DialogFooter>
+              <button
+                type="button"
+                onClick={() => setEditOpen(false)}
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/70 dark:hover:bg-white/[0.08]"
+                disabled={isUpdating}
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                className={cn(glassBtnPrimary, "h-9 px-4")}
+                disabled={isUpdating}
+              >
+                {isUpdating ? "Menyimpan..." : "Simpan Perubahan"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

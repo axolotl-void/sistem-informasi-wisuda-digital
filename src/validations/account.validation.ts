@@ -12,3 +12,18 @@ export const createStaffAccountSchema = z.object({
 });
 
 export type CreateStaffAccountInput = z.infer<typeof createStaffAccountSchema>;
+
+export const updateStaffAccountSchema = z.object({
+  name: z.string().min(2, "Nama minimal 2 karakter").max(100, "Nama maksimal 100 karakter"),
+  email: z.string().email("Format email tidak valid"),
+  role: z.enum(["ADMIN_FAKULTAS", "PETUGAS_SCAN"]),
+  fakultas: z.string().max(120).optional(),
+  password: z
+    .string()
+    .min(8, "Password minimal 8 karakter")
+    .max(64, "Password maksimal 64 karakter")
+    .optional()
+    .or(z.literal("")),
+});
+
+export type UpdateStaffAccountInput = z.infer<typeof updateStaffAccountSchema>;

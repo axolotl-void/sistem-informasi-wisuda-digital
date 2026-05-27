@@ -20,9 +20,6 @@ export function AdminSidebar() {
 
   const navItems = [
     { label: "Dashboard", href: ROUTES.ADMIN.DASHBOARD, icon: LayoutDashboard },
-    ...(role === "SUPER_ADMIN"
-      ? [{ label: "Akun Admin/Pengawas", href: ROUTES.ADMIN.AKUN, icon: ShieldCheck }]
-      : []),
     { label: "Akun Wisudawan", href: ROUTES.ADMIN.MAHASISWA, icon: Users },
     { label: "Undangan Digital", href: ROUTES.ADMIN.UNDANGAN, icon: Mail },
     { label: "Seat Monitoring", href: ROUTES.ADMIN.SEAT_MONITORING, icon: Armchair },
@@ -30,6 +27,9 @@ export function AdminSidebar() {
     { label: "Kehadiran", href: ROUTES.ADMIN.KEHADIRAN, icon: ClipboardList },
     { label: "Laporan", href: ROUTES.ADMIN.LAPORAN, icon: BarChart3 },
     { label: "Pengaturan", href: ROUTES.ADMIN.PENGATURAN, icon: Settings },
+    ...(role === "SUPER_ADMIN"
+      ? [{ label: "Akun Admin/Pengawas", href: ROUTES.ADMIN.AKUN, icon: ShieldCheck }]
+      : []),
   ];
 
   function handleNav(href: string) {
