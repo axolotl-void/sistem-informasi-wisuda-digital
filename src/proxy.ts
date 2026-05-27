@@ -13,6 +13,7 @@ const CLIENT_AUTH_ROUTES = ["/portal"];
 // Role-based route access
 const ROLE_ROUTES: Record<string, UserRole[]> = {
   "/dashboard": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
+  "/akun": ["SUPER_ADMIN"],
   "/mahasiswa": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
   "/undangan": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
   "/kehadiran": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],

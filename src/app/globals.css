@@ -48,6 +48,49 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Theme toggle animation (View Transitions API)
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  --magicui-theme-toggle-vt-duration: 420ms;
+  --magicui-theme-vt-clip-from: circle(0px at 50% 50%);
+}
+
+/* Prevent the default cross-fade from fighting our clip-path reveal. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  will-change: clip-path;
+}
+
+/* Pin collapsed clip-path before JS animation starts (avoid flash). */
+:root[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  animation-duration: var(--magicui-theme-toggle-vt-duration);
+  clip-path: var(--magicui-theme-vt-clip-from);
+}
+
+/* Performance: reduce repaint cost during the theme reveal. */
+:root[data-magicui-theme-vt="active"] *,
+:root[data-magicui-theme-vt="active"] *::before,
+:root[data-magicui-theme-vt="active"] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Backdrop blur & heavy effects are expensive to animate across the whole page. */
+:root[data-magicui-theme-vt="active"] .backdrop-blur,
+:root[data-magicui-theme-vt="active"] [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:root[data-magicui-theme-vt="active"] .shadow,
+:root[data-magicui-theme-vt="active"] [class*="shadow-"] {
+  box-shadow: none !important;
+}
+
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -251,4 +294,9 @@
   .portal-bottom-nav {
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
+}
+
+::view-transition-old(root), ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
 }

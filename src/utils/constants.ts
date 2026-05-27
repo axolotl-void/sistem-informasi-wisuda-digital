@@ -6,6 +6,7 @@ export const ROUTES = {
   LOGIN: "/login",
   ADMIN: {
     DASHBOARD: "/dashboard",
+    AKUN: "/akun",
     MAHASISWA: "/mahasiswa",
     UNDANGAN: "/undangan",
     KEHADIRAN: "/kehadiran",
@@ -55,6 +56,9 @@ export const API_ROUTES = {
     STATS: "/api/dashboard/stats",
     ACTIVITY: "/api/dashboard/activity",
     SEATS: "/api/dashboard/seats",
+  },
+  ADMIN: {
+    ACCOUNTS: "/api/admin/accounts",
   },
 } as const;
 

@@ -6,26 +6,31 @@ import { useTransition } from "react";
 import {
   LayoutDashboard, Users, Mail, Armchair, ScanLine,
   ClipboardList, BarChart3, Settings, GraduationCap, ChevronRight,
-  Loader2,
+  Loader2, ShieldCheck,
 } from "lucide-react";
 import { ROUTES } from "@/utils/constants";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { label: "Dashboard", href: ROUTES.ADMIN.DASHBOARD, icon: LayoutDashboard },
-  { label: "Akun Wisudawan", href: ROUTES.ADMIN.MAHASISWA, icon: Users },
-  { label: "Undangan Digital", href: ROUTES.ADMIN.UNDANGAN, icon: Mail },
-  { label: "Seat Monitoring", href: ROUTES.ADMIN.SEAT_MONITORING, icon: Armchair },
-  { label: "Scanner Gate", href: ROUTES.SCANNER.SCAN, icon: ScanLine },
-  { label: "Kehadiran", href: ROUTES.ADMIN.KEHADIRAN, icon: ClipboardList },
-  { label: "Laporan", href: ROUTES.ADMIN.LAPORAN, icon: BarChart3 },
-  { label: "Pengaturan", href: ROUTES.ADMIN.PENGATURAN, icon: Settings },
-];
+import { useAuthStore } from "@/store/auth.store";
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const role = useAuthStore((s) => s.user?.role);
+
+  const navItems = [
+    { label: "Dashboard", href: ROUTES.ADMIN.DASHBOARD, icon: LayoutDashboard },
+    ...(role === "SUPER_ADMIN"
+      ? [{ label: "Akun Admin/Pengawas", href: ROUTES.ADMIN.AKUN, icon: ShieldCheck }]
+      : []),
+    { label: "Akun Wisudawan", href: ROUTES.ADMIN.MAHASISWA, icon: Users },
+    { label: "Undangan Digital", href: ROUTES.ADMIN.UNDANGAN, icon: Mail },
+    { label: "Seat Monitoring", href: ROUTES.ADMIN.SEAT_MONITORING, icon: Armchair },
+    { label: "Scanner Gate", href: ROUTES.SCANNER.SCAN, icon: ScanLine },
+    { label: "Kehadiran", href: ROUTES.ADMIN.KEHADIRAN, icon: ClipboardList },
+    { label: "Laporan", href: ROUTES.ADMIN.LAPORAN, icon: BarChart3 },
+    { label: "Pengaturan", href: ROUTES.ADMIN.PENGATURAN, icon: Settings },
+  ];
 
   function handleNav(href: string) {
     if (href.startsWith("#")) {

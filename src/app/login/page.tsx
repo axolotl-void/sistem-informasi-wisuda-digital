@@ -2,16 +2,13 @@
 
 import { useState, useEffect, useRef, type FormEvent } from "react";
 import axios from "axios";
-import { useTheme } from "next-themes";
 import {
   GraduationCap,
   Mail,
   Lock,
+  Loader2,
   Eye,
   EyeOff,
-  Loader2,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -20,18 +17,16 @@ import {
   fetchWithAuth,
   clearClientAuth,
 } from "@/lib/client-auth";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { LoginAurora } from "@/features/auth/components/login-aurora";
 export default function LoginPage() {
-  const { theme, setTheme } = useTheme();
   const { login, isLoading } = useAuth();
-  const [mounted, setMounted] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => setMounted(true), []);
 
   // Redirect otomatis hanya dari callback middleware (?callbackUrl=) — hindari loop spam
   useEffect(() => {
@@ -62,6 +57,20 @@ export default function LoginPage() {
       cancelled = true;
     };
   }, []);
+
+  const inputClassName = [
+    "h-12 w-full rounded-xl text-sm outline-none",
+    "border border-slate-200 bg-slate-50 text-slate-900 caret-slate-900 placeholder:text-slate-400",
+    "transition-all duration-300",
+    "focus:border-blue-500 focus:bg-white focus:text-slate-900 focus:ring-2 focus:ring-blue-500/40",
+    "dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:caret-zinc-100 dark:placeholder:text-zinc-500",
+    "dark:focus:border-orange-500 dark:focus:bg-zinc-900 dark:focus:text-zinc-100 dark:focus:ring-2 dark:focus:ring-orange-500/40",
+    "[&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#f8fafc]",
+    "[&:-webkit-autofill]:[-webkit-text-fill-color:#0f172a]",
+    "dark:[&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#18181b]",
+    "dark:[&:-webkit-autofill]:[-webkit-text-fill-color:#f4f4f5]",
+    "disabled:cursor-not-allowed disabled:opacity-50",
+  ].join(" ");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -100,12 +109,25 @@ export default function LoginPage() {
     <main className="relative flex w-screen min-h-screen items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('/img/Tamnel-login-page.png')" }}
     >
+      {/* Aurora — bagian atas */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[min(46vh,420px)] min-h-[220px]"
+      >
+        <div
+          className="absolute inset-0 opacity-90 [mask-image:linear-gradient(to_bottom,black_25%,transparent_100%)]"
+          style={{ WebkitMaskImage: "linear-gradient(to bottom, black 25%, transparent 100%)" }}
+        >
+          <LoginAurora />
+        </div>
+      </div>
+
       {/* ================================================================
           1. BACKGROUND OVERLAY — Light / Dark adaptive
       ================================================================ */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-white/10 backdrop-blur-sm dark:bg-black/50 dark:backdrop-blur-sm"
+        className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-b from-white/5 via-white/15 to-white/35 backdrop-blur-[2px] dark:from-black/25 dark:via-black/45 dark:to-black/65 dark:backdrop-blur-sm"
       />
 
       {/* Bottom aura glow — blue (light) / orange (dark) */}
@@ -117,22 +139,11 @@ export default function LoginPage() {
       {/* ================================================================
           2. THEME TOGGLE — Top-right absolute
       ================================================================ */}
-      <button
-        type="button"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        aria-label="Toggle theme"
+      <AnimatedThemeToggler
+        variant="circle"
+        duration={420}
         className="absolute top-5 right-5 z-30 flex size-10 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white/80 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 active:scale-95 dark:border-orange-500/30 dark:bg-zinc-900/80"
-      >
-        {mounted ? (
-          theme === "dark" ? (
-            <Sun className="size-[18px] text-orange-400" />
-          ) : (
-            <Moon className="size-[18px] text-blue-600" />
-          )
-        ) : (
-          <span className="size-[18px]" />
-        )}
-      </button>
+      />
 
       {/* ================================================================
           3. CARD — Glassmorphism + Aura Glow + 3D Hover
@@ -233,15 +244,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 onInput={(e) => setEmail(e.currentTarget.value)}
                 disabled={isLoading}
-                className={[
-                  "h-12 w-full rounded-xl pl-11 pr-4 text-sm outline-none",
-                  "border border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400",
-                  "transition-all duration-300",
-                  "focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/40",
-                  "dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500",
-                  "dark:focus:border-orange-500 dark:focus:ring-2 dark:focus:ring-orange-500/40",
-                  "disabled:cursor-not-allowed disabled:opacity-50",
-                ].join(" ")}
+                className={`${inputClassName} pl-11 pr-4`}
               />
             </div>
           </div>
@@ -273,15 +276,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 onInput={(e) => setPassword(e.currentTarget.value)}
                 disabled={isLoading}
-                className={[
-                  "h-12 w-full rounded-xl pl-11 pr-12 text-sm outline-none",
-                  "border border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400",
-                  "transition-all duration-300",
-                  "focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/40",
-                  "dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500",
-                  "dark:focus:border-orange-500 dark:focus:ring-2 dark:focus:ring-orange-500/40",
-                  "disabled:cursor-not-allowed disabled:opacity-50",
-                ].join(" ")}
+                className={`${inputClassName} pl-11 pr-12`}
               />
               <button
                 type="button"

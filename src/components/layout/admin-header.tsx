@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, User, LogOut, Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
+import { User, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 function LiveClock() {
   const [time, setTime] = useState("");
@@ -38,31 +38,6 @@ function LiveClock() {
     <span className="font-mono text-[13px] tabular-nums text-slate-500 dark:text-white/50">
       {time}
     </span>
-  );
-}
-
-function ThemeToggle() {
-  const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <div className="size-9" />;
-
-  const isDark = resolvedTheme === "dark";
-
-  return (
-    <button
-      type="button"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
-      className={cn(
-        "flex size-9 cursor-pointer items-center justify-center rounded-xl transition-colors",
-        "text-slate-500 hover:bg-slate-100 hover:text-slate-800",
-        "dark:text-white/50 dark:hover:bg-white/[0.08] dark:hover:text-white/80",
-      )}
-    >
-      {isDark ? <Sun className="size-[17px]" /> : <Moon className="size-[17px]" />}
-    </button>
   );
 }
 
@@ -107,20 +82,15 @@ export function AdminHeader() {
 
       <div className="flex items-center gap-3">
         <LiveClock />
-        <ThemeToggle />
-
-        <button
-          type="button"
+        <AnimatedThemeToggler
+          variant="circle"
+          duration={420}
           className={cn(
-            "relative flex size-9 cursor-pointer items-center justify-center rounded-xl transition-colors",
-            "text-slate-500 hover:bg-slate-100 hover:text-slate-700",
-            "dark:text-white/45 dark:hover:bg-white/[0.08] dark:hover:text-white/75",
+            "flex size-9 cursor-pointer items-center justify-center rounded-xl transition-colors",
+            "text-slate-500 hover:bg-slate-100 hover:text-slate-800",
+            "dark:text-white/50 dark:hover:bg-white/[0.08] dark:hover:text-white/80",
           )}
-          aria-label="Notifications"
-        >
-          <Bell className="size-[17px]" />
-          <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-orange-500 ring-2 ring-white dark:ring-[#0a1628]" />
-        </button>
+        />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
