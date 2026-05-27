@@ -59,7 +59,7 @@ export default function LoginPage() {
   }, []);
 
   const inputClassName = [
-    "h-12 w-full rounded-xl text-sm outline-none",
+    "h-10 w-full rounded-lg text-sm outline-none sm:h-12 sm:rounded-xl",
     "border border-slate-200 bg-slate-50 text-slate-900 caret-slate-900 placeholder:text-slate-400",
     "transition-all duration-300",
     "focus:border-blue-500 focus:bg-white focus:text-slate-900 focus:ring-2 focus:ring-blue-500/40",
@@ -106,13 +106,14 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative flex w-screen min-h-screen items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
+    <main
+      className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat px-3 py-5 sm:min-h-screen sm:w-screen sm:px-0 sm:py-0"
       style={{ backgroundImage: "url('/img/Tamnel-login-page.png')" }}
     >
       {/* Aurora — bagian atas */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[min(46vh,420px)] min-h-[220px]"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-[min(38vh,320px)] min-h-[160px] sm:h-[min(46vh,420px)] sm:min-h-[220px]"
       >
         <div
           className="absolute inset-0 opacity-90 [mask-image:linear-gradient(to_bottom,black_25%,transparent_100%)]"
@@ -142,7 +143,7 @@ export default function LoginPage() {
       <AnimatedThemeToggler
         variant="circle"
         duration={420}
-        className="absolute top-5 right-5 z-30 flex size-10 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white/80 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 active:scale-95 dark:border-orange-500/30 dark:bg-zinc-900/80"
+        className="absolute top-3 right-3 z-30 flex size-9 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white/80 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 active:scale-95 sm:top-5 sm:right-5 sm:size-10 sm:rounded-xl dark:border-orange-500/30 dark:bg-zinc-900/80"
       />
 
       {/* ================================================================
@@ -150,20 +151,20 @@ export default function LoginPage() {
       ================================================================ */}
       <div
         className={[
-          "relative z-10 mx-4 w-full max-w-[26rem]",
-          "rounded-3xl px-7 py-10 sm:px-9",
+          "relative z-10 w-full max-w-[19.5rem] sm:max-w-[26rem]",
+          "rounded-2xl px-5 py-6 sm:rounded-3xl sm:px-9 sm:py-10",
           "backdrop-blur-xl",
           // Light: white card + blue aura glow
           "bg-white/90 border border-blue-100",
-          "shadow-[0_0_50px_rgba(37,99,235,0.25)]",
+          "shadow-[0_0_40px_rgba(37,99,235,0.2)] sm:shadow-[0_0_50px_rgba(37,99,235,0.25)]",
           // Dark: dark card + orange aura glow
           "dark:bg-zinc-950/90 dark:border-orange-500/20",
-          "dark:shadow-[0_0_60px_rgba(249,115,22,0.35)]",
-          // 3D hover lift
+          "dark:shadow-[0_0_45px_rgba(249,115,22,0.3)] sm:dark:shadow-[0_0_60px_rgba(249,115,22,0.35)]",
+          // 3D hover lift (desktop only)
           "transition-all duration-500 ease-out",
-          "hover:-translate-y-1.5 hover:scale-[1.01]",
-          "hover:shadow-[0_0_70px_rgba(37,99,235,0.35)]",
-          "dark:hover:shadow-[0_0_80px_rgba(249,115,22,0.45)]",
+          "sm:hover:-translate-y-1.5 sm:hover:scale-[1.01]",
+          "sm:hover:shadow-[0_0_70px_rgba(37,99,235,0.35)]",
+          "sm:dark:hover:shadow-[0_0_80px_rgba(249,115,22,0.45)]",
           // Entrance
           "animate-in fade-in slide-in-from-bottom-8 zoom-in-95",
           "fill-mode-both duration-700 ease-out",
@@ -172,30 +173,30 @@ export default function LoginPage() {
         {/* -- Logo Icon ----------------------------------------------- */}
         <div
           className={[
-            "mb-4 flex justify-center",
+            "mb-3 flex justify-center sm:mb-4",
             "animate-in fade-in slide-in-from-bottom-4",
             "fill-mode-both duration-700 ease-out delay-75",
           ].join(" ")}
         >
-          <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 dark:from-orange-500 dark:to-orange-700 dark:shadow-orange-500/30">
-            <GraduationCap className="size-8 text-white" strokeWidth={2.2} />
+          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 sm:size-16 sm:rounded-2xl dark:from-orange-500 dark:to-orange-700 dark:shadow-orange-500/30">
+            <GraduationCap className="size-6 text-white sm:size-8" strokeWidth={2.2} />
           </div>
         </div>
 
         {/* -- Title — Gradient Shimmer -------------------------------- */}
         <div
           className={[
-            "mb-8 text-center",
+            "mb-5 text-center sm:mb-8",
             "animate-in fade-in slide-in-from-bottom-4",
             "fill-mode-both duration-700 ease-out delay-75",
           ].join(" ")}
         >
-          <h1 className="text-[1.65rem] font-bold tracking-tight sm:text-[1.8rem]">
+          <h1 className="text-lg font-bold tracking-tight sm:text-[1.8rem]">
             <span className="animate-shimmer bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 bg-clip-text text-transparent dark:from-orange-500 dark:via-amber-400 dark:to-orange-500">
               Portal Wisuda Digital
             </span>
           </h1>
-          <p className="mt-2 text-[0.84rem] text-slate-500 dark:text-zinc-400">
+          <p className="mt-1.5 text-xs leading-snug text-slate-500 sm:mt-2 sm:text-[0.84rem] dark:text-zinc-400">
             Masuk untuk mengakses undangan dan informasi acara
           </p>
         </div>
@@ -205,7 +206,7 @@ export default function LoginPage() {
           ref={formRef}
           onSubmit={handleSubmit}
           noValidate
-          className="space-y-5"
+          className="space-y-3.5 sm:space-y-5"
         >
           {/* Error banner */}
           {error && (
@@ -217,19 +218,19 @@ export default function LoginPage() {
           {/* -- Email ------------------------------------------------- */}
           <div
             className={[
-              "space-y-2",
+              "space-y-1.5 sm:space-y-2",
               "animate-in fade-in slide-in-from-bottom-5",
               "fill-mode-both duration-700 ease-out delay-150",
             ].join(" ")}
           >
             <label
               htmlFor="login-email"
-              className="block text-sm font-medium text-slate-700 dark:text-zinc-300"
+              className="block text-xs font-medium text-slate-700 sm:text-sm dark:text-zinc-300"
             >
               Email
             </label>
             <div className="group relative">
-              <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-[17px] -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-blue-500 dark:text-zinc-500 dark:group-focus-within:text-orange-400" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-blue-500 sm:left-3.5 sm:size-[17px] dark:text-zinc-500 dark:group-focus-within:text-orange-400" />
               <input
                 id="login-email"
                 name="email"
@@ -244,7 +245,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 onInput={(e) => setEmail(e.currentTarget.value)}
                 disabled={isLoading}
-                className={`${inputClassName} pl-11 pr-4`}
+                className={`${inputClassName} pl-10 pr-3 sm:pl-11 sm:pr-4`}
               />
             </div>
           </div>
@@ -252,19 +253,19 @@ export default function LoginPage() {
           {/* -- Password ---------------------------------------------- */}
           <div
             className={[
-              "space-y-2",
+              "space-y-1.5 sm:space-y-2",
               "animate-in fade-in slide-in-from-bottom-5",
               "fill-mode-both duration-700 ease-out delay-150",
             ].join(" ")}
           >
             <label
               htmlFor="login-password"
-              className="block text-sm font-medium text-slate-700 dark:text-zinc-300"
+              className="block text-xs font-medium text-slate-700 sm:text-sm dark:text-zinc-300"
             >
               Password
             </label>
             <div className="group relative">
-              <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-[17px] -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-blue-500 dark:text-zinc-500 dark:group-focus-within:text-orange-400" />
+              <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-blue-500 sm:left-3.5 sm:size-[17px] dark:text-zinc-500 dark:group-focus-within:text-orange-400" />
               <input
                 id="login-password"
                 name="password"
@@ -276,7 +277,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 onInput={(e) => setPassword(e.currentTarget.value)}
                 disabled={isLoading}
-                className={`${inputClassName} pl-11 pr-12`}
+                className={`${inputClassName} pl-10 pr-10 sm:pl-11 sm:pr-12`}
               />
               <button
                 type="button"
@@ -315,7 +316,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className={[
                 "touch-manipulation",
-                "flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-sm font-semibold",
+                "flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-semibold sm:h-12 sm:rounded-xl",
                 // Light — Blue gradient + blue drop shadow
                 "bg-gradient-to-r from-blue-600 to-blue-500 text-white",
                 "shadow-[0_4px_0_0_#1e40af,0_6px_20px_rgba(37,99,235,0.3)]",
@@ -348,7 +349,7 @@ export default function LoginPage() {
         {/* -- Footer -------------------------------------------------- */}
         <p
           className={[
-            "mt-8 text-center text-xs text-slate-400 dark:text-zinc-600",
+            "mt-5 text-center text-[10px] text-slate-400 sm:mt-8 sm:text-xs dark:text-zinc-600",
             "animate-in fade-in fill-mode-both duration-500 ease-out delay-500",
           ].join(" ")}
         >
