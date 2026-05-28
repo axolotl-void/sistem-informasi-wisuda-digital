@@ -6,6 +6,7 @@ import { User, Users, Ticket, GraduationCap, LogOut, Bell } from "lucide-react";
 import axios from "axios";
 import { useAuthStore } from "@/store/auth.store";
 import { cn } from "@/lib/utils";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 interface PortalUser {
   id: string;
@@ -107,7 +108,7 @@ function Sidebar({
 function BottomNav({ pathname }: { pathname: string }) {
   return (
     <nav
-      className="portal-bottom-nav lg:hidden fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.08] bg-[#080f1e]/98"
+      className="portal-bottom-nav lg:hidden fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-white/[0.08] dark:bg-[#080f1e]/98"
       aria-label="Navigasi utama"
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1">
@@ -121,13 +122,16 @@ function BottomNav({ pathname }: { pathname: string }) {
               href={href}
               className={cn(
                 "flex min-h-[52px] min-w-[72px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1.5 transition-colors touch-manipulation",
-                active ? "text-blue-400" : "text-white/35 active:bg-white/[0.06]",
+                active
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-slate-500 active:bg-slate-100 dark:text-white/35 dark:active:bg-white/[0.06]",
               )}
             >
               <div
                 className={cn(
                   "flex size-10 items-center justify-center rounded-2xl transition-colors",
-                  active && "bg-blue-500/20 border border-blue-500/25",
+                  active &&
+                    "bg-blue-500/10 border border-blue-500/20 dark:bg-blue-500/20 dark:border-blue-500/25",
                 )}
               >
                 <Icon className="size-5" />
@@ -143,29 +147,43 @@ function BottomNav({ pathname }: { pathname: string }) {
 
 function MobileHeader({ user }: { user: PortalUser }) {
   return (
-    <header className="portal-mobile-header lg:hidden sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-white/[0.08] bg-[#080f1e]/98 px-4 py-3">
+    <header className="portal-mobile-header lg:hidden sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/95 backdrop-blur px-4 py-3 dark:border-white/[0.08] dark:bg-[#080f1e]/98">
       <div className="flex min-w-0 items-center gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/15">
-          <GraduationCap className="size-4 text-blue-400" />
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 dark:bg-blue-500/15">
+          <GraduationCap className="size-4 text-blue-600 dark:text-blue-400" />
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-white/90">Portal Wisuda</p>
-          <p className="truncate text-[0.65rem] text-white/35">{user.nim}</p>
+          <p className="truncate text-sm font-bold text-slate-900 dark:text-white/90">
+            Portal Wisuda
+          </p>
+          <p className="truncate text-[0.65rem] text-slate-500 dark:text-white/35">{user.nim}</p>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
+        <AnimatedThemeToggler
+          variant="circle"
+          duration={360}
+          className={cn(
+            "flex size-10 items-center justify-center rounded-xl transition-colors touch-manipulation",
+            "text-slate-600 active:bg-slate-100",
+            "dark:text-white/40 dark:active:bg-white/[0.08]",
+          )}
+          aria-label="Ganti tema"
+        />
         <button
           type="button"
-          className="flex size-10 items-center justify-center rounded-xl text-white/40 transition-colors touch-manipulation active:bg-white/[0.08]"
+          className="flex size-10 items-center justify-center rounded-xl text-slate-600 transition-colors touch-manipulation active:bg-slate-100 dark:text-white/40 dark:active:bg-white/[0.08]"
           aria-label="Notifikasi"
         >
           <Bell className="size-4" />
         </button>
-        <div className="flex size-10 items-center justify-center overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/30 to-indigo-500/30">
+        <div className="flex size-10 items-center justify-center overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 to-indigo-500/10 dark:from-blue-500/30 dark:to-indigo-500/30">
           {user.foto ? (
             <img src={user.foto} alt={user.nama} className="size-full object-cover" />
           ) : (
-            <span className="text-[0.65rem] font-bold text-blue-300">{user.avatar}</span>
+            <span className="text-[0.65rem] font-bold text-blue-700 dark:text-blue-300">
+              {user.avatar}
+            </span>
           )}
         </div>
       </div>
@@ -196,13 +214,13 @@ export function PortalShell({
   }
 
   return (
-    <div className="portal-root min-h-[100dvh] bg-[#060d1a] text-white">
+    <div className="portal-root min-h-[100dvh] bg-slate-50 text-slate-900 dark:bg-[#060d1a] dark:text-white">
       <div
         className="pointer-events-none fixed inset-0 z-0"
         aria-hidden
         style={{
           background:
-            "radial-gradient(ellipse 80% 50% at 20% 0%, rgba(59,130,246,0.07) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(99,102,241,0.05) 0%, transparent 60%)",
+            "radial-gradient(ellipse 80% 50% at 20% 0%, rgba(59,130,246,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(99,102,241,0.08) 0%, transparent 60%)",
         }}
       />
 

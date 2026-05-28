@@ -60,29 +60,29 @@ function getSesiInfo(sesi: string | null) {
 const STATUS_CFG = {
   AKTIF: {
     label: "QR Aktif",
-    dot: "bg-emerald-400 animate-pulse",
-    text: "text-emerald-400",
+    dot: "bg-emerald-500 dark:bg-emerald-400 animate-pulse",
+    text: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-500/10",
     border: "border-emerald-500/20",
   },
   DIGUNAKAN: {
     label: "Sudah Digunakan",
-    dot: "bg-blue-400",
-    text: "text-blue-400",
+    dot: "bg-blue-500 dark:bg-blue-400",
+    text: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-500/10",
     border: "border-blue-500/20",
   },
   KADALUARSA: {
     label: "Kadaluarsa",
-    dot: "bg-red-400",
-    text: "text-red-400",
+    dot: "bg-red-500 dark:bg-red-400",
+    text: "text-red-600 dark:text-red-400",
     bg: "bg-red-500/10",
     border: "border-red-500/20",
   },
   DIBATALKAN: {
     label: "Dibatalkan",
-    dot: "bg-gray-400",
-    text: "text-gray-400",
+    dot: "bg-gray-500 dark:bg-gray-400",
+    text: "text-gray-600 dark:text-gray-400",
     bg: "bg-gray-500/10",
     border: "border-gray-500/20",
   },
@@ -99,21 +99,21 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
   const { waktu, gate } = getSesiInfo(mahasiswa.sesiWisuda);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/[0.1] bg-gradient-to-b from-[#0d1829] to-[#080f1e] shadow-2xl">
+    <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-white/[0.1] dark:bg-gradient-to-b dark:from-[#0d1829] dark:to-[#080f1e] shadow-lg dark:shadow-2xl">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 size-32 bg-blue-500/10 blur-3xl rounded-full" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 size-32 bg-blue-500/5 dark:bg-blue-500/10 blur-3xl rounded-full" />
 
       {/* Header */}
       <div className="relative px-6 pt-6 pb-4">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[0.6rem] font-black uppercase tracking-[0.2em] text-blue-400/60">
+            <p className="text-[0.6rem] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400/60">
               Universitas Nusantara
             </p>
-            <h2 className="text-lg font-black text-white/90 mt-0.5 leading-tight">
+            <h2 className="text-lg font-black text-slate-800 dark:text-white/90 mt-0.5 leading-tight">
               Undangan Wisuda
             </h2>
-            <p className="text-[0.65rem] text-white/30 mt-0.5">Periode 2024/2025</p>
+            <p className="text-[0.65rem] text-slate-400 dark:text-white/30 mt-0.5">Periode 2024/2025</p>
           </div>
           <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 border ${cfg.bg} ${cfg.border}`}>
             <span className={`size-1.5 rounded-full ${cfg.dot}`} />
@@ -124,16 +124,16 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
 
       {/* Notch divider */}
       <div className="relative flex items-center px-4">
-        <div className="size-5 rounded-full bg-[#060d1a] border border-white/[0.06] shrink-0 -ml-6" />
-        <div className="flex-1 border-t border-dashed border-white/[0.08] mx-2" />
-        <div className="size-5 rounded-full bg-[#060d1a] border border-white/[0.06] shrink-0 -mr-6" />
+        <div className="size-5 rounded-full bg-slate-50 border border-slate-200 dark:bg-[#060d1a] dark:border-white/[0.06] shrink-0 -ml-6" />
+        <div className="flex-1 border-t border-dashed border-slate-200 dark:border-white/[0.08] mx-2" />
+        <div className="size-5 rounded-full bg-slate-50 border border-slate-200 dark:bg-[#060d1a] dark:border-white/[0.06] shrink-0 -mr-6" />
       </div>
 
       {/* QR Section */}
       <div className="flex flex-col items-center px-6 py-6 gap-4">
         <div className="relative">
-          <div className="absolute inset-0 rounded-2xl bg-blue-500/20 blur-2xl scale-110" />
-          <div className="relative rounded-2xl bg-white p-4 shadow-2xl">
+          <div className="absolute inset-0 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 blur-2xl scale-110" />
+          <div className="relative rounded-2xl bg-white p-4 border border-slate-100 dark:border-transparent shadow-xl dark:shadow-2xl">
             {qrDataUrl ? (
               <img
                 src={qrDataUrl}
@@ -160,24 +160,24 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
           ))}
         </div>
         <div className="text-center">
-          <p className="font-mono text-xs font-bold text-white/50 tracking-widest">{undangan.kode}</p>
-          <p className="text-[0.6rem] text-white/20 mt-0.5">Tunjukkan QR ini kepada petugas</p>
+          <p className="font-mono text-xs font-bold text-slate-500 dark:text-white/50 tracking-widest">{undangan.kode}</p>
+          <p className="text-[0.6rem] text-slate-400 dark:text-white/20 mt-0.5">Tunjukkan QR ini kepada petugas</p>
         </div>
       </div>
 
       {/* Notch divider */}
       <div className="relative flex items-center px-4">
-        <div className="size-5 rounded-full bg-[#060d1a] border border-white/[0.06] shrink-0 -ml-6" />
-        <div className="flex-1 border-t border-dashed border-white/[0.08] mx-2" />
-        <div className="size-5 rounded-full bg-[#060d1a] border border-white/[0.06] shrink-0 -mr-6" />
+        <div className="size-5 rounded-full bg-slate-50 border border-slate-200 dark:bg-[#060d1a] dark:border-white/[0.06] shrink-0 -ml-6" />
+        <div className="flex-1 border-t border-dashed border-slate-200 dark:border-white/[0.08] mx-2" />
+        <div className="size-5 rounded-full bg-slate-50 border border-slate-200 dark:bg-[#060d1a] dark:border-white/[0.06] shrink-0 -mr-6" />
       </div>
 
       {/* Info */}
       <div className="px-6 py-5 space-y-3">
-        <div className="text-center pb-3 border-b border-white/[0.05]">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-white/25">Nama Wisudawan</p>
-          <p className="text-base font-black text-white/90 mt-1">{mahasiswa.nama}</p>
-          <p className="text-[0.7rem] text-white/35">{mahasiswa.nim} · {mahasiswa.prodi}</p>
+        <div className="text-center pb-3 border-b border-slate-100 dark:border-white/[0.05]">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-slate-400 dark:text-white/25">Nama Wisudawan</p>
+          <p className="text-base font-black text-slate-800 dark:text-white/90 mt-1">{mahasiswa.nama}</p>
+          <p className="text-[0.7rem] text-slate-500 dark:text-white/35">{mahasiswa.nim} · {mahasiswa.prodi}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -189,25 +189,25 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
             { icon: Clock, label: "Waktu", value: waktu },
             { icon: Users, label: "Kuota Tamu", value: `${undangan.kuotaTamu} orang` },
           ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+            <div key={label} className="rounded-xl border border-slate-100 bg-slate-50/50 dark:border-white/[0.06] dark:bg-white/[0.02] px-3 py-2.5">
               <div className="flex items-center gap-1.5 mb-1">
-                <Icon className="size-3 text-white/20" />
-                <p className="text-[0.6rem] font-semibold uppercase tracking-wider text-white/25">{label}</p>
+                <Icon className="size-3 text-slate-400 dark:text-white/20" />
+                <p className="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-400 dark:text-white/25">{label}</p>
               </div>
-              <p className="text-[0.78rem] font-bold text-white/70 leading-tight">{value}</p>
+              <p className="text-[0.78rem] font-bold text-slate-700 dark:text-white/70 leading-tight">{value}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Gate instruction */}
-      <div className="mx-4 mb-5 rounded-2xl border border-blue-500/15 bg-blue-500/[0.07] px-4 py-3">
+      <div className="mx-4 mb-5 rounded-2xl border border-blue-500/15 bg-blue-500/[0.04] dark:bg-blue-500/[0.07] px-4 py-3">
         <div className="flex items-start gap-2.5">
-          <Info className="size-4 text-blue-400/60 shrink-0 mt-0.5" />
+          <Info className="size-4 text-blue-600 dark:text-blue-400/60 shrink-0 mt-0.5" />
           <div>
-            <p className="text-[0.7rem] font-bold text-blue-400/80">Instruksi Gate Masuk</p>
-            <p className="text-[0.65rem] text-white/30 mt-0.5 leading-relaxed">
-              Hadir 30 menit sebelum acara dimulai. Masuk melalui <strong className="text-white/50">{gate}</strong>.
+            <p className="text-[0.7rem] font-bold text-blue-600 dark:text-blue-400/80">Instruksi Gate Masuk</p>
+            <p className="text-[0.65rem] text-slate-500 dark:text-white/30 mt-0.5 leading-relaxed">
+              Hadir 30 menit sebelum acara dimulai. Masuk melalui <strong className="text-slate-750 dark:text-white/50">{gate}</strong>.
               Tunjukkan QR Code ini kepada petugas scan di pintu masuk.
             </p>
           </div>
@@ -226,14 +226,14 @@ function NoTicket() {
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-3xl border border-white/[0.07] bg-white/[0.03] py-16 px-6 text-center"
+      className="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white dark:border-white/[0.07] dark:bg-white/[0.03] py-16 px-6 text-center shadow-md dark:shadow-xl dark:shadow-black/20"
     >
-      <div className="flex size-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] mb-4">
-        <QrCode className="size-8 text-white/15" />
+      <div className="flex size-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.08] dark:bg-white/[0.04] mb-4">
+        <QrCode className="size-8 text-slate-400 dark:text-white/15" />
       </div>
-      <p className="text-sm font-bold text-white/40 mb-1">Undangan Belum Tersedia</p>
-      <p className="text-xs text-white/20 leading-relaxed max-w-xs">
-        Ajukan permintaan tamu di menu <strong className="text-white/35">Tamu</strong> dan tunggu persetujuan admin untuk mendapatkan E-Ticket.
+      <p className="text-sm font-bold text-slate-700 dark:text-white/40 mb-1">Undangan Belum Tersedia</p>
+      <p className="text-xs text-slate-500 dark:text-white/20 leading-relaxed max-w-xs">
+        Ajukan permintaan tamu di menu <strong className="text-slate-600 dark:text-white/35">Tamu</strong> dan tunggu persetujuan admin untuk mendapatkan E-Ticket.
       </p>
     </motion.div>
   );
@@ -367,8 +367,8 @@ export default function TiketPage() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-12 rounded-2xl bg-white/[0.03] animate-pulse" />
-        <div className="h-[500px] rounded-3xl bg-white/[0.03] animate-pulse" />
+        <div className="h-12 rounded-2xl bg-slate-100 dark:bg-white/[0.03] animate-pulse" />
+        <div className="h-[500px] rounded-3xl bg-slate-100 dark:bg-white/[0.03] animate-pulse" />
       </div>
     );
   }
@@ -410,9 +410,9 @@ export default function TiketPage() {
               onClick={onClick}
               disabled={disabled}
               className={`flex min-h-[52px] flex-col items-center justify-center gap-1.5 rounded-2xl border py-3.5 text-[0.75rem] font-semibold transition-all touch-manipulation active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0 ${
-                variant === "primary" ? "border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/15"
-                : variant === "success" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : "border-white/[0.08] bg-white/[0.04] text-white/40 hover:bg-white/[0.07] hover:text-white/60"
+                variant === "primary" ? "border-blue-500/20 bg-blue-500/10 dark:border-blue-500/30 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/15"
+                : variant === "success" ? "border-emerald-500/20 bg-emerald-500/10 dark:border-emerald-500/30 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : "border-slate-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.04] text-slate-500 dark:text-white/40 hover:bg-slate-50 dark:hover:bg-white/[0.07] hover:text-slate-700 dark:hover:text-white/60"
               }`}
             >
               <Icon className={`size-5 ${spin ? "animate-spin" : ""}`} />
@@ -426,7 +426,7 @@ export default function TiketPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="text-center text-[0.68rem] text-white/20 leading-relaxed"
+        className="text-center text-[0.68rem] text-slate-400 dark:text-white/20 leading-relaxed"
       >
         Simpan atau screenshot E-Ticket ini. Tunjukkan QR Code kepada petugas saat memasuki venue wisuda.
       </motion.p>

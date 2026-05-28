@@ -148,7 +148,7 @@ export function TamuRequestsPanel({ onRefreshUndangan }: { onRefreshUndangan?: (
     setIsLoading(true);
     try {
       const res = await fetch("/api/admin/tamu-requests", {
-        headers: authHeaders(),
+        headers: authHeaders() as HeadersInit,
         credentials: "include",
       });
       const result = await res.json();
@@ -166,7 +166,7 @@ export function TamuRequestsPanel({ onRefreshUndangan }: { onRefreshUndangan?: (
     try {
       const res = await fetch(`/api/admin/tamu-requests/${mahasiswaId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
+        headers: { "Content-Type": "application/json", ...authHeaders() } as HeadersInit,
         credentials: "include",
         body: JSON.stringify({
           action: "approve",
@@ -189,7 +189,7 @@ export function TamuRequestsPanel({ onRefreshUndangan }: { onRefreshUndangan?: (
     try {
       const res = await fetch(`/api/admin/tamu-requests/${mahasiswaId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
+        headers: { "Content-Type": "application/json", ...authHeaders() } as HeadersInit,
         credentials: "include",
         body: JSON.stringify({ action: "reject" }),
       });

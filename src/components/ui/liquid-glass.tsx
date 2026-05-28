@@ -61,7 +61,7 @@ export function LiquidGlassCard({
   if (noEntrance) {
     const { style, id, role, "aria-label": ariaLabel } = motionProps;
     return (
-      <div className={classes} style={style} id={id} role={role} aria-label={ariaLabel}>
+      <div className={classes} style={style as React.CSSProperties} id={id} role={role} aria-label={ariaLabel}>
         {inner}
       </div>
     );

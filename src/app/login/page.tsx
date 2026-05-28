@@ -50,7 +50,7 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.replace(callbackUrl);
+      window.location.replace(callbackUrl || "/portal");
     }
     void resumeSession();
     return () => {

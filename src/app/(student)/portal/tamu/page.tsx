@@ -35,31 +35,31 @@ const STATUS_CFG = {
     icon: Clock,
     title: "Menunggu Persetujuan Admin",
     desc: "Pengajuan Anda sedang ditinjau. Anda akan mendapat notifikasi setelah admin memproses.",
-    color: "text-amber-400",
-    bg: "bg-amber-500/[0.07]",
+    color: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-500/[0.05] dark:bg-amber-500/[0.07]",
     border: "border-amber-500/20",
     iconBg: "bg-amber-500/10",
-    dot: "bg-amber-400 animate-pulse",
+    dot: "bg-amber-500 dark:bg-amber-400 animate-pulse",
   },
   APPROVED: {
     icon: CheckCircle2,
     title: "Pengajuan Disetujui!",
     desc: "Admin telah menyetujui pengajuan tamu Anda. Undangan Anda sudah aktif.",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/[0.07]",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-500/[0.05] dark:bg-emerald-500/[0.07]",
     border: "border-emerald-500/20",
     iconBg: "bg-emerald-500/10",
-    dot: "bg-emerald-400",
+    dot: "bg-emerald-500 dark:bg-emerald-400",
   },
   REJECTED: {
     icon: XCircle,
     title: "Pengajuan Ditolak",
     desc: "Pengajuan tamu Anda ditolak oleh admin. Anda dapat mengajukan kembali.",
-    color: "text-red-400",
-    bg: "bg-red-500/[0.07]",
+    color: "text-red-600 dark:text-red-400",
+    bg: "bg-red-500/[0.05] dark:bg-red-500/[0.07]",
     border: "border-red-500/20",
     iconBg: "bg-red-500/10",
-    dot: "bg-red-400",
+    dot: "bg-red-500 dark:bg-red-400",
   },
 };
 
@@ -89,16 +89,16 @@ function StatusCard({ status, requestedTamu, undangan }: {
             <span className={`size-1.5 rounded-full ${cfg.dot}`} />
             <p className={`text-sm font-bold ${cfg.color}`}>{cfg.title}</p>
           </div>
-          <p className="text-xs text-white/35 mt-1 leading-relaxed">{cfg.desc}</p>
+          <p className="text-xs text-slate-500 dark:text-white/35 mt-1 leading-relaxed">{cfg.desc}</p>
         </div>
       </div>
 
       {/* Detail */}
       {requestedTamu > 0 && (
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 flex items-center justify-between">
+        <div className="rounded-xl border border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.03] px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="size-3.5 text-white/25" />
-            <span className="text-xs text-white/40">Jumlah tamu diajukan</span>
+            <Users className="size-3.5 text-slate-400 dark:text-white/25" />
+            <span className="text-xs text-slate-500 dark:text-white/40">Jumlah tamu diajukan</span>
           </div>
           <span className={`text-sm font-bold ${cfg.color}`}>{requestedTamu} orang</span>
         </div>
@@ -106,12 +106,12 @@ function StatusCard({ status, requestedTamu, undangan }: {
 
       {/* Undangan info jika sudah approved */}
       {status === "APPROVED" && undangan && (
-        <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.05] px-4 py-3 flex items-center justify-between">
+        <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05] px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Ticket className="size-3.5 text-emerald-400/60" />
-            <span className="text-xs text-white/40">Kode Undangan</span>
+            <Ticket className="size-3.5 text-emerald-500/70 dark:text-emerald-400/60" />
+            <span className="text-xs text-slate-500 dark:text-white/40">Kode Undangan</span>
           </div>
-          <span className="font-mono text-xs font-bold text-emerald-400">{undangan.kode}</span>
+          <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">{undangan.kode}</span>
         </div>
       )}
     </motion.div>
@@ -241,11 +241,11 @@ export default function TamuPage() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 space-y-5"
+          className="rounded-2xl border border-slate-200 bg-white dark:border-white/[0.07] dark:bg-white/[0.03] p-5 space-y-5 shadow-md dark:shadow-xl dark:shadow-black/20"
         >
           <div className="flex items-center gap-2">
-            <Users className="size-3.5 text-indigo-400/60" />
-            <p className="text-[0.7rem] font-black uppercase tracking-widest text-white/25">
+            <Users className="size-3.5 text-indigo-500/70 dark:text-indigo-400/60" />
+            <p className="text-[0.7rem] font-black uppercase tracking-widest text-slate-400 dark:text-white/25">
               {isPending ? "Pengajuan Terkirim" : "Form Pengajuan Tamu"}
             </p>
           </div>
@@ -253,7 +253,7 @@ export default function TamuPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Input jumlah */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-white/40">
+              <label className="text-xs font-semibold text-slate-500 dark:text-white/40">
                 Berapa jumlah tamu/keluarga yang ingin diundang?
               </label>
               <div className="flex items-center gap-3">
@@ -262,7 +262,7 @@ export default function TamuPage() {
                   type="button"
                   onClick={() => setJumlahTamu((v) => Math.max(1, v - 1))}
                   disabled={isFormDisabled || jumlahTamu <= 1}
-                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-xl font-bold text-white/50 transition-all touch-manipulation hover:bg-white/[0.08] hover:text-white/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.08] dark:bg-white/[0.04] text-xl font-bold text-slate-500 dark:text-white/50 transition-all touch-manipulation hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:text-slate-700 dark:hover:text-white/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   −
                 </button>
@@ -270,14 +270,14 @@ export default function TamuPage() {
                 {/* Number display */}
                 <div className={`flex-1 h-14 rounded-2xl border flex items-center justify-center gap-2 ${
                   isFormDisabled
-                    ? "border-white/[0.05] bg-white/[0.02]"
-                    : "border-indigo-500/30 bg-indigo-500/[0.06]"
+                    ? "border-slate-150 bg-slate-50/50 dark:border-white/[0.05] dark:bg-white/[0.02]"
+                    : "border-indigo-500/20 bg-indigo-50/30 dark:border-indigo-500/30 dark:bg-indigo-500/[0.06]"
                 }`}>
-                  <Users className={`size-4 ${isFormDisabled ? "text-white/20" : "text-indigo-400/60"}`} />
-                  <span className={`text-2xl font-black tabular-nums ${isFormDisabled ? "text-white/30" : "text-white/90"}`}>
+                  <Users className={`size-4 ${isFormDisabled ? "text-slate-300 dark:text-white/20" : "text-indigo-500/70 dark:text-indigo-400/60"}`} />
+                  <span className={`text-2xl font-black tabular-nums ${isFormDisabled ? "text-slate-400 dark:text-white/30" : "text-slate-800 dark:text-white/90"}`}>
                     {jumlahTamu}
                   </span>
-                  <span className={`text-xs ${isFormDisabled ? "text-white/20" : "text-white/40"}`}>orang</span>
+                  <span className={`text-xs ${isFormDisabled ? "text-slate-400 dark:text-white/20" : "text-slate-500 dark:text-white/40"}`}>orang</span>
                 </div>
 
                 {/* Increment */}
@@ -285,20 +285,20 @@ export default function TamuPage() {
                   type="button"
                   onClick={() => setJumlahTamu((v) => Math.min(10, v + 1))}
                   disabled={isFormDisabled || jumlahTamu >= 10}
-                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-xl font-bold text-white/50 transition-all touch-manipulation hover:bg-white/[0.08] hover:text-white/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.08] dark:bg-white/[0.04] text-xl font-bold text-slate-500 dark:text-white/50 transition-all touch-manipulation hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:text-slate-700 dark:hover:text-white/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   +
                 </button>
               </div>
-              <p className="text-[0.65rem] text-white/20">Maksimal 10 orang tamu</p>
+              <p className="text-[0.65rem] text-slate-400 dark:text-white/20">Maksimal 10 orang tamu</p>
             </div>
 
             {/* Sesi info */}
             {tamuData?.sesiWisuda && (
-              <div className="flex items-center gap-2 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5">
-                <span className="size-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="text-xs text-white/35">Sesi wisuda Anda:</span>
-                <span className="text-xs font-bold text-cyan-400">{tamuData.sesiWisuda}</span>
+              <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-white/[0.05] dark:bg-white/[0.02] px-3 py-2.5">
+                <span className="size-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-pulse" />
+                <span className="text-xs text-slate-500 dark:text-white/35">Sesi wisuda Anda:</span>
+                <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">{tamuData.sesiWisuda}</span>
               </div>
             )}
 
@@ -309,7 +309,7 @@ export default function TamuPage() {
                   type="button"
                   onClick={handleCancel}
                   disabled={isCancelling}
-                  className="flex-1 h-12 rounded-2xl border border-red-500/20 bg-red-500/[0.06] text-sm font-semibold text-red-400/70 hover:bg-red-500/[0.12] hover:text-red-400 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 h-12 rounded-2xl border border-red-200 bg-red-50/50 dark:border-red-500/20 dark:bg-red-500/[0.06] text-sm font-semibold text-red-500 hover:bg-red-100 hover:text-red-600 dark:text-red-400/70 dark:hover:bg-red-500/[0.12] dark:hover:text-red-400 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isCancelling ? (
                     <><Loader2 className="size-4 animate-spin" /> Membatalkan...</>
@@ -321,7 +321,7 @@ export default function TamuPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting || isFormDisabled}
-                  className="flex h-12 min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl border border-indigo-500/30 bg-indigo-500/15 text-sm font-bold text-indigo-400 transition-all touch-manipulation hover:border-indigo-500/50 hover:bg-indigo-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-12 min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-500/10 dark:border-indigo-500/30 dark:bg-indigo-500/15 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <><Loader2 className="size-4 animate-spin" /> Mengirim...</>
@@ -340,10 +340,10 @@ export default function TamuPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.15 }}
-        className="flex items-start gap-2.5 rounded-2xl border border-white/[0.05] bg-white/[0.02] p-3.5"
+        className="flex items-start gap-2.5 rounded-2xl border border-slate-200 bg-slate-100/40 dark:border-white/[0.05] dark:bg-white/[0.02] p-3.5"
       >
-        <AlertTriangle className="size-4 text-white/15 shrink-0 mt-0.5" />
-        <p className="text-[0.68rem] text-white/22 leading-relaxed">
+        <AlertTriangle className="size-4 text-slate-400 dark:text-white/15 shrink-0 mt-0.5" />
+        <p className="text-[0.68rem] text-slate-500 dark:text-white/22 leading-relaxed">
           Pengajuan tamu akan ditinjau oleh admin. Setelah disetujui, undangan digital Anda akan otomatis digenerate dengan kuota tamu sesuai pengajuan.
         </p>
       </motion.div>
