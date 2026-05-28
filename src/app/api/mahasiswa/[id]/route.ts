@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import prisma from "@/lib/prisma";
 import { MahasiswaService } from "@/services/mahasiswa.service";
 import { getTokenFromRequest, unauthorizedResponse, forbiddenResponse } from "@/lib/auth";
 import { apiSuccess, apiError } from "@/lib/utils";
@@ -10,6 +11,16 @@ export async function GET(request: NextRequest, { params }: Params) {
   if (!payload) return unauthorizedResponse();
 
   const { id } = await params;
+
+  // Proteksi IDOR: Mahasiswa hanya boleh mengakses datanya sendiri
+  if (payload.role === "MAHASISWA") {
+    const dbMahasiswa = await prisma.mahasiswa.findUnique({
+      where: { userId: payload.sub },
+    });
+    if (!dbMahasiswa || dbMahasiswa.id !== id) {
+      return forbiddenResponse("Anda tidak memiliki hak akses untuk data wisudawan ini.");
+    }
+  }
 
   try {
     const mahasiswa = await MahasiswaService.getById(id);

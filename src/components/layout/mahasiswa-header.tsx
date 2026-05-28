@@ -23,7 +23,7 @@ export function MahasiswaHeader() {
         <div className="h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center p-1">
+            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center p-0.5">
               <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="h-full w-full object-contain" />
             </div>
             <span className="font-bold text-gray-900 text-sm">Wisuda Digital</span>

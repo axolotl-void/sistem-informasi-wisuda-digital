@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
+import prisma from "@/lib/prisma";
 import { UndanganService } from "@/services/undangan.service";
 import { getTokenFromRequest, unauthorizedResponse, forbiddenResponse } from "@/lib/auth";
 import { apiSuccess, apiError } from "@/lib/utils";
@@ -21,8 +22,24 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get("search") ?? undefined;
   const mahasiswaId = searchParams.get("mahasiswaId") ?? undefined;
 
+  let targetMahasiswaId = mahasiswaId;
+
+  // Proteksi IDOR: Mahasiswa hanya boleh mengakses undangan miliknya sendiri
+  if (payload.role === "MAHASISWA") {
+    const dbMahasiswa = await prisma.mahasiswa.findUnique({
+      where: { userId: payload.sub },
+    });
+    if (!dbMahasiswa) {
+      return forbiddenResponse("Profil wisudawan tidak ditemukan.");
+    }
+    if (mahasiswaId && mahasiswaId !== dbMahasiswa.id) {
+      return forbiddenResponse("Anda tidak memiliki hak akses untuk data undangan ini.");
+    }
+    targetMahasiswaId = dbMahasiswa.id;
+  }
+
   try {
-    const result = await UndanganService.getAll({ search, mahasiswaId }, page, limit);
+    const result = await UndanganService.getAll({ search, mahasiswaId: targetMahasiswaId }, page, limit);
     return apiSuccess(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Gagal mengambil data";
@@ -40,7 +57,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     console.log("Generate undangan request body:", body);
-    
+
     const parsed = generateSchema.safeParse(body);
     if (!parsed.success) {
       console.error("Validation error:", parsed.error.flatten());

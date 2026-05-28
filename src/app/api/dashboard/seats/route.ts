@@ -19,9 +19,45 @@ export async function GET(request: NextRequest) {
       where: {
         statusUndangan: { in: ["AKTIF", "DIGUNAKAN"] },
       },
-      include: {
-        mahasiswa: true,
-        kehadiran: true,
+      select: {
+        id: true,
+        kode: true,
+        statusUndangan: true,
+        tanggalWisuda: true,
+        tempatWisuda: true,
+        kuotaTamu: true,
+        pdfUrl: true,
+        mahasiswaId: true,
+        createdAt: true,
+        updatedAt: true,
+        mahasiswa: {
+          select: {
+            id: true,
+            nim: true,
+            nama: true,
+            email: true,
+            fakultas: true,
+            prodi: true,
+            angkatan: true,
+            status: true,
+            sesiWisuda: true,
+            userId: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        kehadiran: {
+          select: {
+            id: true,
+            statusKehadiran: true,
+            waktuScan: true,
+            catatan: true,
+            undanganId: true,
+            mahasiswaId: true,
+            petugasId: true,
+            createdAt: true,
+          },
+        },
       },
       orderBy: {
         mahasiswa: {

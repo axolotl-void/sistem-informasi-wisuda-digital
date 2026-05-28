@@ -65,11 +65,14 @@ export function AdminSidebar() {
       {/* Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 20px" }}>
         <div style={{
-          width: 36, height: 36, borderRadius: 12,
+          width: 48, height: 48, borderRadius: 14,
           display: "flex", alignItems: "center", justifyContent: "center",
-          background: "linear-gradient(135deg, rgb(59,130,246), rgb(37,99,235))",
-          boxShadow: "0 4px 12px rgba(59,130,246,0.25)",
-          padding: 6
+          background: "rgba(59, 130, 246, 0.08)",
+          border: "1px solid rgba(59, 130, 246, 0.2)",
+          backdropFilter: "blur(12px)",
+          boxShadow: "0 4px 16px rgba(59, 130, 246, 0.06)",
+          overflow: "hidden",
+          flexShrink: 0
         }}>
           <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
         </div>

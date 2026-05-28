@@ -39,7 +39,7 @@ function Sidebar({
   return (
     <aside className="hidden lg:flex min-h-screen w-64 shrink-0 flex-col border-r border-white/[0.06] bg-[#080f1e]">
       <div className="flex items-center gap-3 border-b border-white/[0.06] px-6 py-5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/15 p-1.5">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/15 overflow-hidden">
           <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="size-full object-contain" />
         </div>
         <div>
@@ -161,7 +161,7 @@ function MobileHeader({ user }: { user: PortalUser }) {
       className="portal-mobile-header lg:hidden sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg px-5 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4 dark:border-white/[0.08] dark:bg-[#080f1e]/80"
     >
       <div className="flex min-w-0 items-center gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/15 p-1.5">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/15 overflow-hidden">
           <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="size-full object-contain" />
         </div>
         <div className="min-w-0">

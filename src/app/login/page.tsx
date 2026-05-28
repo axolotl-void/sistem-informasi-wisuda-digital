@@ -177,7 +177,7 @@ export default function LoginPage() {
             "fill-mode-both duration-700 ease-out delay-75",
           ].join(" ")}
         >
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 sm:size-16 sm:rounded-2xl dark:from-orange-500 dark:to-orange-700 dark:shadow-orange-500/30 p-2 sm:p-3">
+          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 sm:size-16 sm:rounded-2xl dark:from-orange-500 dark:to-orange-700 dark:shadow-orange-500/30 p-1 sm:p-1.5">
             <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="size-full object-contain" />
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { sanitizeString } from "@/utils/sanitize";
 
 // --- Create Account ----------------------------------------------------------
 
@@ -6,18 +7,26 @@ export const createWisudawanSchema = z.object({
   nama: z
     .string()
     .min(2, "Nama minimal 2 karakter")
-    .max(100, "Nama maksimal 100 karakter"),
+    .max(100, "Nama maksimal 100 karakter")
+    .transform(sanitizeString),
   nim: z
     .string()
     .min(8, "NIM minimal 8 karakter")
-    .max(20, "NIM maksimal 20 karakter"),
+    .max(20, "NIM maksimal 20 karakter")
+    .transform(sanitizeString),
   email: z.string().email("Format email tidak valid"),
   password: z
     .string()
     .min(8, "Password minimal 8 karakter")
     .max(64, "Password maksimal 64 karakter"),
-  fakultas: z.string().min(2, "Fakultas wajib diisi"),
-  prodi: z.string().min(2, "Program studi wajib diisi"),
+  fakultas: z
+    .string()
+    .min(2, "Fakultas wajib diisi")
+    .transform(sanitizeString),
+  prodi: z
+    .string()
+    .min(2, "Program studi wajib diisi")
+    .transform(sanitizeString),
   angkatan: z
     .number()
     .int()
@@ -30,12 +39,30 @@ export type CreateWisudawanInput = z.infer<typeof createWisudawanSchema>;
 // --- Update Account ----------------------------------------------------------
 
 export const updateWisudawanSchema = z.object({
-  nim: z.string().min(8, "NIM minimal 8 karakter").max(20, "NIM maksimal 20 karakter").optional(),
-  nama: z.string().min(2).max(100).optional(),
+  nim: z
+    .string()
+    .min(8, "NIM minimal 8 karakter")
+    .max(20, "NIM maksimal 20 karakter")
+    .optional()
+    .transform((val) => (val ? sanitizeString(val) : val)),
+  nama: z
+    .string()
+    .min(2)
+    .max(100)
+    .optional()
+    .transform((val) => (val ? sanitizeString(val) : val)),
   email: z.string().email().optional(),
   password: z.string().min(8).max(64).optional(), // kosong = tidak diubah
-  fakultas: z.string().min(2).optional(),
-  prodi: z.string().min(2).optional(),
+  fakultas: z
+    .string()
+    .min(2)
+    .optional()
+    .transform((val) => (val ? sanitizeString(val) : val)),
+  prodi: z
+    .string()
+    .min(2)
+    .optional()
+    .transform((val) => (val ? sanitizeString(val) : val)),
   angkatan: z.number().int().min(2000).max(2100).optional(),
   status: z.enum(["AKTIF", "LULUS", "CUTI", "DROPOUT"]).optional(),
   foto: z.string().url().optional().nullable(),
@@ -63,7 +90,11 @@ export const verifyAccountSchema = z.object({
   action: z.enum(["approve", "reject", "revision"], {
     error: "Action wajib diisi",
   }),
-  note: z.string().max(500).optional(),
+  note: z
+    .string()
+    .max(500)
+    .optional()
+    .transform((val) => (val ? sanitizeString(val) : val)),
 });
 
 export type VerifyAccountInput = z.infer<typeof verifyAccountSchema>;

@@ -12,7 +12,7 @@ export function ScannerHeader() {
   return (
     <header className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6">
       <div className="flex items-center gap-3">
-        <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="h-5 w-5 object-contain" />
+        <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="h-7 w-7 object-contain" />
         <span className="font-semibold text-white text-sm">Scanner Wisuda</span>
       </div>
 
