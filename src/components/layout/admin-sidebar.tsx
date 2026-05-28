@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import {
   LayoutDashboard, Users, Mail, Armchair, ScanLine,
-  ClipboardList, BarChart3, Settings, GraduationCap, ChevronRight,
+  ClipboardList, BarChart3, Settings, ChevronRight,
   Loader2, ShieldCheck,
 } from "lucide-react";
 import { ROUTES } from "@/utils/constants";
@@ -69,8 +69,9 @@ export function AdminSidebar() {
           display: "flex", alignItems: "center", justifyContent: "center",
           background: "linear-gradient(135deg, rgb(59,130,246), rgb(37,99,235))",
           boxShadow: "0 4px 12px rgba(59,130,246,0.25)",
+          padding: 6
         }}>
-          <GraduationCap style={{ width: 20, height: 20, color: "white" }} />
+          <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
         </div>
         <div>
           <p className="text-[15px] font-semibold tracking-tight text-slate-800 dark:text-white leading-tight m-0">Wisuda</p>

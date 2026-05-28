@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, type FormEvent } from "react";
 import axios from "axios";
 import {
-  GraduationCap,
   Mail,
   Lock,
   Loader2,
@@ -178,8 +177,8 @@ export default function LoginPage() {
             "fill-mode-both duration-700 ease-out delay-75",
           ].join(" ")}
         >
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 sm:size-16 sm:rounded-2xl dark:from-orange-500 dark:to-orange-700 dark:shadow-orange-500/30">
-            <GraduationCap className="size-6 text-white sm:size-8" strokeWidth={2.2} />
+          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 sm:size-16 sm:rounded-2xl dark:from-orange-500 dark:to-orange-700 dark:shadow-orange-500/30 p-2 sm:p-3">
+            <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="size-full object-contain" />
           </div>
         </div>
 

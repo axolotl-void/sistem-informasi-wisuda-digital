@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { User, Users, Ticket, GraduationCap, LogOut, Bell } from "lucide-react";
+import { User, Users, Ticket, LogOut } from "lucide-react";
 import axios from "axios";
 import { useAuthStore } from "@/store/auth.store";
 import { cn } from "@/lib/utils";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { motion } from "framer-motion";
+
 
 interface PortalUser {
   id: string;
@@ -37,8 +39,8 @@ function Sidebar({
   return (
     <aside className="hidden lg:flex min-h-screen w-64 shrink-0 flex-col border-r border-white/[0.06] bg-[#080f1e]">
       <div className="flex items-center gap-3 border-b border-white/[0.06] px-6 py-5">
-        <div className="flex size-9 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/15">
-          <GraduationCap className="size-5 text-blue-400" />
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/15 p-1.5">
+          <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="size-full object-contain" />
         </div>
         <div>
           <p className="text-sm font-bold leading-tight text-white/90">Portal Wisuda</p>
@@ -147,16 +149,26 @@ function BottomNav({ pathname }: { pathname: string }) {
 
 function MobileHeader({ user }: { user: PortalUser }) {
   return (
-    <header className="portal-mobile-header lg:hidden sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/95 backdrop-blur px-4 py-3 dark:border-white/[0.08] dark:bg-[#080f1e]/98">
+    <motion.header
+      initial={{ y: -70, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{
+        type: "spring",
+        stiffness: 260,
+        damping: 24,
+        mass: 0.8
+      }}
+      className="portal-mobile-header lg:hidden sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg px-5 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-4 dark:border-white/[0.08] dark:bg-[#080f1e]/80"
+    >
       <div className="flex min-w-0 items-center gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 dark:bg-blue-500/15">
-          <GraduationCap className="size-4 text-blue-600 dark:text-blue-400" />
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/15 p-1.5">
+          <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="size-full object-contain" />
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-slate-900 dark:text-white/90">
+          <p className="truncate text-sm font-bold tracking-tight text-slate-900 dark:text-white/95">
             Portal Wisuda
           </p>
-          <p className="truncate text-[0.65rem] text-slate-500 dark:text-white/35">{user.nim}</p>
+          <p className="truncate text-[0.68rem] font-medium text-slate-500 dark:text-slate-400/80">{user.nim}</p>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
@@ -165,19 +177,12 @@ function MobileHeader({ user }: { user: PortalUser }) {
           duration={360}
           className={cn(
             "flex size-10 items-center justify-center rounded-xl transition-colors touch-manipulation",
-            "text-slate-600 active:bg-slate-100",
+            "text-slate-600 active:bg-slate-100/80",
             "dark:text-white/40 dark:active:bg-white/[0.08]",
           )}
           aria-label="Ganti tema"
         />
-        <button
-          type="button"
-          className="flex size-10 items-center justify-center rounded-xl text-slate-600 transition-colors touch-manipulation active:bg-slate-100 dark:text-white/40 dark:active:bg-white/[0.08]"
-          aria-label="Notifikasi"
-        >
-          <Bell className="size-4" />
-        </button>
-        <div className="flex size-10 items-center justify-center overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 to-indigo-500/10 dark:from-blue-500/30 dark:to-indigo-500/30">
+        <div className="flex size-10 items-center justify-center overflow-hidden rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/15 to-indigo-500/10 dark:from-blue-500/30 dark:to-indigo-500/30 transition-all duration-300 hover:scale-105 active:scale-95">
           {user.foto ? (
             <img src={user.foto} alt={user.nama} className="size-full object-cover" />
           ) : (
@@ -187,7 +192,7 @@ function MobileHeader({ user }: { user: PortalUser }) {
           )}
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }
 

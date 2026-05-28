@@ -284,7 +284,10 @@
 }
 
 .portal-mobile-header {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 16px) !important;
+  padding-bottom: 1rem !important;
+  padding-left: 1.25rem !important;
+  padding-right: 1.25rem !important;
 }
 
 @supports (padding: max(0px)) {

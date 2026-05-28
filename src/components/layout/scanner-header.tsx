@@ -1,6 +1,6 @@
 "use client";
 
-import { GraduationCap, LogOut, Wifi, WifiOff } from "lucide-react";
+import { LogOut, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useScannerStore } from "@/store/scanner.store";
@@ -12,7 +12,7 @@ export function ScannerHeader() {
   return (
     <header className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6">
       <div className="flex items-center gap-3">
-        <GraduationCap className="h-5 w-5 text-blue-400" />
+        <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="h-5 w-5 object-contain" />
         <span className="font-semibold text-white text-sm">Scanner Wisuda</span>
       </div>
 

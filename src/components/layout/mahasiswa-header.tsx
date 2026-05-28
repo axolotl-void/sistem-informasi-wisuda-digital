@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, LayoutDashboard, Mail, LogOut } from "lucide-react";
+import { LayoutDashboard, Mail, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -23,8 +23,8 @@ export function MahasiswaHeader() {
         <div className="h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-              <GraduationCap className="h-4 w-4 text-white" />
+            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center p-1">
+              <img src="/img/logo-wusuda-2.png" alt="Logo Wisuda" className="h-full w-full object-contain" />
             </div>
             <span className="font-bold text-gray-900 text-sm">Wisuda Digital</span>
           </div>
