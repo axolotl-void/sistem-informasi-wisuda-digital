@@ -51,15 +51,31 @@ interface FormErrors {
 // --- Constants ----------------------------------------------------------------
 
 const FAKULTAS_OPTIONS = [
-  "Fakultas Teknik",
-  "Fakultas Ekonomi",
-  "Fakultas Hukum",
-  "Fakultas MIPA",
-  "Fakultas Kedokteran",
-  "Fakultas Ilmu Sosial dan Politik",
   "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)",
   "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)",
 ];
+
+const PRODI_OPTIONS: Record<string, string[]> = {
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)": [
+    "S1 Pendidikan Bahasa dan Sastra Aceh",
+    "S1 Pendidikan Bahasa Indonesia",
+    "S1 Pendidikan Bahasa Inggris",
+    "S1 Pendidikan Matematika",
+    "S1 Pendidikan Jasmani",
+    "S1 Pendidikan Guru Sekolah Dasar (PGSD)",
+    "S1 Pendidikan Guru Pendidikan Anak Usia Dini (PG PAUD)",
+    "S1 Pendidikan Ilmu Pengetahuan Alam (Pendidikan IPA)",
+    "S1 Pendidikan Seni Pertunjukan",
+    "S2 Penjaminan Mutu Pendidikan",
+    "S2 Pendidikan Dasar",
+    "Pendidikan Profesi Guru (PPG)",
+  ],
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)": [
+    "S1 Ilmu Komputer",
+    "S1 Keperawatan",
+    "S1 Kebidanan",
+  ],
+};
 
 const TOGA_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
@@ -869,7 +885,15 @@ export default function ProfilPage() {
             <div className="relative">
               <select
                 value={form.fakultas}
-                onChange={(e) => { setForm((f) => ({ ...f, fakultas: e.target.value })); setErrors((er) => ({ ...er, fakultas: undefined })); }}
+                onChange={(e) => {
+                  const newFakultas = e.target.value;
+                  setForm((f) => ({
+                    ...f,
+                    fakultas: newFakultas,
+                    prodi: PRODI_OPTIONS[newFakultas]?.includes(f.prodi) ? f.prodi : "",
+                  }));
+                  setErrors((er) => ({ ...er, fakultas: undefined, prodi: undefined }));
+                }}
                 className={errors.fakultas ? inputError + " cursor-pointer" : selectBase}
               >
                 <option value="" className="bg-white dark:bg-[#0F172A] text-slate-800 dark:text-white">Pilih fakultas...</option>
@@ -891,13 +915,22 @@ export default function ProfilPage() {
 
           <div>
             <FieldLabel icon={GraduationCap} label="Program Studi" />
-            <input
-              type="text"
-              value={form.prodi}
-              onChange={(e) => { setForm((f) => ({ ...f, prodi: e.target.value })); setErrors((er) => ({ ...er, prodi: undefined })); }}
-              placeholder="Contoh: Teknik Informatika"
-              className={errors.prodi ? inputError : inputNormal}
-            />
+            <div className="relative">
+              <select
+                value={form.prodi}
+                onChange={(e) => { setForm((f) => ({ ...f, prodi: e.target.value })); setErrors((er) => ({ ...er, prodi: undefined })); }}
+                disabled={!form.fakultas}
+                className={errors.prodi ? inputError + " cursor-pointer" : selectBase + (!form.fakultas ? " opacity-50 cursor-not-allowed" : "")}
+              >
+                <option value="" className="bg-white dark:bg-[#0F172A] text-slate-800 dark:text-white">
+                  {form.fakultas ? "Pilih program studi..." : "Pilih fakultas terlebih dahulu"}
+                </option>
+                {form.fakultas && PRODI_OPTIONS[form.fakultas]?.map((p) => (
+                  <option key={p} value={p} className="bg-white dark:bg-[#0F172A] text-slate-800 dark:text-white">{p}</option>
+                ))}
+              </select>
+              <BookOpen className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 size-3.5 text-slate-400 dark:text-white/20" />
+            </div>
             <AnimatePresence>
               {errors.prodi && (
                 <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
