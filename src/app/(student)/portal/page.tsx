@@ -26,6 +26,7 @@ interface MahasiswaData {
   status: string;
   sesiWisuda: string | null;
   foto: string | null;
+  ukuranToga: string | null;
   undangan: {
     id: string;
     kode: string;
@@ -695,16 +696,18 @@ export default function ProfilPage() {
         body: JSON.stringify({
           fakultas: form.fakultas,
           prodi: form.prodi,
+          ...(form.ukuranToga ? { ukuranToga: form.ukuranToga } : {}),
         }),
       });
-      if (!res.ok) throw new Error("Gagal menyimpan");
-      setData((prev) => prev ? { ...prev, fakultas: form.fakultas, prodi: form.prodi } : prev);
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Gagal menyimpan");
+      setData((prev) => prev ? { ...prev, fakultas: form.fakultas, prodi: form.prodi, ukuranToga: form.ukuranToga } : prev);
       toast.success("Profil berhasil disimpan", {
         description: "Perubahan data Anda telah tersimpan.",
         icon: <CheckCircle2 className="size-4 text-emerald-400" />,
       });
-    } catch {
-      toast.error("Gagal menyimpan profil", { description: "Coba lagi beberapa saat." });
+    } catch (err: any) {
+      toast.error("Gagal menyimpan profil", { description: err.message || "Coba lagi beberapa saat." });
     } finally {
       setIsSaving(false);
     }

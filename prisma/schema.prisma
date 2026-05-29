@@ -78,6 +78,7 @@ model Mahasiswa {
   status     StatusMahasiswa @default(AKTIF)
   sesiWisuda String?
   foto       String?
+  ukuranToga String?
 
   // Request & Approve tamu
   requestedTamu    Int                  @default(0)

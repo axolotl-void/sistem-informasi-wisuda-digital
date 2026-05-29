@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
       status: mahasiswa.status,
       sesiWisuda: mahasiswa.sesiWisuda,
       foto: mahasiswa.foto,
+      ukuranToga: mahasiswa.ukuranToga,
       undangan: mahasiswa.undangan[0] ?? null,
       kehadiran: mahasiswa.kehadiran[0] ?? null,
     });

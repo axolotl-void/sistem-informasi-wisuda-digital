@@ -8,6 +8,7 @@ const updateSchema = z.object({
   fakultas: z.string().min(2).optional(),
   prodi: z.string().min(2).optional(),
   foto: z.string().nullable().optional(), // Base64 string atau null
+  ukuranToga: z.enum(["XS", "S", "M", "L", "XL", "XXL", "XXXL"]).optional(),
 });
 
 /**
@@ -41,6 +42,7 @@ export async function PATCH(request: NextRequest) {
     if (parsed.data.fakultas !== undefined) updateData.fakultas = parsed.data.fakultas;
     if (parsed.data.prodi !== undefined) updateData.prodi = parsed.data.prodi;
     if (parsed.data.foto !== undefined) updateData.foto = parsed.data.foto;
+    if (parsed.data.ukuranToga !== undefined) updateData.ukuranToga = parsed.data.ukuranToga;
 
     const updated = await prisma.mahasiswa.update({
       where: { id: mahasiswa.id },
@@ -56,6 +58,7 @@ export async function PATCH(request: NextRequest) {
         status: true,
         sesiWisuda: true,
         foto: true,
+        ukuranToga: true,
       },
     });
 
