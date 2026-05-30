@@ -107,7 +107,7 @@ function Sidebar({
   );
 }
 
-function BottomNav({ pathname }: { pathname: string }) {
+function BottomNav({ pathname, onLogout }: { pathname: string; onLogout: () => void }) {
   return (
     <nav
       className="portal-bottom-nav lg:hidden fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-white/[0.08] dark:bg-[#080f1e]/98"
@@ -142,6 +142,21 @@ function BottomNav({ pathname }: { pathname: string }) {
             </Link>
           );
         })}
+
+        {/* Tombol Keluar (Logout) */}
+        <button
+          type="button"
+          onClick={onLogout}
+          className={cn(
+            "flex min-h-[52px] min-w-[72px] flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1.5 transition-colors touch-manipulation",
+            "text-slate-500 active:bg-red-500/10 active:text-red-600 dark:text-white/35 dark:active:bg-red-500/15 dark:active:text-red-400 hover:text-red-600 dark:hover:text-red-400 group"
+          )}
+        >
+          <div className="flex size-10 items-center justify-center rounded-2xl transition-colors group-hover:bg-red-500/10 dark:group-hover:bg-red-500/20">
+            <LogOut className="size-5 transition-transform group-hover:scale-105" />
+          </div>
+          <span className="text-[0.62rem] font-semibold leading-none">Keluar</span>
+        </button>
       </div>
     </nav>
   );
@@ -241,7 +256,7 @@ export function PortalShell({
         </div>
       </div>
 
-      <BottomNav pathname={pathname} />
+      <BottomNav pathname={pathname} onLogout={handleLogout} />
     </div>
   );
 }

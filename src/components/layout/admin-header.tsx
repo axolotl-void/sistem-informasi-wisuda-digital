@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { usePengaturanStore } from "@/store/pengaturan.store";
 
 function LiveClock() {
   const [time, setTime] = useState("");
@@ -43,6 +44,11 @@ function LiveClock() {
 
 export function AdminHeader() {
   const { user, logout } = useAuth();
+  const { namaAcara, lokasi, fetchSettings } = usePengaturanStore();
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const initials = user?.name
     ? user.name
@@ -64,18 +70,12 @@ export function AdminHeader() {
       )}
     >
       <div className="flex items-center gap-4">
-        <div className="hidden items-center gap-2 sm:flex">
-          <div className="size-2 animate-pulse rounded-full bg-emerald-500 dark:bg-emerald-400" />
-          <span className="text-[0.78rem] font-medium text-emerald-600 dark:text-emerald-400">
-            Live
-          </span>
-        </div>
         <div className="hidden md:block">
           <p className="text-sm font-semibold tracking-tight text-slate-800 dark:text-white/85">
-            Wisuda Periode 2024/2025
+            {namaAcara}
           </p>
           <p className="text-xs font-medium text-slate-500 dark:text-white/40">
-            Auditorium Utama · Sesi Pagi
+            {lokasi}
           </p>
         </div>
       </div>

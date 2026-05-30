@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useWisudawan } from "@/hooks/use-wisudawan";
 import type { WisudawanRow } from "@/services/wisudawan.service";
+import { api } from "@/lib/axios";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -178,6 +179,7 @@ function TabDetail({
   isVerifying: string | null;
 }) {
   const sc = STATUS_CFG[student.status] ?? STATUS_CFG.AKTIF;
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="space-y-5">
@@ -242,9 +244,29 @@ function TabDetail({
           <p className={detailLabelCls}>Angkatan</p>
           <p className={detailValueCls}>{student.angkatan}</p>
         </div>
-        <div className={cn(detailFieldCls, "md:col-span-2")}>
+        <div className={detailFieldCls}>
           <p className={detailLabelCls}>Email</p>
           <p className={cn(detailValueCls, "break-all")}>{student.email}</p>
+        </div>
+        <div className={cn(detailFieldCls, "relative pr-10")}>
+          <p className={detailLabelCls}>Password</p>
+          <p className={cn(detailValueCls, "font-mono break-all pr-2")}>
+            {student.password ? (showPassword ? student.password : "••••••••") : "••••••••"}
+          </p>
+          {student.password ? (
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-blue-600 dark:text-white/35 dark:hover:text-blue-400"
+              title={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          ) : (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Loader2 className="size-3.5 animate-spin text-slate-400 dark:text-white/35" />
+            </div>
+          )}
         </div>
         <div className={detailFieldCls}>
           <p className={detailLabelCls}>Fakultas</p>
@@ -626,6 +648,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
   const [isLoading,   setIsLoading]   = useState(false);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
   const [activeTab,   setActiveTab]   = useState("detail");
+  const [detailedStudent, setDetailedStudent] = useState<WisudawanRow | null>(null);
 
   const [form, setFormState] = useState<EditFormData>({
     nama: "", nim: "", email: "", password: "",
@@ -635,6 +658,18 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
 
   useEffect(() => {
     if (student) {
+      setDetailedStudent(student);
+      
+      api.get(`/api/wisudawan/${student.id}`)
+        .then((res) => {
+          if (res.data?.success) {
+            setDetailedStudent(res.data.data);
+          }
+        })
+        .catch((err) => {
+          console.error("Gagal memuat detail wisudawan:", err);
+        });
+
       setFormState({
         nama:       student.nama,
         nim:        student.nim,
@@ -648,6 +683,8 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         kuotaTamu:  2,
       });
       setActiveTab("detail");
+    } else {
+      setDetailedStudent(null);
     }
   }, [student]);
 
@@ -812,7 +849,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
           <TabsContent value="detail" className="px-6 py-5 mt-0 focus-visible:ring-0">
             {student && (
               <TabDetail
-                student={student}
+                student={detailedStudent ?? student}
                 onVerify={handleVerify}
                 isVerifying={isVerifying}
               />

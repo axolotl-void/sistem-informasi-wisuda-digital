@@ -23,6 +23,7 @@ export interface WisudawanRow {
   foto: string | null;
   userId: string;
   userName: string;
+  password?: string;
   isFirstLogin: boolean;
   hasUndangan: boolean;
   undanganId: string | null;
@@ -134,7 +135,7 @@ export class WisudawanService {
     const m = await prisma.mahasiswa.findUnique({
       where: { id },
       include: {
-        user: { select: { name: true, id: true } },
+        user: { select: { name: true, id: true, password: true } },
         undangan: {
           take: 1,
           orderBy: { createdAt: "desc" },
@@ -161,6 +162,7 @@ export class WisudawanService {
       foto: m.foto,
       userId: m.userId,
       userName: m.user.name,
+      password: m.user.password,
       isFirstLogin: true,
       hasUndangan: m.undangan.length > 0,
       undanganId: m.undangan[0]?.id ?? null,
@@ -231,6 +233,7 @@ export class WisudawanService {
       foto: result.mahasiswa.foto,
       userId: result.user.id,
       userName: result.user.name,
+      password: result.user.password,
       isFirstLogin: true,
       hasUndangan: false,
       undanganId: null,
@@ -296,7 +299,7 @@ export class WisudawanService {
       where: { id },
       data: updateData,
       include: {
-        user: { select: { name: true, id: true } },
+        user: { select: { name: true, id: true, password: true } },
         undangan: {
           take: 1,
           orderBy: { createdAt: "desc" },
@@ -322,6 +325,7 @@ export class WisudawanService {
       foto: mahasiswa.foto,
       userId: mahasiswa.userId,
       userName: mahasiswa.user.name,
+      password: mahasiswa.user.password,
       isFirstLogin: true,
       hasUndangan: mahasiswa.undangan.length > 0,
       undanganId: mahasiswa.undangan[0]?.id ?? null,
