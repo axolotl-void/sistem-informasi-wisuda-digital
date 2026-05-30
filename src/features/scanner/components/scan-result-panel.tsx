@@ -100,10 +100,10 @@ export function ScanResultPanel() {
   return (
     <div className="space-y-4">
       {/* --- Main Result Panel --- */}
-      <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white dark:border-white/[0.08] dark:bg-[#0C1120] shadow-sm min-h-[340px] flex flex-col justify-between">
+      <div className="relative overflow-hidden rounded-[28px] border border-gray-200/60 bg-white/80 dark:border-white/[0.08] dark:bg-[#0C1120]/45 backdrop-blur-2xl shadow-xl min-h-[340px] flex flex-col justify-between">
 
-        {status === "success" && <div className="absolute -right-16 -top-16 -z-10 size-40 rounded-full bg-emerald-400/10 blur-[60px]" />}
-        {status === "error"   && <div className="absolute -right-16 -top-16 -z-10 size-40 rounded-full bg-red-400/10 blur-[60px]" />}
+        {status === "success" && <div className="absolute -right-16 -top-16 -z-10 size-40 rounded-full bg-emerald-400/15 blur-[60px]" />}
+        {status === "error"   && <div className="absolute -right-16 -top-16 -z-10 size-40 rounded-full bg-red-400/15 blur-[60px]" />}
 
         <div className="flex-1 flex flex-col p-5">
           {/* Header */}
@@ -300,7 +300,7 @@ export function ScanResultPanel() {
 
       {/* --- Counter Widget --- */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white dark:border-emerald-500/20 dark:from-emerald-500/[0.06] dark:to-transparent p-3.5 shadow-sm dark:shadow-none">
+        <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.05] dark:bg-emerald-500/[0.06] backdrop-blur-xl p-3.5 shadow-md">
           <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-500/15">
             <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
           </div>
@@ -309,7 +309,7 @@ export function ScanResultPanel() {
             <p className="text-[10px] font-semibold text-emerald-500/60 dark:text-emerald-400/40 uppercase tracking-wider mt-0.5">Berhasil</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-red-100 bg-gradient-to-br from-red-50 to-white dark:border-red-500/20 dark:from-red-500/[0.06] dark:to-transparent p-3.5 shadow-sm dark:shadow-none">
+        <div className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/[0.05] dark:bg-red-500/[0.06] backdrop-blur-xl p-3.5 shadow-md">
           <div className="flex size-9 items-center justify-center rounded-lg bg-red-100 dark:bg-red-500/15">
             <XCircle className="size-4 text-red-500 dark:text-red-400" />
           </div>
@@ -322,7 +322,7 @@ export function ScanResultPanel() {
 
       {/* --- Scan History --- */}
       {scanHistory.length > 0 && (
-        <div className="rounded-2xl border border-gray-200/80 bg-white dark:border-white/[0.08] dark:bg-[#0C1120] overflow-hidden shadow-sm dark:shadow-none">
+        <div className="rounded-[28px] border border-gray-200/60 bg-white/80 dark:border-white/[0.08] dark:bg-[#0C1120]/45 backdrop-blur-2xl shadow-xl overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-white/[0.06]">
             <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-white/40 flex items-center gap-1.5">
               <Activity className="size-3.5 text-blue-500 dark:text-blue-400" />

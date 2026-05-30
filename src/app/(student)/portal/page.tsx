@@ -8,6 +8,7 @@ import {
   QrCode, Calendar, MapPin, ArrowRight, Shirt,
   Sparkles, ShieldCheck, Timer, ListChecks,
   ChevronRight, ImageIcon, Users, Ticket,
+  Lock, Eye, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -41,11 +42,15 @@ interface FormState {
   fakultas: string;
   prodi: string;
   ukuranToga: string;
+  email: string;
+  password?: string;
 }
 
 interface FormErrors {
   fakultas?: string;
   prodi?: string;
+  email?: string;
+  password?: string;
 }
 
 // --- Constants ----------------------------------------------------------------
@@ -603,9 +608,16 @@ export default function ProfilPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-  const [form, setForm] = useState<FormState>({ fakultas: "", prodi: "", ukuranToga: "" });
+  const [form, setForm] = useState<FormState>({
+    fakultas: "",
+    prodi: "",
+    ukuranToga: "",
+    email: "",
+    password: "",
+  });
   const [errors, setErrors] = useState<FormErrors>({});
   const [tamuStatus, setTamuStatus] = useState<"NONE" | "PENDING" | "APPROVED" | "REJECTED" | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -618,6 +630,8 @@ export default function ProfilPage() {
             fakultas: result.data.fakultas ?? "",
             prodi: result.data.prodi ?? "",
             ukuranToga: result.data.ukuranToga ?? "",
+            email: result.data.email ?? "",
+            password: "",
           });
         }
       })
@@ -696,6 +710,14 @@ export default function ProfilPage() {
     const e: FormErrors = {};
     if (!form.fakultas) e.fakultas = "Fakultas wajib dipilih";
     if (!form.prodi.trim()) e.prodi = "Program studi wajib diisi";
+    if (!form.email.trim()) {
+      e.email = "Email wajib diisi";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      e.email = "Format email tidak valid";
+    }
+    if (form.password && form.password.length < 8) {
+      e.password = "Password minimal 8 karakter";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -712,12 +734,15 @@ export default function ProfilPage() {
         body: JSON.stringify({
           fakultas: form.fakultas,
           prodi: form.prodi,
+          email: form.email,
           ...(form.ukuranToga ? { ukuranToga: form.ukuranToga } : {}),
+          ...(form.password ? { password: form.password } : {}),
         }),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Gagal menyimpan");
-      setData((prev) => prev ? { ...prev, fakultas: form.fakultas, prodi: form.prodi, ukuranToga: form.ukuranToga } : prev);
+      setData((prev) => prev ? { ...prev, fakultas: form.fakultas, prodi: form.prodi, ukuranToga: form.ukuranToga, email: form.email } : prev);
+      setForm((f) => ({ ...f, password: "" }));
       toast.success("Profil berhasil disimpan", {
         description: "Perubahan data Anda telah tersimpan.",
         icon: <CheckCircle2 className="size-4 text-emerald-400" />,
@@ -868,8 +893,73 @@ export default function ProfilPage() {
             </div>
             <div>
               <FieldLabel icon={Mail} label="Email" />
-              <input type="email" value={data?.email ?? ""} disabled className={inputDisabled} />
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, email: e.target.value }));
+                  setErrors((er) => ({ ...er, email: undefined }));
+                }}
+                className={errors.email ? inputError : inputNormal}
+                placeholder="nama@gmail.com"
+              />
+              <AnimatePresence>
+                {errors.email && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="mt-1.5 text-[0.65rem] text-red-500 dark:text-red-400 flex items-center gap-1"
+                  >
+                    <AlertCircle className="size-3" /> {errors.email}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
+          </div>
+
+          <div>
+            <FieldLabel icon={Lock} label="Password Baru" />
+            <div className="relative group">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={form.password || ""}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, password: e.target.value }));
+                  setErrors((er) => ({ ...er, password: undefined }));
+                }}
+                className={(errors.password ? inputError : inputNormal) + " pr-10"}
+                placeholder="Masukkan password baru (minimal 8 karakter)..."
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+                aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer rounded-lg p-1 text-slate-400 transition-colors duration-200 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-zinc-200"
+              >
+                {showPassword ? (
+                  <EyeOff className="size-[17px]" />
+                ) : (
+                  <Eye className="size-[17px]" />
+                )}
+              </button>
+            </div>
+            <p className="mt-1.5 text-[0.62rem] text-slate-400 dark:text-white/20">
+              Kosongkan jika tidak ingin mengubah password
+            </p>
+            <AnimatePresence>
+              {errors.password && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-1.5 text-[0.65rem] text-red-500 dark:text-red-400 flex items-center gap-1"
+                >
+                  <AlertCircle className="size-3" /> {errors.password}
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
         </SectionCard>
 

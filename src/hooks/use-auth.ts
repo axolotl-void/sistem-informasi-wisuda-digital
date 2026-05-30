@@ -37,7 +37,7 @@ export function useAuth() {
         if (role === "SUPER_ADMIN" || role === "ADMIN_FAKULTAS") {
           router.replace(ROUTES.ADMIN.DASHBOARD);
         } else if (role === "PETUGAS_SCAN") {
-          router.replace(ROUTES.SCANNER.SCAN);
+          router.replace(ROUTES.SCANNER.PETUGAS);
         } else {
           router.replace(ROUTES.LOGIN);
         }

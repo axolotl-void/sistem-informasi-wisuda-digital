@@ -16,6 +16,7 @@ export const ROUTES = {
   },
   SCANNER: {
     SCAN: "/scan",
+    PETUGAS: "/petugas/scan",
   },
   MAHASISWA: {
     DASHBOARD: "/mahasiswa/dashboard",

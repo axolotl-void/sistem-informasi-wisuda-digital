@@ -17,7 +17,11 @@ const ROLE_ROUTES: Record<string, UserRole[]> = {
   "/mahasiswa": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
   "/undangan": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
   "/kehadiran": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
-  "/scan": ["PETUGAS_SCAN", "SUPER_ADMIN"],
+  "/seat-monitoring": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
+  "/laporan": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
+  "/pengaturan": ["SUPER_ADMIN"],
+  "/scan": ["SUPER_ADMIN", "ADMIN_FAKULTAS"],
+  "/petugas/scan": ["PETUGAS_SCAN", "SUPER_ADMIN"],
 };
 
 export function proxy(request: NextRequest) {
@@ -75,7 +79,7 @@ function getDefaultRouteForRole(role: UserRole): string {
     case "ADMIN_FAKULTAS":
       return "/dashboard";
     case "PETUGAS_SCAN":
-      return "/scan";
+      return "/petugas/scan";
     case "MAHASISWA":
       return "/portal";
     default:

@@ -32,6 +32,10 @@ interface UseQrScannerOptions {
   qrbox?: number | QrBoxFn;
 }
 
+// A global Promise chain to serialize all start/stop scanner operations across components/hooks.
+// This prevents concurrent camera operations and resolves race conditions (like React Strict Mode double-mounting).
+let globalScannerChain = Promise.resolve();
+
 export function useQrScanner({
   onScan,
   onError,
@@ -96,197 +100,170 @@ export function useQrScanner({
     }
   }, []);
 
-  const startScanning = useCallback(async () => {
-    if (scannerRef.current || isStartingRef.current) return;
-    isStartingRef.current = true;
+  const startScanning = useCallback(() => {
+    globalScannerChain = globalScannerChain.then(async () => {
+      // Abort starting if the hook is already unmounted
+      if (!isMountedRef.current) return;
 
-    // Clean up any existing active streams/tracks before starting a new one
-    stopActiveStreams();
-    stopAllVideoTracks();
+      if (scannerRef.current || isStartingRef.current) return;
+      isStartingRef.current = true;
 
-    let originalGetUserMedia: any = null;
-    let patched = false;
+      // Clean up any existing active streams/tracks before starting a new one
+      stopActiveStreams();
+      stopAllVideoTracks();
 
-    // Temporarily patch getUserMedia to capture the MediaStream instance
-    if (typeof window !== "undefined" && navigator.mediaDevices) {
-      try {
-        const mediaDevices = navigator.mediaDevices as any;
-        if (mediaDevices.getUserMedia) {
-          originalGetUserMedia = mediaDevices.getUserMedia.bind(mediaDevices);
-          mediaDevices.getUserMedia = async (constraints: any) => {
-            const stream = await originalGetUserMedia(constraints);
-            activeStreamsRef.current.push(stream);
-            return stream;
-          };
-          patched = true;
+      let originalGetUserMedia: any = null;
+      let patched = false;
+
+      // Temporarily patch getUserMedia to capture the MediaStream instance
+      if (typeof window !== "undefined" && navigator.mediaDevices) {
+        try {
+          const mediaDevices = navigator.mediaDevices as any;
+          if (mediaDevices.getUserMedia) {
+            originalGetUserMedia = mediaDevices.getUserMedia.bind(mediaDevices);
+            mediaDevices.getUserMedia = async (constraints: any) => {
+              const stream = await originalGetUserMedia(constraints);
+              activeStreamsRef.current.push(stream);
+              return stream;
+            };
+            patched = true;
+          }
+        } catch (e) {
+          console.warn("[QR Scanner] Failed to patch getUserMedia:", e);
         }
-      } catch (e) {
-        console.warn("[QR Scanner] Failed to patch getUserMedia:", e);
-      }
-    }
-
-    try {
-      const scanner = new Html5Qrcode(containerId, {
-        verbose: false,
-        useBarCodeDetectorIfSupported: true,
-      });
-      scannerRef.current = scanner;
-
-      const scanConfig: {
-        fps: number;
-        disableFlip: boolean;
-        videoConstraints: MediaTrackConstraints;
-        qrbox?: number | { width: number; height: number } | QrBoxFn;
-      } = {
-        fps,
-        disableFlip: false,
-        videoConstraints: {
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      };
-
-      // Hanya kirim qrbox jika diminta eksplisit — kalau tidak, library scan full frame tanpa overlay hitam
-      if (qrbox !== undefined) {
-        scanConfig.qrbox =
-          typeof qrbox === "number"
-            ? { width: qrbox, height: qrbox }
-            : qrbox;
       }
 
-      await scanner.start(
-        { facingMode: "environment" },
-        scanConfig,
-        (decodedText) => {
-          onScanRef.current(decodedText);
-        },
-        (errorMessage) => {
-          // Ignore frequent "not found" errors
-          if (!errorMessage.includes("No MultiFormat Readers")) {
-            onErrorRef.current?.(errorMessage);
+      try {
+        const scanner = new Html5Qrcode(containerId, {
+          verbose: false,
+          useBarCodeDetectorIfSupported: true,
+        });
+        scannerRef.current = scanner;
+
+        const scanConfig: {
+          fps: number;
+          disableFlip: boolean;
+          videoConstraints: MediaTrackConstraints;
+          qrbox?: number | { width: number; height: number } | QrBoxFn;
+        } = {
+          fps,
+          disableFlip: false,
+          videoConstraints: {
+            facingMode: "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+        };
+
+        // Hanya kirim qrbox jika diminta eksplisit — kalau tidak, library scan full frame tanpa overlay hitam
+        if (qrbox !== undefined) {
+          scanConfig.qrbox =
+            typeof qrbox === "number"
+              ? { width: qrbox, height: qrbox }
+              : qrbox;
+        }
+
+        await scanner.start(
+          { facingMode: "environment" },
+          scanConfig,
+          (decodedText) => {
+            onScanRef.current(decodedText);
+          },
+          () => {
+            // Silent ignore frame-by-frame decoding failures to optimize performance and prevent console spam
+          }
+        );
+
+        // Check if the component was unmounted while the camera was starting
+        if (!isMountedRef.current) {
+          try {
+            const isRunning = scanner.isScanning || 
+                              scanner.getState() === Html5QrcodeScannerState.SCANNING || 
+                              scanner.getState() === Html5QrcodeScannerState.PAUSED;
+            if (isRunning) {
+              await scanner.stop();
+            }
+          } catch (stopErr) {
+            console.warn("[QR Scanner] Error stopping on rapid unmount:", stopErr);
+          }
+          try {
+            (scanner as any).clear?.();
+          } catch (clearErr) {
+            console.warn("[QR Scanner] Error clearing on rapid unmount:", clearErr);
+          }
+          stopActiveStreams();
+          stopAllVideoTracks();
+          if (scannerRef.current === scanner) {
+            scannerRef.current = null;
+          }
+          return;
+        }
+
+        setIsScanning(true);
+        setHasPermission(true);
+      } catch (err) {
+        setHasPermission(false);
+        onErrorRef.current?.(err instanceof Error ? err.message : "Gagal mengakses kamera");
+        scannerRef.current = null;
+        stopActiveStreams();
+        stopAllVideoTracks();
+      } finally {
+        // Restore getUserMedia
+        if (patched && originalGetUserMedia && typeof window !== "undefined" && navigator.mediaDevices) {
+          try {
+            (navigator.mediaDevices as any).getUserMedia = originalGetUserMedia;
+          } catch (e) {
+            console.warn("[QR Scanner] Failed to restore getUserMedia:", e);
           }
         }
-      );
+        isStartingRef.current = false;
+      }
+    });
+  }, [fps, qrbox, stopActiveStreams, stopAllVideoTracks]);
 
-      // Check if the component is still mounted.
-      // If it was unmounted while the camera was starting (React Strict Mode double-mounting),
-      // stop it immediately to prevent camera leaks.
-      if (!isMountedRef.current) {
-        try {
+  const stopScanning = useCallback(() => {
+    globalScannerChain = globalScannerChain.then(async () => {
+      const scanner = scannerRef.current;
+      
+      try {
+        if (scanner) {
           const isRunning = scanner.isScanning || 
                             scanner.getState() === Html5QrcodeScannerState.SCANNING || 
                             scanner.getState() === Html5QrcodeScannerState.PAUSED;
           if (isRunning) {
             await scanner.stop();
           }
-        } catch (stopErr) {
-          console.warn("[QR Scanner] Error stopping on rapid unmount:", stopErr);
-        }
-        try {
-          (scanner as any).clear?.();
-        } catch (clearErr) {
-          console.warn("[QR Scanner] Error clearing on rapid unmount:", clearErr);
-        }
-        stopActiveStreams();
-        stopAllVideoTracks();
-        if (scannerRef.current === scanner) {
-          scannerRef.current = null;
-        }
-        return;
-      }
-
-      setIsScanning(true);
-      setHasPermission(true);
-    } catch (err) {
-      setHasPermission(false);
-      onErrorRef.current?.(err instanceof Error ? err.message : "Gagal mengakses kamera");
-      scannerRef.current = null;
-      // If start failed, clean up any stream that might have been partially opened
-      stopActiveStreams();
-      stopAllVideoTracks();
-    } finally {
-      // Restore getUserMedia
-      if (patched && originalGetUserMedia && typeof window !== "undefined" && navigator.mediaDevices) {
-        try {
-          (navigator.mediaDevices as any).getUserMedia = originalGetUserMedia;
-        } catch (e) {
-          console.warn("[QR Scanner] Failed to restore getUserMedia:", e);
-        }
-      }
-      isStartingRef.current = false;
-    }
-  }, [fps, qrbox, stopActiveStreams, stopAllVideoTracks]);
-
-  const stopScanning = useCallback(async () => {
-    const scanner = scannerRef.current;
-    
-    try {
-      if (scanner) {
-        const isRunning = scanner.isScanning || 
-                          scanner.getState() === Html5QrcodeScannerState.SCANNING || 
-                          scanner.getState() === Html5QrcodeScannerState.PAUSED;
-        if (isRunning) {
-          await scanner.stop();
-        }
-      }
-    } catch (err) {
-      console.warn("[QR Scanner] Error stopping scanner:", err);
-    } finally {
-      // ALWAYS stop all captured streams and video element tracks
-      stopActiveStreams();
-      stopAllVideoTracks();
-
-      try {
-        if (scanner) {
-          (scanner as any).clear?.();
         }
       } catch (err) {
-        console.warn("[QR Scanner] Error clearing scanner:", err);
-      }
+        console.warn("[QR Scanner] Error stopping scanner:", err);
+      } finally {
+        // ALWAYS stop all captured streams and video element tracks
+        stopActiveStreams();
+        stopAllVideoTracks();
 
-      scannerRef.current = null;
-      setIsScanning(false);
-    }
+        try {
+          if (scanner) {
+            (scanner as any).clear?.();
+          }
+        } catch (err) {
+          console.warn("[QR Scanner] Error clearing scanner:", err);
+        }
+
+        scannerRef.current = null;
+        setIsScanning(false);
+      }
+    });
   }, [stopActiveStreams, stopAllVideoTracks]);
 
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      
-      // Safe cleanup on unmount with a small timeout to let any active transitions settle
-      setTimeout(() => {
-        if (scannerRef.current) {
-          const scanner = scannerRef.current;
-          try {
-            const isRunning = scanner.isScanning || 
-                              scanner.getState() === Html5QrcodeScannerState.SCANNING || 
-                              scanner.getState() === Html5QrcodeScannerState.PAUSED;
-            if (isRunning) {
-              scanner.stop()
-                .then(() => {
-                  try { (scanner as any).clear?.(); } catch {}
-                })
-                .catch((err) => {
-                  console.warn("[QR Scanner] Failed to stop on unmount:", err);
-                  try { (scanner as any).clear?.(); } catch {}
-                });
-            } else {
-              try { (scanner as any).clear?.(); } catch {}
-            }
-          } catch (err) {
-            console.warn("[QR Scanner] Error during unmount cleanup:", err);
-          }
-          scannerRef.current = null;
-        }
-
-        // ALWAYS stop all captured streams and video element tracks on unmount
-        stopActiveStreams();
-        stopAllVideoTracks();
-      }, 50);
+      // Stop scanning synchronously by appending to the global serialization chain.
+      // This ensures that the webcam is completely released before any new scan starts.
+      stopScanning();
     };
-  }, [stopActiveStreams, stopAllVideoTracks]);
+  }, [stopScanning]);
 
   return {
     containerId,

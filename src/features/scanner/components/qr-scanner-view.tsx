@@ -49,6 +49,9 @@ export function QrScannerView() {
       const data = res.data.data;
       setScanResult(data);
       playBeep(data.success);
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(data.success ? [100, 50, 100] : [300]);
+      }
       if (data.success) toast.success(data.message || "Absensi berhasil dicatat!");
       else toast.error(data.message || "QR Code tidak valid!");
     } catch (error: any) {
@@ -75,7 +78,7 @@ export function QrScannerView() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="rounded-2xl border border-gray-200/80 bg-white dark:border-white/[0.08] dark:bg-[#0C1120] shadow-sm overflow-hidden"
+      className="rounded-[32px] border border-gray-200/60 bg-white/80 dark:border-white/[0.08] dark:bg-[#0C1120]/45 backdrop-blur-2xl shadow-xl overflow-hidden max-w-[320px] sm:max-w-[350px] md:max-w-[380px] mx-auto w-full"
     >
       {/* -- Top bar -- */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-white/[0.06]">
@@ -113,7 +116,7 @@ export function QrScannerView() {
       <div className="px-4 pt-3 pb-3">
         <div className={cn(
           "relative w-full overflow-hidden rounded-xl flex items-center justify-center transition-all duration-300",
-          "aspect-[4/3]",
+          "aspect-square",
           isScanning
             ? "bg-gray-950 ring-1 ring-blue-500/30 shadow-lg shadow-blue-500/10"
             : "bg-gray-50 border-2 border-dashed border-gray-200 dark:bg-white/[0.02] dark:border-white/[0.08]"
@@ -157,9 +160,9 @@ export function QrScannerView() {
                 })}
                 {!localLoading && (
                   <motion.div
-                    className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-80"
+                    className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-90 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
                     animate={{ top: ["5%", "95%", "5%"] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                    transition={{ duration: 2.0, repeat: Infinity, ease: "easeInOut" }}
                   />
                 )}
               </div>
