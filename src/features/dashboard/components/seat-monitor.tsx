@@ -411,22 +411,6 @@ export function SeatMonitor() {
                 LIVE
               </span>
             </h2>
-            <div
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold border transition-all duration-300",
-                isConnected
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                  : "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400"
-              )}
-            >
-              <span
-                className={cn(
-                  "size-1.5 rounded-full shrink-0",
-                  isConnected ? "bg-emerald-500 dark:bg-emerald-400 animate-pulse" : "bg-red-500 dark:bg-red-400"
-                )}
-              />
-              {isConnected ? "LIVE SYNC" : "OFFLINE"}
-            </div>
           </div>
           <p className="text-sm font-semibold text-slate-500 dark:text-white/40 mt-1 leading-relaxed">
             Layout Auditorium Utama ·{" "}
@@ -441,7 +425,7 @@ export function SeatMonitor() {
           </p>
         </div>
 
-        {/* Legend & Refresh */}
+        {/* Legend */}
         <div className="flex flex-wrap items-center gap-4 lg:gap-6">
           <div className="flex flex-wrap gap-4 bg-slate-100/60 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04] rounded-2xl px-4 py-2.5 backdrop-blur-md">
             {(
@@ -465,20 +449,6 @@ export function SeatMonitor() {
               </div>
             ))}
           </div>
-
-          <button
-            type="button"
-            onClick={fetchSeats}
-            disabled={loading}
-            className={cn(
-              "flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all active:scale-95 disabled:opacity-50 cursor-pointer",
-              "border-slate-200/80 bg-white/70 text-slate-700 hover:bg-slate-50",
-              "dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-white/80 dark:hover:bg-white/[0.08]"
-            )}
-          >
-            <RefreshCw className={cn("size-4", loading && "animate-spin")} />
-            Sync Map
-          </button>
         </div>
       </div>
 
