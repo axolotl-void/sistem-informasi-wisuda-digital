@@ -26,6 +26,7 @@ import {
   glassBtnPrimary,
   glassInput,
 } from "@/components/ui/liquid-glass";
+import { usePengaturanStore } from "@/store/pengaturan.store";
 
 // --- Types --------------------------------------------------------------------
 
@@ -377,6 +378,7 @@ function TabEdit({
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }) {
+  const { sesiList } = usePengaturanStore();
   const [showPassword, setShowPassword] = useState(false);
   const availableProdi = form.fakultas ? (PRODI_MAP[form.fakultas] ?? []) : [];
 
@@ -551,8 +553,10 @@ function TabEdit({
                 <SelectValue placeholder="Pilih sesi…" />
               </SelectTrigger>
               <SelectContent className={selectContentCls}>
-                {SESI_OPTIONS.map((s) => (
-                  <SelectItem key={s.value} value={s.value} className="cursor-pointer text-sm dark:focus:bg-white/10">{s.label}</SelectItem>
+                {sesiList.map((s) => (
+                  <SelectItem key={s} value={s} className="cursor-pointer text-sm dark:focus:bg-white/10">
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -645,10 +649,15 @@ function TabEdit({
 
 export function EditModal({ student, open, onClose, onSuccess, onUpdated }: EditModalProps) {
   const { update, verify } = useWisudawan();
+  const fetchSettings = usePengaturanStore((state) => state.fetchSettings);
   const [isLoading,   setIsLoading]   = useState(false);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
   const [activeTab,   setActiveTab]   = useState("detail");
   const [detailedStudent, setDetailedStudent] = useState<WisudawanRow | null>(null);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const [form, setFormState] = useState<EditFormData>({
     nama: "", nim: "", email: "", password: "",

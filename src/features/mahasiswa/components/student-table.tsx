@@ -126,10 +126,11 @@ function StudentRow({
     <div
       className={cn(
         ROW_GRID,
-        "text-[13px] transition-colors",
+        "text-[13px] transition-colors cursor-pointer",
         "border-b border-white/40 last:border-0",
         "hover:bg-white/40 dark:border-white/[0.05] dark:hover:bg-white/[0.04]",
       )}
+      onClick={() => onEdit?.(s)}
     >
       <div className="flex items-center gap-2.5 px-3 py-3">
         <div className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-blue-400/30 bg-gradient-to-br from-blue-400/25 to-blue-600/10 text-[10px] font-bold text-blue-800 dark:border-blue-500/25 dark:text-blue-300">

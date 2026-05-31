@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Download, RefreshCw, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { useKehadiranStore } from "@/store/kehadiran.store";
 import { FAKULTAS_LIST, API_ROUTES } from "@/utils/constants";
 import { cn } from "@/lib/utils";
+import { usePengaturanStore } from "@/store/pengaturan.store";
 
 const inputClass = cn(
   "h-9 rounded-xl border text-xs font-medium outline-none transition-all duration-200",
@@ -41,7 +42,12 @@ export function KehadiranToolbar() {
     isLoading,
   } = useKehadiranStore();
 
+  const { sesiList, fetchSettings } = usePengaturanStore();
   const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const handleRefresh = async () => {
     try {
@@ -127,9 +133,11 @@ export function KehadiranToolbar() {
             className={selectClass}
           >
             <option value="all">Semua Sesi</option>
-            <option value="Sesi 1">Sesi 1</option>
-            <option value="Sesi 2">Sesi 2</option>
-            <option value="Sesi 3">Sesi 3</option>
+            {sesiList.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
           </select>
           <span className="pointer-events-none absolute right-2.5 top-1/2 size-1.5 -translate-y-1/2 rotate-45 border-r-2 border-b-2 border-slate-400 dark:border-white/30" />
         </div>

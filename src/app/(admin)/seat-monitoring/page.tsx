@@ -14,15 +14,6 @@ export default function SeatMonitoringPage() {
             </span>
             <span className="hidden dark:inline">Seat Monitoring</span>
           </h1>
-          <p className="mt-2 text-sm font-medium text-slate-700 dark:text-white/40">
-            Pemantauan denah kursi wisuda secara real-time —{" "}
-            {new Date().toLocaleDateString("id-ID", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
         </div>
 
         {/* Full Seat Monitor Component */}
