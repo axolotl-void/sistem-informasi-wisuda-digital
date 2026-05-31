@@ -3,13 +3,14 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  RefreshCw, Crown, HelpCircle, 
-  Sparkles, CheckCircle2, Info, Maximize2
+   RefreshCw, Crown, HelpCircle, 
+   Sparkles, CheckCircle2, Info, Maximize2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SeatModal } from "./seat-modal";
 import { useSocket } from "@/hooks/use-socket";
 import { useScannerStore } from "@/store/scanner.store";
+import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 
 // --- Types --------------------------------------------------------------------
 
@@ -389,21 +390,22 @@ export function SeatMonitor() {
   }, [seats]);
 
   return (
-    <motion.div
+    <LiquidGlassCard
+      noEntrance={false}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="rounded-3xl border border-white/[0.08] bg-[#070A13]/85 p-6 backdrop-blur-xl shadow-2xl overflow-hidden relative"
+      className="p-6 overflow-hidden relative"
     >
       {/* Ambient glow */}
-      <div className="absolute -top-40 left-1/3 -z-10 size-[500px] rounded-full bg-violet-600/10 blur-[120px] animate-pulse" />
+      <div className="absolute -top-40 left-1/3 -z-10 size-[500px] rounded-full bg-violet-600/10 blur-[120px] animate-pulse dark:bg-violet-600/10" />
       <div className="absolute -bottom-40 right-1/4 -z-10 size-[450px] rounded-full bg-blue-600/5 blur-[120px]" />
 
       {/* -- Header -------------------------------------------------- */}
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-white/[0.06] pb-5">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/80 dark:border-white/[0.06] pb-5">
         <div>
           <div className="flex items-center gap-2.5">
-            <h2 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+            <h2 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-2">
               Auditorium Seat Monitor{" "}
               <span className="text-xs bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent font-bold font-mono">
                 LIVE
@@ -413,26 +415,26 @@ export function SeatMonitor() {
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold border transition-all duration-300",
                 isConnected
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                  : "bg-red-500/10 border-red-500/20 text-red-400"
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                  : "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400"
               )}
             >
               <span
                 className={cn(
                   "size-1.5 rounded-full shrink-0",
-                  isConnected ? "bg-emerald-400 animate-pulse" : "bg-red-400"
+                  isConnected ? "bg-emerald-500 dark:bg-emerald-400 animate-pulse" : "bg-red-500 dark:bg-red-400"
                 )}
               />
               {isConnected ? "LIVE SYNC" : "OFFLINE"}
             </div>
           </div>
-          <p className="text-sm font-semibold text-white/40 mt-1 leading-relaxed">
+          <p className="text-sm font-semibold text-slate-500 dark:text-white/40 mt-1 leading-relaxed">
             Layout Auditorium Utama ·{" "}
-            <span className="text-white font-bold">
+            <span className="text-slate-800 dark:text-white font-bold">
               {statsSummary.totalCheckedIn}
             </span>{" "}
             hadir dari{" "}
-            <span className="text-white font-bold">
+            <span className="text-slate-800 dark:text-white font-bold">
               {statsSummary.totalAssigned}
             </span>{" "}
             terdaftar
@@ -441,7 +443,7 @@ export function SeatMonitor() {
 
         {/* Legend & Refresh */}
         <div className="flex flex-wrap items-center gap-4 lg:gap-6">
-          <div className="flex flex-wrap gap-4 bg-white/[0.02] border border-white/[0.04] rounded-2xl px-4 py-2.5 backdrop-blur-md">
+          <div className="flex flex-wrap gap-4 bg-slate-100/60 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04] rounded-2xl px-4 py-2.5 backdrop-blur-md">
             {(
               Object.entries(statusConfig) as [
                 SeatStatus,
@@ -457,7 +459,7 @@ export function SeatMonitor() {
                   style={{ filter: cfg.filter }}
                   draggable={false}
                 />
-                <span className="text-[11px] font-bold text-white/50">
+                <span className="text-[11px] font-bold text-slate-600 dark:text-white/50">
                   {cfg.label}
                 </span>
               </div>
@@ -468,7 +470,11 @@ export function SeatMonitor() {
             type="button"
             onClick={fetchSeats}
             disabled={loading}
-            className="flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-xs font-bold text-white/80 transition-all hover:bg-white/[0.08] active:scale-95 disabled:opacity-50 cursor-pointer"
+            className={cn(
+              "flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all active:scale-95 disabled:opacity-50 cursor-pointer",
+              "border-slate-200/80 bg-white/70 text-slate-700 hover:bg-slate-50",
+              "dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-white/80 dark:hover:bg-white/[0.08]"
+            )}
           >
             <RefreshCw className={cn("size-4", loading && "animate-spin")} />
             Sync Map
@@ -483,28 +489,28 @@ export function SeatMonitor() {
             initial={{ opacity: 0, y: -10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
-            className="mb-5 flex items-center justify-between gap-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+            className="mb-5 flex items-center justify-between gap-4 rounded-2xl border border-emerald-400/30 bg-emerald-50/70 p-4 text-emerald-800 shadow-[0_4px_12px_rgba(16,185,129,0.08)] dark:border-emerald-500/20 dark:bg-emerald-500/[0.06] dark:text-emerald-300 dark:shadow-[0_0_20px_rgba(16,185,129,0.1)]"
           >
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
                 <Sparkles className="size-5 animate-pulse" />
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                <p className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Scan QR Code Berhasil
                 </p>
-                <p className="text-sm font-semibold text-white mt-0.5">
-                  <span className="text-emerald-300 font-bold">
+                <p className="text-sm font-semibold text-slate-800 dark:text-white mt-0.5">
+                  <span className="text-emerald-700 dark:text-emerald-300 font-bold">
                     {recentArrival.name}
                   </span>{" "}
                   ({recentArrival.nim}) menempati kursi{" "}
-                  <span className="font-extrabold text-emerald-400">
+                  <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
                     {recentArrival.blockName} {recentArrival.seatCode}
                   </span>
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded-lg text-[10px] font-mono font-bold text-emerald-400">
+            <div className="flex items-center gap-1 bg-emerald-100/80 px-2 py-1 rounded-lg text-[10px] font-mono font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
               <CheckCircle2 className="size-3.5" /> Real-time
             </div>
           </motion.div>
@@ -512,7 +518,7 @@ export function SeatMonitor() {
       </AnimatePresence>
 
       {/* -- Main Seat Map ------------------------------------------- */}
-      <div className="relative w-full border border-white/[0.08] bg-black/60 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+      <div className="relative w-full border border-slate-200/80 dark:border-white/[0.08] bg-[#0d121f]/95 dark:bg-black/60 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
         {/* Stage gradient line */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-600 via-blue-500 to-emerald-500 blur-[1px]" />
 
@@ -700,6 +706,6 @@ export function SeatMonitor() {
 
       {/* Seat Detail Modal */}
       <SeatModal seat={selectedSeat} onClose={() => setSelectedSeat(null)} />
-    </motion.div>
+    </LiquidGlassCard>
   );
 }
