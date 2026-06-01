@@ -186,7 +186,7 @@ const KehadiranRow = memo(function KehadiranRow({
       </div>
 
       <div className="w-24 shrink-0 py-3.5 px-4 text-xs font-semibold text-slate-600 dark:text-white/50">
-        {k.petugasId ?? "—"}
+        {k.gate ?? k.petugasId ?? "—"}
       </div>
 
       <div className="w-28 shrink-0 py-3.5 px-4">

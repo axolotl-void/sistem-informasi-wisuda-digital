@@ -7,6 +7,7 @@ import { InMemoryRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
 const scanSchema = z.object({
   qrToken: z.string().min(1, "QR Token tidak boleh kosong"),
+  gate: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
     const result = await ScannerService.processQrScan({
       qrToken: parsed.data.qrToken,
       petugasId: payload.sub,
+      gate: parsed.data.gate,
     });
 
     const status = result.success ? 200 : 400;

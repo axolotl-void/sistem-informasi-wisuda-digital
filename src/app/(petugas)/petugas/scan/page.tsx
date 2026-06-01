@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useScannerStore } from "@/store/scanner.store";
+import { usePengaturanStore } from "@/store/pengaturan.store";
 import { useSocket } from "@/hooks/use-socket";
 import { QrScannerView } from "@/features/scanner/components/qr-scanner-view";
 import { ScanResultPanel } from "@/features/scanner/components/scan-result-panel";
@@ -21,13 +22,23 @@ import {
   WifiOff,
   Sparkles,
   TrendingUp,
+  DoorOpen,
 } from "lucide-react";
 
 export default function ScanPage() {
   const [activeTab, setActiveTab] = useState<"kehadiran" | "scanner" | "profil">("scanner");
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { scanHistory, totalScanned, isConnected } = useScannerStore();
+  const { scanHistory, totalScanned, isConnected, activeGate, setActiveGate } = useScannerStore();
+  const { gateList, fetchSettings } = usePengaturanStore();
+
+  useEffect(() => {
+    fetchSettings();
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("active_gate");
+      if (saved) setActiveGate(saved);
+    }
+  }, [fetchSettings, setActiveGate]);
   const { user, logout } = useAuth();
   
   useSocket("scanner");
@@ -95,6 +106,26 @@ export default function ScanPage() {
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start w-full">
                 {/* Left: Camera view */}
                 <div className="md:col-span-6 lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
+                  {/* Gate Selector */}
+                  <div className="rounded-3xl border border-white/[0.08] bg-white/[0.02] p-4.5 backdrop-blur-xl flex flex-col gap-2.5 mx-auto w-full max-w-[320px] sm:max-w-[350px] md:max-w-[380px]">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <DoorOpen className="size-3.5 text-blue-400 animate-pulse" />
+                      Pintu Jaga (Gate) Aktif
+                    </label>
+                    <select
+                      value={activeGate || ""}
+                      onChange={(e) => setActiveGate(e.target.value || null)}
+                      className="w-full h-11 px-3.5 rounded-xl border border-white/[0.08] bg-[#0C1120] text-xs text-white outline-none focus:border-blue-500/50 focus:bg-[#0C1120] transition-colors"
+                    >
+                      <option value="">-- Pilih Gate Pemindai --</option>
+                      {gateList.map((g) => (
+                        <option key={g} value={g}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   <QrScannerView />
                 </div>
 

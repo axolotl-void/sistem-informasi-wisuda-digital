@@ -32,6 +32,7 @@ interface MahasiswaData {
   prodi: string;
   fakultas: string;
   sesiWisuda: string | null;
+  gate: string | null;
   undangan: UndanganData | null;
 }
 
@@ -96,7 +97,8 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
   qrDataUrl: string;
 }) {
   const cfg = STATUS_CFG[undangan.statusUndangan] ?? STATUS_CFG.AKTIF;
-  const { waktu, gate } = getSesiInfo(mahasiswa.sesiWisuda);
+  const { waktu, gate: defaultGate } = getSesiInfo(mahasiswa.sesiWisuda);
+  const gate = mahasiswa.gate || defaultGate;
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white dark:border-white/[0.1] dark:bg-gradient-to-b dark:from-[#0d1829] dark:to-[#080f1e] shadow-lg dark:shadow-2xl">
@@ -285,8 +287,9 @@ export default function TiketPage() {
 
   function handleShare() {
     if (!mahasiswa || !undangan) return;
-    const { waktu, gate } = getSesiInfo(mahasiswa.sesiWisuda);
-    const text = `🎓 Undangan Wisuda Digital\n👤 ${mahasiswa.nama}\n🎫 Kode: ${undangan.kode}\n📅 ${formatTanggal(undangan.tanggalWisuda)}\n🕐 ${mahasiswa.sesiWisuda ?? "—"} (${waktu})\n📍 ${undangan.tempatWisuda}`;
+    const { waktu, gate: defaultGate } = getSesiInfo(mahasiswa.sesiWisuda);
+    const gate = mahasiswa.gate || defaultGate;
+    const text = `🎓 Undangan Wisuda Digital\n👤 ${mahasiswa.nama}\n🎫 Kode: ${undangan.kode}\n📅 ${formatTanggal(undangan.tanggalWisuda)}\n🕐 ${mahasiswa.sesiWisuda ?? "—"} (${waktu})\n📍 ${undangan.tempatWisuda}\n🚪 Gate Masuk: ${gate}`;
     if (navigator.share) {
       navigator.share({ title: "Undangan Wisuda", text }).catch(() => {});
     } else {
@@ -299,7 +302,8 @@ export default function TiketPage() {
     setIsDownloading(true);
     try {
       const { default: jsPDF } = await import("jspdf");
-      const { waktu, gate } = getSesiInfo(mahasiswa.sesiWisuda);
+      const { waktu, gate: defaultGate } = getSesiInfo(mahasiswa.sesiWisuda);
+      const gate = mahasiswa.gate || defaultGate;
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [85, 150] });
 
       pdf.setFillColor(8, 15, 30);

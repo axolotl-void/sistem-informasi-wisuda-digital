@@ -30,6 +30,7 @@ export interface WisudawanRow {
   undanganKode: string | null;
   undanganStatus: string | null;
   sesiWisuda: string | null;
+  gate: string | null;
   kehadiranStatus: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -114,6 +115,7 @@ export class WisudawanService {
       undanganKode: m.undangan[0]?.kode ?? null,
       undanganStatus: m.undangan[0]?.statusUndangan ?? null,
       sesiWisuda: m.sesiWisuda ?? null,
+      gate: m.gate ?? null,
       kehadiranStatus: m.kehadiran[0]?.statusKehadiran ?? null,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
@@ -169,6 +171,7 @@ export class WisudawanService {
       undanganKode: m.undangan[0]?.kode ?? null,
       undanganStatus: m.undangan[0]?.statusUndangan ?? null,
       sesiWisuda: m.sesiWisuda ?? null,
+      gate: m.gate ?? null,
       kehadiranStatus: m.kehadiran[0]?.statusKehadiran ?? null,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
@@ -215,6 +218,8 @@ export class WisudawanService {
           angkatan: input.angkatan,
           userId: user.id,
           status: "AKTIF",
+          sesiWisuda: input.sesiWisuda ?? null,
+          gate: input.gate ?? null,
         },
       });
 
@@ -239,7 +244,8 @@ export class WisudawanService {
       undanganId: null,
       undanganKode: null,
       undanganStatus: null,
-      sesiWisuda: null,
+      sesiWisuda: result.mahasiswa.sesiWisuda ?? null,
+      gate: result.mahasiswa.gate ?? null,
       kehadiranStatus: null,
       createdAt: result.mahasiswa.createdAt,
       updatedAt: result.mahasiswa.updatedAt,
@@ -294,6 +300,7 @@ export class WisudawanService {
     if (input.foto     !== undefined) updateData.foto     = input.foto;
     // sesiWisuda disimpan langsung di tabel mahasiswa
     if (input.sesiWisuda !== undefined) updateData.sesiWisuda = input.sesiWisuda;
+    if (input.gate       !== undefined) updateData.gate       = input.gate;
 
     const mahasiswa = await prisma.mahasiswa.update({
       where: { id },
@@ -332,6 +339,7 @@ export class WisudawanService {
       undanganKode: mahasiswa.undangan[0]?.kode ?? null,
       undanganStatus: mahasiswa.undangan[0]?.statusUndangan ?? null,
       sesiWisuda: mahasiswa.sesiWisuda ?? null,
+      gate: mahasiswa.gate ?? null,
       kehadiranStatus: mahasiswa.kehadiran[0]?.statusKehadiran ?? null,
       createdAt: mahasiswa.createdAt,
       updatedAt: mahasiswa.updatedAt,

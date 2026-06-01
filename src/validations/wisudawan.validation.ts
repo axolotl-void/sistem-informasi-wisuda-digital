@@ -32,6 +32,8 @@ export const createWisudawanSchema = z.object({
     .int()
     .min(2000, "Tahun angkatan tidak valid")
     .max(2100, "Tahun angkatan tidak valid"),
+  sesiWisuda: z.string().optional().nullable(),
+  gate: z.string().optional().nullable(),
 });
 
 export type CreateWisudawanInput = z.infer<typeof createWisudawanSchema>;
@@ -67,6 +69,7 @@ export const updateWisudawanSchema = z.object({
   status: z.enum(["AKTIF", "LULUS", "CUTI", "DROPOUT"]).optional(),
   foto: z.string().url().optional().nullable(),
   sesiWisuda: z.string().optional().nullable(),
+  gate: z.string().optional().nullable(),
 });
 
 export type UpdateWisudawanInput = z.infer<typeof updateWisudawanSchema>;

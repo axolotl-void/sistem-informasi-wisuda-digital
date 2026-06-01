@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
       angkatan: mahasiswa.angkatan,
       status: mahasiswa.status,
       sesiWisuda: mahasiswa.sesiWisuda,
+      gate: mahasiswa.gate,
       foto: mahasiswa.foto,
       ukuranToga: mahasiswa.ukuranToga,
       undangan: mahasiswa.undangan[0] ?? null,

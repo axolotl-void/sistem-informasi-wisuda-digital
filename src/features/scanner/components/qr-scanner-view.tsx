@@ -11,7 +11,7 @@ import { API_ROUTES } from "@/utils/constants";
 import { cn } from "@/lib/utils";
 
 export function QrScannerView() {
-  const { setStatus, setScanResult, status } = useScannerStore();
+  const { setStatus, setScanResult, status, activeGate } = useScannerStore();
   const [localLoading, setLocalLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -45,7 +45,10 @@ export function QrScannerView() {
     setStatus("scanning");
     setErrorMessage(null);
     try {
-      const res = await axios.post(API_ROUTES.KEHADIRAN.SCAN, { qrToken: decodedText });
+      const res = await axios.post(API_ROUTES.KEHADIRAN.SCAN, {
+        qrToken: decodedText,
+        gate: activeGate || undefined,
+      });
       const data = res.data.data;
       setScanResult(data);
       playBeep(data.success);

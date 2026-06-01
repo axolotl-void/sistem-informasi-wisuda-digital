@@ -10,12 +10,14 @@ export interface Kehadiran {
   statusKehadiran: StatusKehadiran;
   waktuScan: Date;
   catatan?: string;
+  gate?: string | null;
   createdAt: Date;
 }
 
 export interface ScanQrDto {
   qrToken: string;
   petugasId: string;
+  gate?: string;
 }
 
 export interface ScanResult {

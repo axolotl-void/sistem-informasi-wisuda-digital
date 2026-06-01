@@ -5,7 +5,7 @@ import {
   User, CreditCard, Building2, BookOpen, Users as UsersIcon,
   Mail, Lock, Eye, EyeOff, Loader2, Save,
   CheckCircle2, XCircle, RotateCcw, GraduationCap,
-  ShieldCheck, CalendarDays, Pencil, Ticket,
+  ShieldCheck, CalendarDays, Pencil, Ticket, DoorOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -48,6 +48,7 @@ interface EditFormData {
   angkatan: number;
   status: string;
   sesiWisuda: string;
+  gate: string;
   kuotaTamu: number;
 }
 
@@ -287,12 +288,23 @@ function TabDetail({
           <p className={detailLabelCls}>Status Undangan</p>
           <p className={detailValueCls}>{student.undanganStatus ?? "-"}</p>
         </div>
-        <div className={cn(detailFieldCls, "md:col-span-2")}>
+        <div className={detailFieldCls}>
           <p className={detailLabelCls}>Sesi Wisuda</p>
           {student.sesiWisuda ? (
             <div className="flex items-center gap-2">
               <GraduationCap className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
               <p className={detailValueCls}>{student.sesiWisuda}</p>
+            </div>
+          ) : (
+            <p className="text-sm font-semibold text-slate-400 dark:text-white/35">Belum Ditentukan</p>
+          )}
+        </div>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Gate Wisuda</p>
+          {student.gate ? (
+            <div className="flex items-center gap-2">
+              <DoorOpen className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+              <p className={detailValueCls}>{student.gate}</p>
             </div>
           ) : (
             <p className="text-sm font-semibold text-slate-400 dark:text-white/35">Belum Ditentukan</p>
@@ -378,7 +390,7 @@ function TabEdit({
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }) {
-  const { sesiList } = usePengaturanStore();
+  const { sesiList, gateList } = usePengaturanStore();
   const [showPassword, setShowPassword] = useState(false);
   const availableProdi = form.fakultas ? (PRODI_MAP[form.fakultas] ?? []) : [];
 
@@ -562,6 +574,32 @@ function TabEdit({
             </Select>
           </div>
 
+          {/* Gate Wisuda */}
+          <div className="space-y-1.5">
+            <label htmlFor="gate-trigger" className={fieldLabelCls}>
+              Gate Wisuda
+            </label>
+            <Select
+              value={form.gate}
+              onValueChange={(v) => setField("gate", v)}
+              disabled={isLoading}
+            >
+              <SelectTrigger
+                id="gate-trigger"
+                className={cn(selectTriggerCls, "h-auto [&>span]:text-slate-900 [&>span[data-placeholder]]:text-slate-400")}
+              >
+                <SelectValue placeholder="Pilih gate masuk…" />
+              </SelectTrigger>
+              <SelectContent className={selectContentCls}>
+                {gateList.map((g) => (
+                  <SelectItem key={g} value={g} className="cursor-pointer text-sm dark:focus:bg-white/10">
+                    {g}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Status Verifikasi */}
           <div className="space-y-1.5">
             <label htmlFor="status-trigger" className={fieldLabelCls}>
@@ -662,7 +700,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
   const [form, setFormState] = useState<EditFormData>({
     nama: "", nim: "", email: "", password: "",
     fakultas: "", prodi: "", angkatan: CURRENT_YEAR,
-    status: "AKTIF", sesiWisuda: "", kuotaTamu: 2,
+    status: "AKTIF", sesiWisuda: "", gate: "", kuotaTamu: 2,
   });
 
   useEffect(() => {
@@ -673,6 +711,9 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         .then((res) => {
           if (res.data?.success) {
             setDetailedStudent(res.data.data);
+            if (res.data.data.gate) {
+              setFormState((prev) => ({ ...prev, gate: res.data.data.gate }));
+            }
           }
         })
         .catch((err) => {
@@ -689,6 +730,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         angkatan:   student.angkatan,
         status:     student.status,
         sesiWisuda: student.sesiWisuda ?? "",
+        gate:       student.gate ?? "",
         kuotaTamu:  2,
       });
       setActiveTab("detail");
@@ -725,6 +767,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         angkatan:   form.angkatan,
         status:     form.status,
         sesiWisuda: form.sesiWisuda || null,
+        gate:       form.gate || null,
       };
       if (form.password.trim()) payload.password = form.password;
 

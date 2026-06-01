@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest) {
     await prisma.konfigurasiSistem.upsert({
       where: { key: CONFIG_KEY },
       update: { value: JSON.stringify(parsed.data) },
-      create: { key: CONFIG_KEY, value: JSON.stringify(parsed.data) },
+      create: { id: CONFIG_KEY, key: CONFIG_KEY, value: JSON.stringify(parsed.data) },
     });
 
     return apiSuccess(parsed.data, "Konfigurasi blok kursi berhasil disimpan");

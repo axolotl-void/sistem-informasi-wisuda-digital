@@ -160,7 +160,7 @@ export class DashboardService {
         time: waktu,
         name: k.mahasiswa.nama,
         seat: nimToSeatLabel(k.mahasiswa.nim, seatIndex),
-        gate: petugasMap.get(k.petugasId) ?? "Scanner Gate",
+        gate: k.gate ?? petugasMap.get(k.petugasId) ?? "Scanner Gate",
         status: mapKehadiranStatus(k.statusKehadiran),
       };
     });

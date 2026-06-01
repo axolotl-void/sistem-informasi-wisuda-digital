@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { toast } from "sonner";
+import { fetchWithAuth } from "@/lib/client-auth";
 
 interface PengaturanState {
   namaAcara: string;
@@ -13,7 +14,7 @@ interface PengaturanState {
 }
 
 interface PengaturanActions {
-  fetchSettings: () => void;
+  fetchSettings: () => Promise<void>;
   saveIdentitasAcara: (nama: string, tanggal: string, lokasi: string) => Promise<void>;
   addSesi: (sesi: string) => Promise<void>;
   deleteSesi: (sesi: string) => Promise<void>;
@@ -25,7 +26,7 @@ interface PengaturanActions {
 type PengaturanStore = PengaturanState & PengaturanActions;
 
 const DEFAULT_SETTINGS = {
-  namaAcara: "Wisuda UBBG Periode 2024/2025",
+  namaAcara: "Wisuda Periode 2026/2027",
   tanggalPelaksanaan: "2026-06-25",
   lokasi: "Auditorium Utama UBBG",
   sesiList: ["Sesi Pagi", "Sesi Siang", "Sesi Sore"],
@@ -34,14 +35,50 @@ const DEFAULT_SETTINGS = {
   kuotaPendamping: 2,
 };
 
+async function saveSettingsToServer(updated: unknown) {
+  const res = await fetchWithAuth("/api/pengaturan", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updated),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || "Gagal menyimpan ke server");
+  }
+}
+
 export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
   // State
   ...DEFAULT_SETTINGS,
   isLoading: false,
 
   // Actions
-  fetchSettings: () => {
+  fetchSettings: async () => {
     if (typeof window === "undefined") return;
+    try {
+      const res = await fetchWithAuth("/api/pengaturan");
+      if (res.ok) {
+        const body = await res.json();
+        if (body.success && body.data) {
+          const parsed = body.data;
+          set({
+            namaAcara: parsed.namaAcara ?? DEFAULT_SETTINGS.namaAcara,
+            tanggalPelaksanaan: parsed.tanggalPelaksanaan ?? DEFAULT_SETTINGS.tanggalPelaksanaan,
+            lokasi: parsed.lokasi ?? DEFAULT_SETTINGS.lokasi,
+            sesiList: parsed.sesiList ?? DEFAULT_SETTINGS.sesiList,
+            gateList: parsed.gateList ?? DEFAULT_SETTINGS.gateList,
+            kapasitasKursi: parsed.kapasitasKursi ?? DEFAULT_SETTINGS.kapasitasKursi,
+            kuotaPendamping: parsed.kuotaPendamping ?? DEFAULT_SETTINGS.kuotaPendamping,
+          });
+          localStorage.setItem("wisuda_settings", JSON.stringify(parsed));
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Gagal memuat pengaturan dari API, menggunakan localStorage fallback:", e);
+    }
+
     try {
       const stored = localStorage.getItem("wisuda_settings");
       if (stored) {
@@ -63,11 +100,8 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
 
   saveIdentitasAcara: async (nama, tanggal, lokasi) => {
     set({ isLoading: true });
-    // Simulate database API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
     try {
-      const current = {
-        ...DEFAULT_SETTINGS,
+      const updated = {
         namaAcara: nama,
         tanggalPelaksanaan: tanggal,
         lokasi: lokasi,
@@ -76,12 +110,15 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
         kapasitasKursi: get().kapasitasKursi,
         kuotaPendamping: get().kuotaPendamping,
       };
-      
-      localStorage.setItem("wisuda_settings", JSON.stringify(current));
+
+      await saveSettingsToServer(updated);
+
+      localStorage.setItem("wisuda_settings", JSON.stringify(updated));
       set({ namaAcara: nama, tanggalPelaksanaan: tanggal, lokasi: lokasi });
       toast.success("Identitas acara berhasil diperbarui");
     } catch (e) {
-      toast.error("Gagal menyimpan identitas acara");
+      const msg = e instanceof Error ? e.message : "Gagal menyimpan identitas acara";
+      toast.error(msg);
       throw e;
     } finally {
       set({ isLoading: false });
@@ -90,7 +127,6 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
 
   addSesi: async (sesi) => {
     set({ isLoading: true });
-    await new Promise((resolve) => setTimeout(resolve, 500));
     const normalized = sesi.trim();
     if (!normalized) {
       set({ isLoading: false });
@@ -100,10 +136,10 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
       set({ isLoading: false });
       throw new Error("Sesi tersebut sudah ada");
     }
-    
+
     try {
       const updatedSesi = [...get().sesiList, normalized];
-      const current = {
+      const updated = {
         namaAcara: get().namaAcara,
         tanggalPelaksanaan: get().tanggalPelaksanaan,
         lokasi: get().lokasi,
@@ -112,11 +148,15 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
         kapasitasKursi: get().kapasitasKursi,
         kuotaPendamping: get().kuotaPendamping,
       };
-      localStorage.setItem("wisuda_settings", JSON.stringify(current));
+
+      await saveSettingsToServer(updated);
+
+      localStorage.setItem("wisuda_settings", JSON.stringify(updated));
       set({ sesiList: updatedSesi });
       toast.success(`Sesi "${normalized}" berhasil ditambahkan`);
     } catch (e) {
-      toast.error("Gagal menambahkan sesi");
+      const msg = e instanceof Error ? e.message : "Gagal menambahkan sesi";
+      toast.error(msg);
       throw e;
     } finally {
       set({ isLoading: false });
@@ -125,10 +165,9 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
 
   deleteSesi: async (sesi) => {
     set({ isLoading: true });
-    await new Promise((resolve) => setTimeout(resolve, 400));
     try {
       const updatedSesi = get().sesiList.filter((s) => s !== sesi);
-      const current = {
+      const updated = {
         namaAcara: get().namaAcara,
         tanggalPelaksanaan: get().tanggalPelaksanaan,
         lokasi: get().lokasi,
@@ -137,11 +176,15 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
         kapasitasKursi: get().kapasitasKursi,
         kuotaPendamping: get().kuotaPendamping,
       };
-      localStorage.setItem("wisuda_settings", JSON.stringify(current));
+
+      await saveSettingsToServer(updated);
+
+      localStorage.setItem("wisuda_settings", JSON.stringify(updated));
       set({ sesiList: updatedSesi });
       toast.success(`Sesi "${sesi}" berhasil dihapus`);
     } catch (e) {
-      toast.error("Gagal menghapus sesi");
+      const msg = e instanceof Error ? e.message : "Gagal menghapus sesi";
+      toast.error(msg);
       throw e;
     } finally {
       set({ isLoading: false });
@@ -150,7 +193,6 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
 
   addGate: async (gate) => {
     set({ isLoading: true });
-    await new Promise((resolve) => setTimeout(resolve, 500));
     const normalized = gate.trim();
     if (!normalized) {
       set({ isLoading: false });
@@ -163,7 +205,7 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
 
     try {
       const updatedGate = [...get().gateList, normalized];
-      const current = {
+      const updated = {
         namaAcara: get().namaAcara,
         tanggalPelaksanaan: get().tanggalPelaksanaan,
         lokasi: get().lokasi,
@@ -172,11 +214,15 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
         kapasitasKursi: get().kapasitasKursi,
         kuotaPendamping: get().kuotaPendamping,
       };
-      localStorage.setItem("wisuda_settings", JSON.stringify(current));
+
+      await saveSettingsToServer(updated);
+
+      localStorage.setItem("wisuda_settings", JSON.stringify(updated));
       set({ gateList: updatedGate });
       toast.success(`Gate "${normalized}" berhasil ditambahkan`);
     } catch (e) {
-      toast.error("Gagal menambahkan gate");
+      const msg = e instanceof Error ? e.message : "Gagal menambahkan gate";
+      toast.error(msg);
       throw e;
     } finally {
       set({ isLoading: false });
@@ -185,10 +231,9 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
 
   deleteGate: async (gate) => {
     set({ isLoading: true });
-    await new Promise((resolve) => setTimeout(resolve, 400));
     try {
       const updatedGate = get().gateList.filter((g) => g !== gate);
-      const current = {
+      const updated = {
         namaAcara: get().namaAcara,
         tanggalPelaksanaan: get().tanggalPelaksanaan,
         lokasi: get().lokasi,
@@ -197,11 +242,15 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
         kapasitasKursi: get().kapasitasKursi,
         kuotaPendamping: get().kuotaPendamping,
       };
-      localStorage.setItem("wisuda_settings", JSON.stringify(current));
+
+      await saveSettingsToServer(updated);
+
+      localStorage.setItem("wisuda_settings", JSON.stringify(updated));
       set({ gateList: updatedGate });
       toast.success(`Gate "${gate}" berhasil dihapus`);
     } catch (e) {
-      toast.error("Gagal menghapus gate");
+      const msg = e instanceof Error ? e.message : "Gagal menghapus gate";
+      toast.error(msg);
       throw e;
     } finally {
       set({ isLoading: false });
@@ -210,9 +259,8 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
 
   saveKuotaKursi: async (kapasitas, kuota) => {
     set({ isLoading: true });
-    await new Promise((resolve) => setTimeout(resolve, 800));
     try {
-      const current = {
+      const updated = {
         namaAcara: get().namaAcara,
         tanggalPelaksanaan: get().tanggalPelaksanaan,
         lokasi: get().lokasi,
@@ -221,11 +269,15 @@ export const usePengaturanStore = create<PengaturanStore>((set, get) => ({
         kapasitasKursi: kapasitas,
         kuotaPendamping: kuota,
       };
-      localStorage.setItem("wisuda_settings", JSON.stringify(current));
+
+      await saveSettingsToServer(updated);
+
+      localStorage.setItem("wisuda_settings", JSON.stringify(updated));
       set({ kapasitasKursi: kapasitas, kuotaPendamping: kuota });
       toast.success("Kapasitas kursi & kuota pendamping berhasil diperbarui");
     } catch (e) {
-      toast.error("Gagal memperbarui kuota & kursi");
+      const msg = e instanceof Error ? e.message : "Gagal memperbarui kuota & kursi";
+      toast.error(msg);
       throw e;
     } finally {
       set({ isLoading: false });

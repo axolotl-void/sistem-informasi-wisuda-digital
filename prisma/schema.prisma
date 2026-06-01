@@ -77,6 +77,7 @@ model Mahasiswa {
   angkatan   Int
   status     StatusMahasiswa @default(AKTIF)
   sesiWisuda String?
+  gate       String?
   foto       String?
   ukuranToga String?
 
@@ -130,6 +131,7 @@ model Kehadiran {
   statusKehadiran StatusKehadiran @default(HADIR)
   waktuScan       DateTime        @default(now())
   catatan         String?
+  gate            String?
 
   undanganId String   @unique
   undangan   Undangan @relation(fields: [undanganId], references: [id], onDelete: Cascade)

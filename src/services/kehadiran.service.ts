@@ -14,6 +14,7 @@ interface CreateKehadiranDto {
   statusKehadiran: "HADIR" | "TIDAK_HADIR" | "TERLAMBAT";
   waktuScan: Date;
   catatan?: string;
+  gate?: string;
 }
 
 export class KehadiranService {
@@ -89,6 +90,7 @@ export class KehadiranService {
       waktuScan: u.kehadiran?.waktuScan ?? null,
       catatan: u.kehadiran?.catatan ?? null,
       petugasId: u.kehadiran?.petugasId ?? null,
+      gate: u.kehadiran?.gate ?? null,
       createdAt: u.kehadiran?.createdAt ?? u.createdAt,
       mahasiswa: u.mahasiswa as any,
       undangan: u as any,

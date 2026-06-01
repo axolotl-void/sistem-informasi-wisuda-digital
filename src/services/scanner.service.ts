@@ -8,7 +8,7 @@ export class ScannerService {
    * Proses scan QR code
    */
   static async processQrScan(dto: ScanQrDto): Promise<ScanResult> {
-    const { qrToken, petugasId } = dto;
+    const { qrToken, petugasId, gate } = dto;
 
     // Cari undangan berdasarkan QR token
     const undangan = await prisma.undangan.findFirst({
@@ -65,6 +65,7 @@ export class ScannerService {
       petugasId,
       statusKehadiran: "HADIR",
       waktuScan: new Date(),
+      gate,
     });
 
     // Update status undangan

@@ -9,6 +9,7 @@ interface ScannerState {
   scanHistory: ScanResult[];
   isConnected: boolean;
   totalScanned: number;
+  activeGate: string | null;
 }
 
 interface ScannerActions {
@@ -17,6 +18,7 @@ interface ScannerActions {
   setConnected: (connected: boolean) => void;
   resetStatus: () => void;
   clearHistory: () => void;
+  setActiveGate: (gate: string | null) => void;
 }
 
 type ScannerStore = ScannerState & ScannerActions;
@@ -28,6 +30,7 @@ export const useScannerStore = create<ScannerStore>((set) => ({
   scanHistory: [],
   isConnected: false,
   totalScanned: 0,
+  activeGate: null,
 
   // Actions
   setStatus: (status) => set({ status }),
@@ -45,4 +48,15 @@ export const useScannerStore = create<ScannerStore>((set) => ({
   resetStatus: () => set({ status: "idle", lastResult: null }),
 
   clearHistory: () => set({ scanHistory: [], totalScanned: 0 }),
+
+  setActiveGate: (gate) => {
+    if (typeof window !== "undefined") {
+      if (gate) {
+        localStorage.setItem("active_gate", gate);
+      } else {
+        localStorage.removeItem("active_gate");
+      }
+    }
+    set({ activeGate: gate });
+  },
 }));
