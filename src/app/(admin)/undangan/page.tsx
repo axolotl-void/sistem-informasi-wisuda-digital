@@ -39,12 +39,7 @@ export default function UndanganPage() {
                     </span>
                     <span className="hidden dark:inline">Undangan Digital</span>
                   </h1>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 dark:border-emerald-500/25 dark:bg-emerald-500/10">
-                    <span className="size-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
-                      {stats.total} Total
-                    </span>
-                  </span>
+
                 </div>
                 <p className="mt-0.5 text-sm font-medium text-slate-600 dark:text-white/40">
                   Generate dan kelola undangan wisuda digital

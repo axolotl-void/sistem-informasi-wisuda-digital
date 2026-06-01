@@ -112,25 +112,13 @@ export default function ScanPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className={cn(
-            "flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-300",
-            isConnected
-              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-              : "border-slate-200 bg-slate-100 text-slate-400 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-white/40"
-          )}>
-            {isConnected ? (
-              <>
-                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <Wifi className="size-3.5" />
-                Live
-              </>
-            ) : (
-              <>
-                <WifiOff className="size-3.5" />
-                Offline
-              </>
-            )}
-          </div>
+          {isConnected && (
+            <div className="flex items-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <Wifi className="size-3.5" />
+              Live
+            </div>
+          )}
           <div className="flex items-center gap-1.5 rounded-xl border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-xs font-bold text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300">
             <Users className="size-3.5" />
             {totalScanned} Absen
@@ -165,17 +153,12 @@ export default function ScanPage() {
                   className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-[10px] font-bold text-amber-600 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400">
                   <Loader2 className="size-2.5 animate-spin" /> MEMPROSES
                 </motion.span>
-              ) : isScanning ? (
-                <motion.span key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400">
-                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" /> READY
-                </motion.span>
-              ) : (
+              ) : !isScanning ? (
                 <motion.span key="i" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-1 text-[10px] font-bold text-gray-400 dark:bg-white/[0.04] dark:border-white/[0.06] dark:text-white/30">
                   STANDBY
                 </motion.span>
-              )}
+              ) : null}
             </AnimatePresence>
           </div>
 

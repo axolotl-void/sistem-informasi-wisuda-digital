@@ -407,9 +407,7 @@ export function SeatMonitor() {
           <div className="flex items-center gap-2.5">
             <h2 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-2">
               Auditorium Seat Monitor{" "}
-              <span className="text-xs bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent font-bold font-mono">
-                LIVE
-              </span>
+
             </h2>
           </div>
           <p className="text-sm font-semibold text-slate-500 dark:text-white/40 mt-1 leading-relaxed">
