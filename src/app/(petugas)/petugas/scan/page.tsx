@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import type { ScanResult } from "@/types/kehadiran.type";
 import {
@@ -473,6 +474,9 @@ export default function ScanPage() {
               <QrCode className="size-4 text-blue-500" />
               Detail Kursi & Kehadiran
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Informasi lengkap tempat duduk dan data kehadiran wisudawan.
+            </DialogDescription>
           </DialogHeader>
 
           {selectedResult && (
