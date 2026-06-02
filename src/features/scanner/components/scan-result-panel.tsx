@@ -16,12 +16,16 @@ interface SeatLookup {
   blockId: string;
 }
 
-export function ScanResultPanel() {
+export function ScanResultPanel({ seatMap: passedSeatMap }: { seatMap?: Record<string, SeatLookup> } = {}) {
   const { lastResult, status, totalScanned, scanHistory, resetStatus, clearHistory } = useScannerStore();
   const [timeLeft, setTimeLeft] = useState(5);
   const [seatMap, setSeatMap] = useState<Record<string, SeatLookup>>({});
 
   useEffect(() => {
+    if (passedSeatMap && Object.keys(passedSeatMap).length > 0) {
+      setSeatMap(passedSeatMap);
+      return;
+    }
     async function loadSeats() {
       try {
         const res = await fetch("/api/dashboard/seats");

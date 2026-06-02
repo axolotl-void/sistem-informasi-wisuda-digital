@@ -78,11 +78,14 @@
   animation: none !important;
 }
 
-/* Backdrop blur & heavy effects are expensive to animate across the whole page. */
+/* Backdrop blur, Gaussian blurs, drop-shadows, and heavy effects are expensive to animate across the whole page. */
 :root[data-magicui-theme-vt="active"] .backdrop-blur,
-:root[data-magicui-theme-vt="active"] [class*="backdrop-blur"] {
+:root[data-magicui-theme-vt="active"] [class*="backdrop-blur"],
+:root[data-magicui-theme-vt="active"] [class*="blur-"],
+:root[data-magicui-theme-vt="active"] [class*="drop-shadow-"] {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  filter: none !important;
 }
 
 :root[data-magicui-theme-vt="active"] .shadow,
@@ -202,6 +205,7 @@
     radial-gradient(ellipse 80% 60% at 100% 0%, rgba(139, 92, 246, 0.28), transparent 48%),
     radial-gradient(ellipse 70% 55% at 50% 100%, rgba(16, 185, 129, 0.22), transparent 52%),
     radial-gradient(ellipse 50% 40% at 70% 40%, rgba(14, 165, 233, 0.15), transparent 45%);
+  transition: background-color 0.3s ease;
 }
 .dark .dashboard-mesh {
   background-color: oklch(0.12 0.02 260);

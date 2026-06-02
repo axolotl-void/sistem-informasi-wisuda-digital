@@ -4,7 +4,8 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
    RefreshCw, Crown, HelpCircle, 
-   Sparkles, CheckCircle2, Info, Maximize2
+   Sparkles, CheckCircle2, Info, Maximize2,
+   Armchair
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SeatModal } from "./seat-modal";
@@ -132,40 +133,31 @@ function buildBlocksConfig() {
 // Nilai aktual dikelola via state `blocksConfig` di dalam komponen
 
 // --- Status Styles -----------------------------------------------------------
-// Use CSS filter to tint the kursi.png image per status.
-// The image is a dark outline on transparent bg, so we use
-// brightness + invert + sepia + hue-rotate + saturate to colorize it.
+// We style the SVG icon using text color classes instead of heavy filters.
 
 const statusConfig: Record<SeatStatus, {
   label: string;
   textClass: string;
-  // CSS filter chain applied to the <img> element
-  filter: string;
-  // Glow drop-shadow color
   glowClass: string;
 }> = {
   "checked-in": {
     label: "Hadir",
-    textClass: "text-emerald-400",
-    filter: "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(100deg)",
+    textClass: "text-emerald-500 dark:text-emerald-400",
     glowClass: "drop-shadow-[0_0_6px_rgba(16,185,129,0.9)]",
   },
   "not-arrived": {
     label: "Dipesan",
-    textClass: "text-blue-400",
-    filter: "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(190deg)",
+    textClass: "text-blue-500 dark:text-blue-400",
     glowClass: "drop-shadow-[0_0_6px_rgba(59,130,246,0.9)]",
   },
   "vip": {
     label: "Hadir (VIP)",
-    textClass: "text-red-400",
-    filter: "brightness(0) invert(1) sepia(1) saturate(8) hue-rotate(330deg)",
+    textClass: "text-red-500 dark:text-red-400",
     glowClass: "drop-shadow-[0_0_8px_rgba(239,68,68,0.95)]",
   },
   "empty": {
     label: "Kosong / Tersedia",
-    textClass: "text-gray-400",
-    filter: "brightness(0) invert(1) opacity(0.2)",
+    textClass: "text-slate-300 dark:text-white/20 opacity-30",
     glowClass: "",
   },
 };
@@ -402,21 +394,20 @@ export function SeatMonitor() {
       <div className="absolute -bottom-40 right-1/4 -z-10 size-[450px] rounded-full bg-blue-600/5 blur-[120px]" />
 
       {/* -- Header -------------------------------------------------- */}
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/80 dark:border-white/[0.06] pb-5">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/80 dark:border-white/[0.06] pb-5 transition-colors duration-300">
         <div>
           <div className="flex items-center gap-2.5">
-            <h2 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-2">
+            <h2 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-2 transition-colors duration-300">
               Auditorium Seat Monitor{" "}
-
             </h2>
           </div>
-          <p className="text-sm font-semibold text-slate-500 dark:text-white/40 mt-1 leading-relaxed">
+          <p className="text-sm font-semibold text-slate-500 dark:text-white/40 mt-1 leading-relaxed transition-colors duration-300">
             Layout Auditorium Utama ·{" "}
-            <span className="text-slate-800 dark:text-white font-bold">
+            <span className="text-slate-800 dark:text-white font-bold transition-colors duration-300">
               {statsSummary.totalCheckedIn}
             </span>{" "}
             hadir dari{" "}
-            <span className="text-slate-800 dark:text-white font-bold">
+            <span className="text-slate-800 dark:text-white font-bold transition-colors duration-300">
               {statsSummary.totalAssigned}
             </span>{" "}
             terdaftar
@@ -425,7 +416,7 @@ export function SeatMonitor() {
 
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-4 lg:gap-6">
-          <div className="flex flex-wrap gap-4 bg-slate-100/60 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04] rounded-2xl px-4 py-2.5 backdrop-blur-md">
+          <div className="flex flex-wrap gap-4 bg-slate-100/60 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04] rounded-2xl px-4 py-2.5 backdrop-blur-md transition-all duration-300">
             {(
               Object.entries(statusConfig) as [
                 SeatStatus,
@@ -434,12 +425,8 @@ export function SeatMonitor() {
             ).map(([key, cfg]) => (
               <div key={key} className="flex items-center gap-2">
                 {/* Mini chair preview in legend */}
-                <img
-                  src="/img/kursi.png"
-                  alt=""
-                  className={cn("size-4 object-contain", cfg.glowClass)}
-                  style={{ filter: cfg.filter }}
-                  draggable={false}
+                <Armchair
+                  className={cn("size-4 object-contain", cfg.textClass, cfg.glowClass)}
                 />
                 <span className="text-[11px] font-bold text-slate-600 dark:text-white/50">
                   {cfg.label}
@@ -486,7 +473,7 @@ export function SeatMonitor() {
       </AnimatePresence>
 
       {/* -- Main Seat Map ------------------------------------------- */}
-      <div className="relative w-full border border-slate-200/80 dark:border-white/[0.08] bg-[#0d121f]/95 dark:bg-black/60 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+      <div className="relative w-full border border-slate-200/80 dark:border-white/[0.08] bg-[#0d121f]/95 dark:bg-black/60 rounded-3xl overflow-hidden shadow-2xl flex flex-col transition-all duration-300">
         {/* Stage gradient line */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-600 via-blue-500 to-emerald-500 blur-[1px]" />
 
@@ -577,16 +564,13 @@ export function SeatMonitor() {
                             aria-label={`Kursi ${seat.blockName} ${seat.seatCode}`}
                           >
                             {/* Chair image with color filter */}
-                            <img
-                              src="/img/kursi.png"
-                              alt={seat.seatCode}
-                              draggable={false}
+                            <Armchair
                               className={cn(
                                 "w-full h-full object-contain transition-all duration-300 pointer-events-none",
+                                cfg.textClass,
                                 cfg.glowClass,
                                 seat.status === "vip" && "animate-pulse"
                               )}
-                              style={{ filter: cfg.filter }}
                             />
 
                             {/* Tiny active indicator dot */}
