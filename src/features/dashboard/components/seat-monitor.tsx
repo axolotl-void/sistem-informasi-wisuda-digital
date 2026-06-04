@@ -189,39 +189,54 @@ export function SeatMonitor() {
     const sortedInvs = [...invitations].sort((a, b) =>
       (a.mahasiswa?.nim || "").localeCompare(b.mahasiswa?.nim || "")
     );
-    const numStudents = sortedInvs.length;
+
+    // Buat daftar permintaan kursi (wisudawan + keluarga) secara berurutan
+    const seatRequests: { type: "student" | "guest"; guestIndex?: number; inv: any }[] = [];
+    sortedInvs.forEach((inv) => {
+      if (inv.mahasiswa) {
+        // Tambahkan kursi wisudawan
+        seatRequests.push({ type: "student", inv });
+        // Tambahkan kursi tamu pendamping
+        const guestCount = inv.kuotaTamu || 0;
+        for (let i = 0; i < guestCount; i++) {
+          seatRequests.push({ type: "guest", guestIndex: i + 1, inv });
+        }
+      }
+    });
+
+    const numSeats = seatRequests.length;
 
     const blockCapacities = currentConfig.map((b) =>
       b.rowsLayout.reduce((sum, cols) => sum + cols, 0)
     );
     const totalCapacity = blockCapacities.reduce((a, b) => a + b, 0);
 
-    // Distribusi mahasiswa proporsional ke tiap blok
+    // Distribusi kursi proporsional ke tiap blok
     let allocated = 0;
     const groups: Record<string, any[]> = {};
     currentConfig.forEach((block, idx) => {
       const cap = blockCapacities[idx];
       const count =
         idx === currentConfig.length - 1
-          ? numStudents - allocated
-          : Math.round((cap / Math.max(totalCapacity, 1)) * numStudents);
-      groups[block.id] = sortedInvs.slice(allocated, allocated + count);
+          ? numSeats - allocated
+          : Math.round((cap / Math.max(totalCapacity, 1)) * numSeats);
+      groups[block.id] = seatRequests.slice(allocated, allocated + count);
       allocated += count;
     });
 
     currentConfig.forEach((block) => {
       const groupInvs = groups[block.id] ?? [];
-      let studentIndex = 0;
+      let seatIndex = 0;
 
       block.rowsLayout.forEach((colsInRow, row) => {
         for (let col = 0; col < colsInRow; col++) {
           const seatCode = `${String.fromCharCode(65 + row)}${col + 1}`;
-          const inv = groupInvs[studentIndex];
+          const req = groupInvs[seatIndex];
 
-          if (inv && inv.mahasiswa) {
+          if (req && req.inv && req.inv.mahasiswa) {
             const isHadir =
-              inv.kehadiran?.statusKehadiran === "HADIR" ||
-              inv.kehadiran?.statusKehadiran === "TERLAMBAT";
+              req.inv.kehadiran?.statusKehadiran === "HADIR" ||
+              req.inv.kehadiran?.statusKehadiran === "TERLAMBAT";
 
             const seatStatus: SeatStatus = isHadir
               ? row === 0 ? "vip" : "checked-in"
@@ -236,23 +251,25 @@ export function SeatMonitor() {
               seatCode,
               status: seatStatus,
               student: {
-                mahasiswaId: inv.mahasiswa.id,
-                name: inv.mahasiswa.nama,
-                nim: inv.mahasiswa.nim,
-                faculty: inv.mahasiswa.fakultas,
-                prodi: inv.mahasiswa.prodi,
-                sesi: inv.mahasiswa.sesiWisuda || "Sesi Utama",
-                invitationNo: inv.kode,
-                scanTime: inv.kehadiran
-                  ? new Date(inv.kehadiran.waktuScan).toLocaleTimeString("id-ID", {
+                mahasiswaId: req.inv.mahasiswa.id,
+                name: req.type === "student"
+                  ? req.inv.mahasiswa.nama
+                  : `Tamu ${req.guestIndex} - ${req.inv.mahasiswa.nama}`,
+                nim: req.inv.mahasiswa.nim,
+                faculty: req.inv.mahasiswa.fakultas,
+                prodi: req.inv.mahasiswa.prodi,
+                sesi: req.inv.mahasiswa.sesiWisuda || "Sesi Utama",
+                invitationNo: req.inv.kode,
+                scanTime: req.inv.kehadiran
+                  ? new Date(req.inv.kehadiran.waktuScan).toLocaleTimeString("id-ID", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })
                   : undefined,
-                gate: inv.kehadiran?.catatan || undefined,
+                gate: req.inv.kehadiran?.catatan || undefined,
               },
             });
-            studentIndex++;
+            seatIndex++;
           } else {
             seats.push({
               id: `${block.id}-${row}-${col}`,

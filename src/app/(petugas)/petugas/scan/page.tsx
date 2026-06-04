@@ -33,6 +33,8 @@ import {
   DoorOpen,
   Armchair,
   Building2,
+  ShieldCheck,
+  Calendar,
 } from "lucide-react";
 
 export default function ScanPage() {
@@ -60,13 +62,26 @@ export default function ScanPage() {
           const sortedInvs = [...invitations].sort((a, b) =>
             (a.mahasiswa?.nim || "").localeCompare(b.mahasiswa?.nim || "")
           );
+
+          // Buat daftar permintaan kursi (wisudawan + keluarga) secara berurutan
+          const seatRequests: { type: "student" | "guest"; guestIndex?: number; inv: any }[] = [];
+          sortedInvs.forEach((inv) => {
+            if (inv.mahasiswa) {
+              seatRequests.push({ type: "student", inv });
+              const guestCount = inv.kuotaTamu || 0;
+              for (let i = 0; i < guestCount; i++) {
+                seatRequests.push({ type: "guest", guestIndex: i + 1, inv });
+              }
+            }
+          });
+
           const BLOCKS_CONFIG = [
             { id: "yellow", name: "Blok Kuning", rowsLayout: [5, 6, 6, 7, 7, 8] },
             { id: "cyan",   name: "Blok Biru",   rowsLayout: [7, 7, 7, 7, 8, 8, 8] },
             { id: "purple", name: "Blok Ungu",   rowsLayout: [7, 7, 7, 7, 8, 8, 8] },
             { id: "green",  name: "Blok Hijau",  rowsLayout: [5, 6, 6, 7, 7, 8] },
           ];
-          const numStudents = sortedInvs.length;
+          const numSeats = seatRequests.length;
           const blockCapacities = BLOCKS_CONFIG.map((b) =>
             b.rowsLayout.reduce((sum, cols) => sum + cols, 0)
           );
@@ -77,18 +92,25 @@ export default function ScanPage() {
             const cap = blockCapacities[idx];
             const count =
               idx === BLOCKS_CONFIG.length - 1
-                ? numStudents - allocated
-                : Math.round((cap / totalCapacity) * numStudents);
-            const groupInvs = sortedInvs.slice(allocated, allocated + count);
+                ? numSeats - allocated
+                : Math.round((cap / totalCapacity) * numSeats);
+            const groupInvs = seatRequests.slice(allocated, allocated + count);
             allocated += count;
-            let studentIndex = 0;
+            let seatIndex = 0;
             block.rowsLayout.forEach((colsInRow, row) => {
               for (let col = 0; col < colsInRow; col++) {
-                const inv = groupInvs[studentIndex];
-                if (inv && inv.mahasiswa) {
+                const req = groupInvs[seatIndex];
+                if (req && req.inv && req.inv.mahasiswa) {
                   const seatCode = `${String.fromCharCode(65 + row)}${col + 1}`;
-                  lookup[inv.mahasiswa.nim] = { seatCode, blockName: block.name, blockId: block.id };
-                  studentIndex++;
+                  // Hanya simpan penunjuk ke mahasiswa (wisudawan)
+                  if (req.type === "student") {
+                    const guestCount = req.inv.kuotaTamu || 0;
+                    const seatRange = guestCount > 0
+                      ? `${seatCode} (+ ${guestCount} Tamu)`
+                      : seatCode;
+                    lookup[req.inv.mahasiswa.nim] = { seatCode: seatRange, blockName: block.name, blockId: block.id };
+                  }
+                  seatIndex++;
                 }
               }
             });
@@ -346,23 +368,63 @@ export default function ScanPage() {
 
                   <div className="h-px bg-slate-250 dark:bg-white/[0.08] my-4 transition-colors" />
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Koneksi Gateway</span>
-                      <div className="flex items-center gap-1.5 text-xs font-bold transition-colors">
-                        {isConnected ? (
-                          <>
-                            <Wifi className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                            <span className="text-emerald-600 dark:text-emerald-400">Terhubung (Live)</span>
-                          </>
-                        ) : (
-                          <>
-                            <WifiOff className="size-3.5 text-rose-600 dark:text-rose-400" />
-                            <span className="text-rose-600 dark:text-rose-400">Terputus</span>
-                          </>
-                        )}
-                      </div>
+                  <div className="space-y-3.5">
+                    {/* Status Akun */}
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[9px] transition-colors">Status Akun</span>
+                      <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full text-[10px] transition-colors">
+                        <ShieldCheck className="size-3" />
+                        Aktif
+                      </span>
                     </div>
+
+                    {/* Gate Aktif */}
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[9px] transition-colors">Pintu Masuk (Gate)</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-350 transition-colors">
+                        {activeGate ? (
+                          <span className="inline-flex items-center gap-1">
+                            <DoorOpen className="size-3 text-blue-500" />
+                            {activeGate}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-600 italic">Belum Dipilih</span>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Fakultas / Unit */}
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[9px] transition-colors">Unit Tugas</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-350 max-w-[200px] truncate transition-colors" title={user?.fakultas || "Panitia Pusat"}>
+                        {user?.fakultas ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Building2 className="size-3 text-indigo-500" />
+                            {user.fakultas}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1">
+                            <Building2 className="size-3 text-indigo-500" />
+                            Panitia Pusat
+                          </span>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Terdaftar Sejak */}
+                    {user?.createdAt && (
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[9px] transition-colors">Bergabung Sejak</span>
+                        <span className="font-mono text-slate-600 dark:text-slate-450 inline-flex items-center gap-1 transition-colors">
+                          <Calendar className="size-3 text-violet-500" />
+                          {new Date(user.createdAt).toLocaleDateString("id-ID", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

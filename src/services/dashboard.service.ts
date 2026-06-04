@@ -106,6 +106,17 @@ export class DashboardService {
       Math.max(1, petugasAktif.length || (totalKehadiran > 0 ? 1 : 0)),
     );
 
+    // Hitung total kursi terisi = jumlah (1 + kuotaTamu) dari semua undangan yang sudah check-in
+    const checkedInInvs = await prisma.undangan.findMany({
+      where: {
+        kehadiran: { isNot: null },
+      },
+      select: {
+        kuotaTamu: true,
+      },
+    });
+    const kursiTerisi = checkedInInvs.reduce((acc, inv) => acc + 1 + inv.kuotaTamu, 0);
+
     return {
       totalUndangan,
       totalMahasiswa,
@@ -116,7 +127,7 @@ export class DashboardService {
       scanHariIni,
       gateAktif: totalKehadiran > 0 ? gateAktif : 0,
       gateTotal: DEFAULT_GATE_TOTAL,
-      kursiTerisi: totalKehadiran,
+      kursiTerisi,
       kapasitasKursi,
       tamuVipTotal: vipInvitations.length,
       tamuVipHadir,

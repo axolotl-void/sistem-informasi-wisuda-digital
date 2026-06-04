@@ -35,13 +35,26 @@ export function ScanResultPanel({ seatMap: passedSeatMap }: { seatMap?: Record<s
           const sortedInvs = [...invitations].sort((a, b) =>
             (a.mahasiswa?.nim || "").localeCompare(b.mahasiswa?.nim || "")
           );
+
+          // Buat daftar permintaan kursi (wisudawan + keluarga) secara berurutan
+          const seatRequests: { type: "student" | "guest"; guestIndex?: number; inv: any }[] = [];
+          sortedInvs.forEach((inv) => {
+            if (inv.mahasiswa) {
+              seatRequests.push({ type: "student", inv });
+              const guestCount = inv.kuotaTamu || 0;
+              for (let i = 0; i < guestCount; i++) {
+                seatRequests.push({ type: "guest", guestIndex: i + 1, inv });
+              }
+            }
+          });
+
           const BLOCKS_CONFIG = [
             { id: "yellow", name: "Blok Kuning", rowsLayout: [5, 6, 6, 7, 7, 8] },
             { id: "cyan",   name: "Blok Biru",   rowsLayout: [7, 7, 7, 7, 8, 8, 8] },
             { id: "purple", name: "Blok Ungu",   rowsLayout: [7, 7, 7, 7, 8, 8, 8] },
             { id: "green",  name: "Blok Hijau",  rowsLayout: [5, 6, 6, 7, 7, 8] },
           ];
-          const numStudents = sortedInvs.length;
+          const numSeats = seatRequests.length;
           const blockCapacities = BLOCKS_CONFIG.map((b) =>
             b.rowsLayout.reduce((sum, cols) => sum + cols, 0)
           );
@@ -52,18 +65,25 @@ export function ScanResultPanel({ seatMap: passedSeatMap }: { seatMap?: Record<s
             const cap = blockCapacities[idx];
             const count =
               idx === BLOCKS_CONFIG.length - 1
-                ? numStudents - allocated
-                : Math.round((cap / totalCapacity) * numStudents);
-            const groupInvs = sortedInvs.slice(allocated, allocated + count);
+                ? numSeats - allocated
+                : Math.round((cap / totalCapacity) * numSeats);
+            const groupInvs = seatRequests.slice(allocated, allocated + count);
             allocated += count;
-            let studentIndex = 0;
+            let seatIndex = 0;
             block.rowsLayout.forEach((colsInRow, row) => {
               for (let col = 0; col < colsInRow; col++) {
-                const inv = groupInvs[studentIndex];
-                if (inv && inv.mahasiswa) {
+                const req = groupInvs[seatIndex];
+                if (req && req.inv && req.inv.mahasiswa) {
                   const seatCode = `${String.fromCharCode(65 + row)}${col + 1}`;
-                  lookup[inv.mahasiswa.nim] = { seatCode, blockName: block.name, blockId: block.id };
-                  studentIndex++;
+                  // Hanya simpan penunjuk ke mahasiswa (wisudawan)
+                  if (req.type === "student") {
+                    const guestCount = req.inv.kuotaTamu || 0;
+                    const seatRange = guestCount > 0
+                      ? `${seatCode} (+ ${guestCount} Tamu)`
+                      : seatCode;
+                    lookup[req.inv.mahasiswa.nim] = { seatCode: seatRange, blockName: block.name, blockId: block.id };
+                  }
+                  seatIndex++;
                 }
               }
             });
