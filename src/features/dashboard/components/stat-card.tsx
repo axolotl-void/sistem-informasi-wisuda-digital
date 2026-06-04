@@ -3,6 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiquidGlassCard } from "@/components/ui/liquid-glass";
+import CountUp from "@/components/CountUp";
 
 interface StatCardProps {
   label: string;
@@ -52,6 +53,43 @@ export function StatCard({
 }: StatCardProps) {
   const colors = accentMap[accent];
 
+  // Helper untuk merender nilai stat dengan animasi CountUp jika bertipe angka/dapat diparsing
+  const renderValue = () => {
+    // Abaikan jika memuat awal / default loader
+    if (value === "—" || value === "") {
+      return value;
+    }
+
+    if (typeof value === "number") {
+      return <CountUp to={value} separator="." duration={1.5} />;
+    }
+
+    if (typeof value === "string") {
+      // Jika string angka murni (misal: "123")
+      // Hapus titik ribuan bawaan indonesia agar bisa di-parse (misal "1.250" -> 1250)
+      const cleanValue = value.replace(/\./g, "");
+      if (/^\d+$/.test(cleanValue)) {
+        return <CountUp to={parseInt(cleanValue, 10)} separator="." duration={1.5} />;
+      }
+
+      // Jika format pecahan seperti "1/182" atau "1.000/2.000"
+      if (/^[\d.]+\s*\/\s*[\d.]+$/.test(value)) {
+        const parts = value.split("/");
+        const currentStr = parts[0].replace(/\./g, "").trim();
+        const totalStr = parts[1].trim();
+        const current = parseInt(currentStr, 10);
+        return (
+          <>
+            <CountUp to={current} separator="." duration={1.5} />
+            <span>/{totalStr}</span>
+          </>
+        );
+      }
+    }
+
+    return value;
+  };
+
   return (
     <LiquidGlassCard
       noEntrance
@@ -65,9 +103,9 @@ export function StatCard({
           </p>
           <p className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
             <span className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-600 bg-clip-text text-transparent dark:hidden">
-              {value}
+              {renderValue()}
             </span>
-            <span className="hidden dark:inline">{value}</span>
+            <span className="hidden dark:inline">{renderValue()}</span>
           </p>
           {subtitle && (
             <p className="text-xs font-medium text-slate-600 dark:text-white/35">
