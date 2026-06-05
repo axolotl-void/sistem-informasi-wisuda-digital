@@ -39,6 +39,7 @@ export interface WisudawanRow {
 export interface WisudawanFilter {
   search?: string;
   fakultas?: string;
+  prodi?: string;
   status?: string;
   session?: string;
 }
@@ -72,6 +73,7 @@ export class WisudawanService {
       ];
     }
     if (filter.fakultas) where.fakultas = filter.fakultas;
+    if (filter.prodi) where.prodi = filter.prodi;
     if (filter.status) where.status = filter.status;
 
     const [rawData, total] = await Promise.all([
@@ -430,6 +432,42 @@ export class WisudawanService {
     });
 
     return { kode, qrToken };
+  }
+
+  /**
+   * Delete all wisudawan accounts (and their related user, undangan, and kehadiran records)
+   */
+  static async deleteAll(): Promise<number> {
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Hapus semua kehadiran terlebih dahulu
+      await tx.kehadiran.deleteMany({});
+      
+      // 2. Hapus semua undangan
+      await tx.undangan.deleteMany({});
+      
+      // 3. Ambil semua mahasiswa untuk mendapatkan userId mereka
+      const mahasiswaList = await tx.mahasiswa.findMany({
+        select: { userId: true },
+      });
+      const userIds = mahasiswaList.map((m) => m.userId);
+      
+      // 4. Hapus semua mahasiswa
+      await tx.mahasiswa.deleteMany({});
+      
+      // 5. Hapus semua user dengan role MAHASISWA atau yang ID-nya ada di userIds
+      const deleteResult = await tx.user.deleteMany({
+        where: {
+          OR: [
+            { role: "MAHASISWA" },
+            { id: { in: userIds } },
+          ],
+        },
+      });
+      
+      return deleteResult.count;
+    });
+    
+    return result;
   }
 
   /**

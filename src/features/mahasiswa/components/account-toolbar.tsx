@@ -1,9 +1,8 @@
 "use client";
 
-import { Search, Upload, Download, KeyRound, UserPlus } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import {
   LiquidGlassCard,
-  glassBtnGhost,
   glassBtnPrimary,
   glassInput,
 } from "@/components/ui/liquid-glass";
@@ -16,6 +15,8 @@ interface ToolbarProps {
   onStatusFilterChange: (v: string) => void;
   fakultasFilter: string;
   onFakultasFilterChange: (v: string) => void;
+  prodiFilter: string;
+  onProdiFilterChange: (v: string) => void;
   onCreateClick: () => void;
 }
 
@@ -32,6 +33,28 @@ const fakultasOptions = [
   "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)",
 ];
 
+const majors: Record<string, string[]> = {
+  "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)": [
+    "S1 Pendidikan Bahasa dan Sastra Aceh",
+    "S1 Pendidikan Bahasa Indonesia",
+    "S1 Pendidikan Bahasa Inggris",
+    "S1 Pendidikan Matematika",
+    "S1 Pendidikan Jasmani",
+    "S1 Pendidikan Guru Sekolah Dasar (PGSD)",
+    "S1 Pendidikan Guru Pendidikan Anak Usia Dini (PG PAUD)",
+    "S1 Pendidikan Ilmu Pengetahuan Alam (Pendidikan IPA)",
+    "S1 Pendidikan Seni Pertunjukan",
+    "S2 Penjaminan Mutu Pendidikan",
+    "S2 Pendidikan Dasar",
+    "Pendidikan Profesi Guru (PPG)"
+  ],
+  "Fakultas Sains, Teknologi, dan Ilmu Kesehatan (FSTIK)": [
+    "S1 Ilmu Komputer",
+    "S1 Keperawatan",
+    "S1 Kebidanan"
+  ],
+};
+
 export function AccountToolbar({
   search,
   onSearchChange,
@@ -39,9 +62,15 @@ export function AccountToolbar({
   onStatusFilterChange,
   fakultasFilter,
   onFakultasFilterChange,
+  prodiFilter,
+  onProdiFilterChange,
   onCreateClick,
 }: ToolbarProps) {
   const selectCls = cn(glassInput, "h-9 cursor-pointer px-3 text-[11px] font-medium");
+
+  const availableProdis = fakultasFilter
+    ? (majors[fakultasFilter] ?? [])
+    : Object.values(majors).flat();
 
   return (
     <LiquidGlassCard noEntrance hover={false} className="p-4">
@@ -76,7 +105,10 @@ export function AccountToolbar({
 
           <select
             value={fakultasFilter}
-            onChange={(e) => onFakultasFilterChange(e.target.value)}
+            onChange={(e) => {
+              onFakultasFilterChange(e.target.value);
+              onProdiFilterChange("");
+            }}
             className={cn(selectCls, "max-w-[200px]")}
           >
             <option value="" className="bg-white dark:bg-[#0B1424]">
@@ -88,20 +120,24 @@ export function AccountToolbar({
               </option>
             ))}
           </select>
+
+          <select
+            value={prodiFilter}
+            onChange={(e) => onProdiFilterChange(e.target.value)}
+            className={cn(selectCls, "max-w-[200px]")}
+          >
+            <option value="" className="bg-white dark:bg-[#0B1424]">
+              Semua Prodi
+            </option>
+            {availableProdis.map((p) => (
+              <option key={p} value={p} className="bg-white dark:bg-[#0B1424]">
+                {p}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="hidden h-8 w-px bg-white/60 dark:bg-white/[0.08] lg:block" />
-
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" className={cn(glassBtnGhost, "h-9")}>
-            <Upload className="size-3.5" /> Import
-          </button>
-          <button type="button" className={cn(glassBtnGhost, "h-9")}>
-            <Download className="size-3.5" /> Export
-          </button>
-          <button type="button" className={cn(glassBtnGhost, "h-9")}>
-            <KeyRound className="size-3.5" /> Password
-          </button>
           <button
             type="button"
             onClick={onCreateClick}

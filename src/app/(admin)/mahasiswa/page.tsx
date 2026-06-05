@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Users, Plus, Sparkles } from "lucide-react";
+import { Users, Plus, Sparkles, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { AccountStats } from "@/features/mahasiswa/components/account-stats";
 import { AccountToolbar } from "@/features/mahasiswa/components/account-toolbar";
 import { StudentTable } from "@/features/mahasiswa/components/student-table";
@@ -12,38 +13,172 @@ import { ResetPasswordModal } from "@/features/mahasiswa/components/reset-passwo
 import { ImportExportButtons } from "@/features/mahasiswa/components/import-export-buttons";
 import { useWisudawan } from "@/hooks/use-wisudawan";
 import type { WisudawanRow } from "@/services/wisudawan.service";
-import { glassBtnPrimary } from "@/components/ui/liquid-glass";
+import { glassBtnPrimary, glassBtnGhost, LiquidGlassCard } from "@/components/ui/liquid-glass";
 import { cn } from "@/lib/utils";
 
+const glassBtnDanger = cn(
+  glassBtnGhost,
+  "border-red-400/35 bg-red-500/10 text-red-700 hover:bg-red-500/15",
+  "dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/18",
+);
+
+function DeleteAllDialog({
+  open,
+  onConfirm,
+  onCancel,
+  count,
+  isDeleting,
+}: {
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+  count: number;
+  isDeleting: boolean;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/55"
+        onClick={!isDeleting ? onCancel : undefined}
+      />
+      <LiquidGlassCard hover={false} className="relative z-10 w-full max-w-md p-6">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-400/30 bg-red-500/10 dark:border-red-500/25 dark:bg-red-500/10">
+          <Trash2 className="size-5 text-red-600 dark:text-red-400" />
+        </div>
+
+        <h2 className="text-base font-bold text-slate-900 dark:text-white/90">
+          Hapus Semua Akun Wisudawan?
+        </h2>
+        <p className="mt-2 text-[0.82rem] leading-relaxed text-slate-600 dark:text-white/45">
+          Anda akan menghapus{" "}
+          <span className="font-semibold text-red-600 dark:text-red-400">{count} akun wisudawan</span> beserta seluruh data kehadiran, undangan, dan user login terkait.
+          Tindakan ini tidak dapat dibatalkan dan semua data akan hilang permanen.
+        </p>
+
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isDeleting}
+            className={cn(glassBtnGhost, "h-10 flex-1 justify-center disabled:opacity-40")}
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isDeleting}
+            className={cn(glassBtnDanger, "h-10 flex-1 justify-center font-bold disabled:opacity-60")}
+          >
+            {isDeleting ? "Menghapus..." : "Ya, Hapus Semua"}
+          </button>
+        </div>
+      </LiquidGlassCard>
+    </div>
+  );
+}
+
 export default function MahasiswaPage() {
-  const { data, total, isLoading, fetchAll } = useWisudawan();
+  const { data, total, isLoading, fetchAll, removeAll } = useWisudawan();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [fakultasFilter, setFakultasFilter] = useState("");
+  const [prodiFilter, setProdiFilter] = useState("");
+  const [customFilter, setCustomFilter] = useState<string | null>(null);
 
   const [editTarget, setEditTarget] = useState<WisudawanRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<WisudawanRow | null>(null);
   const [resetTarget, setResetTarget] = useState<WisudawanRow | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
-  const listKey = [search, statusFilter, fakultasFilter].join("|");
+  const activeCardLabel = customFilter || (
+    !search && !statusFilter && !fakultasFilter && !prodiFilter ? "Total Wisudawan" : null
+  );
+
+  const handleCardFilter = useCallback((label: string | null) => {
+    if (label === activeCardLabel) {
+      setCustomFilter(null);
+      setSearch("");
+      setStatusFilter("");
+      setFakultasFilter("");
+      setProdiFilter("");
+      return;
+    }
+
+    if (!label || label === "Total Wisudawan") {
+      setCustomFilter(null);
+      setSearch("");
+      setStatusFilter("");
+      setFakultasFilter("");
+      setProdiFilter("");
+      return;
+    }
+
+    if (label === "Terverifikasi") {
+      setStatusFilter("LULUS");
+      setCustomFilter(null);
+    } else {
+      setCustomFilter(label);
+    }
+  }, [activeCardLabel]);
+
+  const filteredData = data.filter((s) => {
+    if (!customFilter) return true;
+    if (customFilter === "Belum Login") {
+      return s.status === "AKTIF" && !s.hasUndangan && !s.kehadiranStatus;
+    }
+    if (customFilter === "Profile Belum Lengkap") {
+      return s.status === "AKTIF" && !s.hasUndangan;
+    }
+    if (customFilter === "Menunggu Verifikasi") {
+      return s.status === "AKTIF" && s.hasUndangan && !s.kehadiranStatus;
+    }
+    if (customFilter === "Terverifikasi") {
+      return s.status === "LULUS";
+    }
+    if (customFilter === "Sudah Hadir") {
+      return s.kehadiranStatus === "HADIR";
+    }
+    return true;
+  });
+
+  const listKey = [search, statusFilter, fakultasFilter, prodiFilter, customFilter].join("|");
 
   const load = useCallback(() => {
     fetchAll(
       {
         search: search || undefined,
         fakultas: fakultasFilter || undefined,
+        prodi: prodiFilter || undefined,
         status: statusFilter || undefined,
       },
       1,
       500,
     );
-  }, [fetchAll, search, statusFilter, fakultasFilter]);
+  }, [fetchAll, search, statusFilter, fakultasFilter, prodiFilter]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleDeleteAllConfirm = useCallback(async () => {
+    setIsDeletingAll(true);
+    try {
+      await removeAll();
+      setShowDeleteAllDialog(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Gagal menghapus semua akun wisudawan";
+      toast.error(message);
+    } finally {
+      setIsDeletingAll(false);
+    }
+  }, [removeAll]);
 
   return (
     <div className="dashboard-mesh relative -m-4 min-h-full overflow-hidden rounded-none p-4 sm:-m-6 sm:p-6 sm:rounded-3xl">
@@ -54,7 +189,7 @@ export default function MahasiswaPage() {
               <Users className="size-5 text-blue-600 dark:text-blue-300" />
             </div>
             <div>
-              <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/90 px-2.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:border-white/10 dark:bg-white/[0.08] dark:text-white/50">
+              <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-white/90 bg-white/90 px-2.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:border-white/10 dark:bg-white/[0.08] dark:text-white/55">
                 <Sparkles className="size-3 text-blue-600 dark:text-blue-400" />
                 Kelola wisudawan
               </div>
@@ -65,9 +200,8 @@ export default function MahasiswaPage() {
                   </span>
                   <span className="hidden dark:inline">Akun Wisudawan</span>
                 </h1>
-
               </div>
-              <p className="mt-0.5 text-sm font-medium text-slate-600 dark:text-white/40">
+              <p className="mt-0.5 text-sm font-medium text-slate-600 dark:text-white/45">
                 Kelola akun dan data wisudawan
               </p>
             </div>
@@ -83,25 +217,54 @@ export default function MahasiswaPage() {
               <Plus className="size-3.5" />
               Tambah
             </button>
+            {total > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteAllDialog(true)}
+                className={cn(glassBtnDanger, "h-9 gap-2 px-3")}
+              >
+                <Trash2 className="size-3.5" />
+                <span className="hidden sm:inline">Hapus Semua</span>
+              </button>
+            )}
           </div>
         </header>
 
-        <AccountStats data={data} total={total} />
+        <AccountStats
+          data={data}
+          total={total}
+          activeFilter={activeCardLabel}
+          onFilterChange={handleCardFilter}
+        />
 
         <AccountToolbar
           search={search}
-          onSearchChange={setSearch}
+          onSearchChange={(s) => {
+            setSearch(s);
+            setCustomFilter(null);
+          }}
           statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
+          onStatusFilterChange={(v) => {
+            setStatusFilter(v);
+            setCustomFilter(null);
+          }}
           fakultasFilter={fakultasFilter}
-          onFakultasFilterChange={setFakultasFilter}
+          onFakultasFilterChange={(v) => {
+            setFakultasFilter(v);
+            setCustomFilter(null);
+          }}
+          prodiFilter={prodiFilter}
+          onProdiFilterChange={(v) => {
+            setProdiFilter(v);
+            setCustomFilter(null);
+          }}
           onCreateClick={() => setCreateOpen(true)}
         />
 
         <StudentTable
-          data={data}
+          data={filteredData}
           isLoading={isLoading}
-          total={total}
+          total={filteredData.length}
           listKey={listKey}
           onSelect={(s) => setEditTarget(s)}
           onEdit={(s) => setEditTarget(s)}
@@ -139,6 +302,14 @@ export default function MahasiswaPage() {
           open={!!resetTarget}
           target={resetTarget}
           onClose={() => setResetTarget(null)}
+        />
+
+        <DeleteAllDialog
+          open={showDeleteAllDialog}
+          count={total}
+          onConfirm={handleDeleteAllConfirm}
+          onCancel={() => setShowDeleteAllDialog(false)}
+          isDeleting={isDeletingAll}
         />
       </div>
     </div>

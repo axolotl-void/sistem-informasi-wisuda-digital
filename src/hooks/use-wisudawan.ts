@@ -53,6 +53,14 @@ export function useWisudawan() {
     setData((prev) => prev.filter((s) => s.id !== id));
   }, []);
 
+  const removeAll = useCallback(async () => {
+    await api.delete(`${BASE}/delete-all`);
+    toast.success("Semua akun wisudawan berhasil dihapus");
+    setData([]);
+    setTotal(0);
+    setTotalPages(1);
+  }, []);
+
   const resetPassword = useCallback(async (id: string, autoGenerate = true) => {
     const res = await api.post(`${BASE}/${id}/reset-password`, { autoGenerate });
     toast.success("Password berhasil direset");
@@ -98,6 +106,7 @@ export function useWisudawan() {
     create,
     update,
     remove,
+    removeAll,
     resetPassword,
     verify,
     generateInvitation,

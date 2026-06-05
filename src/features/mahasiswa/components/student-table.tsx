@@ -106,7 +106,11 @@ function EmptyState() {
       <p className="mt-1 text-xs text-slate-500 dark:text-white/35">
         Import data mahasiswa untuk memulai
       </p>
-      <button type="button" className={cn(glassBtnPrimary, "mt-5 h-9 gap-2 px-4")}>
+      <button
+        type="button"
+        onClick={() => document.getElementById("import-excel-file-input")?.click()}
+        className={cn(glassBtnPrimary, "mt-5 h-9 gap-2 px-4")}
+      >
         <Upload className="size-3.5" /> Import Excel
       </button>
     </LiquidGlassCard>

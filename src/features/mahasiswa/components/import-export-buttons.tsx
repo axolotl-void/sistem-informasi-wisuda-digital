@@ -233,6 +233,7 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
+        id="import-excel-file-input"
         type="file"
         accept=".xlsx,.xls"
         className="hidden"

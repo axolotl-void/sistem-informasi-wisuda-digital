@@ -23,6 +23,7 @@ interface AnimatedItemProps {
   className?: string;
   scrollRoot?: RefObject<Element | null>;
   inViewAmount?: number;
+  once?: boolean;
   onMouseEnter?: () => void;
   onClick?: () => void;
 }
@@ -34,6 +35,7 @@ export function AnimatedListItem({
   className,
   scrollRoot,
   inViewAmount = 0.5,
+  once = true,
   onMouseEnter,
   onClick,
 }: AnimatedItemProps) {
@@ -41,7 +43,7 @@ export function AnimatedListItem({
   const inView = useInView(ref, {
     root: scrollRoot,
     amount: inViewAmount,
-    once: false,
+    once,
   });
 
   return (
@@ -74,6 +76,7 @@ export interface AnimatedListProps {
   itemEnterDelay?: number;
   allowHorizontalScroll?: boolean;
   inViewAmount?: number;
+  once?: boolean;
   header?: ReactNode;
   itemKeys?: string[];
 }
@@ -91,6 +94,7 @@ export function AnimatedList({
   itemEnterDelay = 0.1,
   allowHorizontalScroll = false,
   inViewAmount = 0.5,
+  once = true,
   header,
   itemKeys,
 }: AnimatedListProps) {
@@ -209,6 +213,7 @@ export function AnimatedList({
             scrollRoot={listRef}
             inViewAmount={inViewAmount}
             delay={itemEnterDelay}
+            once={once}
             onMouseEnter={
               onItemSelect != null ? () => handleItemMouseEnter(index) : undefined
             }

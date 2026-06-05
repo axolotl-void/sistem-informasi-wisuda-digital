@@ -20,11 +20,12 @@ export async function GET(request: NextRequest) {
   const limit = Number(sp.get("limit") ?? 10);
   const search = sp.get("search") ?? undefined;
   const fakultas = sp.get("fakultas") ?? undefined;
+  const prodi = sp.get("prodi") ?? undefined;
   const status = sp.get("status") ?? undefined;
 
   try {
     const result = await WisudawanService.getAll(
-      { search, fakultas, status },
+      { search, fakultas, prodi, status },
       page,
       limit,
     );

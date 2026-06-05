@@ -60,8 +60,13 @@ export default function ScanPage() {
       if (data.success) toast.success(data.message || "Absensi berhasil dicatat!");
       else toast.error(data.message || "QR Code tidak valid!");
     } catch (error: any) {
+      const serverResult = error.response?.data?.data;
       const msg = error.response?.data?.message || error.response?.data?.error || "Gagal memproses QR Code";
-      setScanResult({ success: false, message: msg });
+      if (serverResult) {
+        setScanResult(serverResult);
+      } else {
+        setScanResult({ success: false, message: msg });
+      }
       playBeep(false);
       toast.error(msg);
     } finally {
