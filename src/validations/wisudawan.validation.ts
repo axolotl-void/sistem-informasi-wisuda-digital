@@ -14,7 +14,12 @@ export const createWisudawanSchema = z.object({
     .min(8, "NIM minimal 8 karakter")
     .max(20, "NIM maksimal 20 karakter")
     .transform(sanitizeString),
-  email: z.string().email("Format email tidak valid"),
+  email: z
+    .string()
+    .email("Format email tidak valid")
+    .optional()
+    .or(z.literal(""))
+    .nullable(),
   password: z
     .string()
     .max(64, "Password maksimal 64 karakter")
@@ -40,6 +45,11 @@ export const createWisudawanSchema = z.object({
   sesiWisuda: z.string().optional().nullable(),
   gate: z.string().optional().nullable(),
   ukuranToga: z.enum(["XS", "S", "M", "L", "XL", "XXL", "XXXL"]).optional().nullable(),
+  nomorUrut: z.number().int().optional().nullable(),
+  isCumlaude: z.boolean().optional().nullable(),
+  tahunLulus: z.number().int().min(1900).max(2100).optional().nullable(),
+  ipk: z.number().min(0).max(4).optional().nullable(),
+  tanggalLulus: z.string().optional().nullable(),
 });
 
 export type CreateWisudawanInput = z.infer<typeof createWisudawanSchema>;
@@ -77,6 +87,11 @@ export const updateWisudawanSchema = z.object({
   sesiWisuda: z.string().optional().nullable(),
   gate: z.string().optional().nullable(),
   ukuranToga: z.enum(["XS", "S", "M", "L", "XL", "XXL", "XXXL"]).optional().nullable(),
+  nomorUrut: z.number().int().optional().nullable(),
+  isCumlaude: z.boolean().optional().nullable(),
+  tahunLulus: z.number().int().min(1900).max(2100).optional().nullable(),
+  ipk: z.number().min(0).max(4).optional().nullable(),
+  tanggalLulus: z.string().optional().nullable(),
 });
 
 export type UpdateWisudawanInput = z.infer<typeof updateWisudawanSchema>;

@@ -192,13 +192,13 @@ export default function MahasiswaPage() {
   const filteredData = data.filter((s) => {
     if (!customFilter) return true;
     if (customFilter === "Belum Login") {
-      return s.status === "AKTIF" && !s.hasUndangan && !s.kehadiranStatus;
+      return s.status === "AKTIF" && (!s.email || s.email.endsWith("@temp-wisuda.id")) && !s.hasUndangan && !s.kehadiranStatus;
     }
     if (customFilter === "Profile Belum Lengkap") {
-      return s.status === "AKTIF" && !s.hasUndangan;
+      return s.status === "AKTIF" && (!s.email || s.email.endsWith("@temp-wisuda.id")) && !s.hasUndangan;
     }
     if (customFilter === "Menunggu Verifikasi") {
-      return s.status === "AKTIF" && s.hasUndangan && !s.kehadiranStatus;
+      return s.status === "AKTIF" && s.email && !s.email.endsWith("@temp-wisuda.id") && !s.hasUndangan && !s.kehadiranStatus;
     }
     if (customFilter === "Terverifikasi") {
       return s.status === "LULUS";
@@ -220,7 +220,7 @@ export default function MahasiswaPage() {
         status: statusFilter || undefined,
       },
       1,
-      500,
+      5000,
     );
   }, [fetchAll, search, statusFilter, fakultasFilter, prodiFilter]);
 

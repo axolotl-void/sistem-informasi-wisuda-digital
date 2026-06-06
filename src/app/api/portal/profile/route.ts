@@ -76,6 +76,9 @@ export async function PATCH(request: NextRequest) {
       if (parsed.data.foto !== undefined) updateData.foto = parsed.data.foto;
       if (parsed.data.ukuranToga !== undefined) updateData.ukuranToga = parsed.data.ukuranToga;
       if (parsed.data.email !== undefined) updateData.email = parsed.data.email;
+      if (mahasiswa.status === "REVISI") {
+        updateData.status = "AKTIF";
+      }
 
       return await tx.mahasiswa.update({
         where: { id: mahasiswa.id },

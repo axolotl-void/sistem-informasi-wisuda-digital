@@ -5,7 +5,7 @@ import {
   User, CreditCard, Building2, BookOpen, Users as UsersIcon,
   Mail, Lock, Eye, EyeOff, Loader2, Save,
   CheckCircle2, XCircle, RotateCcw, GraduationCap,
-  ShieldCheck, CalendarDays, Pencil, Ticket, DoorOpen, Shirt,
+  ShieldCheck, CalendarDays, Pencil, Ticket, DoorOpen, Shirt, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -39,6 +39,8 @@ interface EditModalProps {
 }
 
 interface EditFormData {
+  nomorUrut: number | "";
+  isCumlaude: boolean;
   nama: string;
   nim: string;
   email: string;
@@ -51,6 +53,9 @@ interface EditFormData {
   gate: string;
   kuotaTamu: number;
   ukuranToga: string;
+  tahunLulus: number | "";
+  ipk: number | "";
+  tanggalLulus: string;
 }
 
 // --- Constants ----------------------------------------------------------------
@@ -251,6 +256,10 @@ function TabDetail({
           <p className={detailValueCls}>{student.nama}</p>
         </div>
         <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Nomor Urut</p>
+          <p className={detailValueCls}>{student.nomorUrut ?? "-"}</p>
+        </div>
+        <div className={detailFieldCls}>
           <p className={detailLabelCls}>NIM</p>
           <p className={cn(detailValueCls, "font-mono")}>{student.nim}</p>
         </div>
@@ -260,7 +269,9 @@ function TabDetail({
         </div>
         <div className={detailFieldCls}>
           <p className={detailLabelCls}>Email</p>
-          <p className={cn(detailValueCls, "break-all")}>{student.email}</p>
+          <p className={cn(detailValueCls, "break-all")}>
+            {student.email && !student.email.endsWith("@temp-wisuda.id") ? student.email : "-"}
+          </p>
         </div>
         <div className={cn(detailFieldCls, "relative pr-10")}>
           <p className={detailLabelCls}>Password</p>
@@ -332,6 +343,37 @@ function TabDetail({
           ) : (
             <p className="text-sm font-semibold text-slate-400 dark:text-white/35">Belum Memilih</p>
           )}
+        </div>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Predikat</p>
+          {student.isCumlaude ? (
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-3.5 shrink-0 text-amber-500" />
+              <p className={cn(detailValueCls, "text-amber-600 dark:text-amber-400")}>Cumlaude</p>
+            </div>
+          ) : (
+            <p className="text-sm font-semibold text-slate-400 dark:text-white/35">Regular</p>
+          )}
+        </div>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Tahun Lulus</p>
+          <p className={detailValueCls}>{student.tahunLulus ?? "-"}</p>
+        </div>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>IPK</p>
+          <p className={detailValueCls}>{student.ipk !== null && student.ipk !== undefined ? student.ipk.toFixed(2) : "-"}</p>
+        </div>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Tanggal Lulus</p>
+          <p className={detailValueCls}>
+            {student.tanggalLulus
+              ? new Date(student.tanggalLulus).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "-"}
+          </p>
         </div>
       </div>
 
@@ -426,6 +468,22 @@ function TabEdit({
         <div className="space-y-4">
           <p className={sectionHeading}>Data Pribadi &amp; Akademik</p>
 
+          {/* Nomor Urut */}
+          <div className="space-y-1.5">
+            <label htmlFor="nomorUrut" className={fieldLabelCls}>
+              Nomor Urut
+            </label>
+            <Input
+              id="nomorUrut"
+              type="number"
+              value={form.nomorUrut}
+              onChange={(e) => setField("nomorUrut", e.target.value === "" ? "" : parseInt(e.target.value, 10))}
+              disabled={isLoading}
+              placeholder="Nomor urut (opsional)"
+              className={inputCls}
+            />
+          </div>
+
           {/* Nama */}
           <div className="space-y-1.5">
             <label htmlFor="nama" className={fieldLabelCls}>
@@ -470,6 +528,58 @@ function TabEdit({
               onChange={(e) => setField("angkatan", parseInt(e.target.value) || CURRENT_YEAR)}
               disabled={isLoading}
               placeholder={String(CURRENT_YEAR)}
+              className={inputCls}
+            />
+          </div>
+
+          {/* Tahun Lulus */}
+          <div className="space-y-1.5">
+            <label htmlFor="tahunLulus" className={fieldLabelCls}>
+              Tahun Lulus
+            </label>
+            <Input
+              id="tahunLulus"
+              type="number"
+              min={1900}
+              max={2100}
+              value={form.tahunLulus}
+              onChange={(e) => setField("tahunLulus", e.target.value === "" ? "" : parseInt(e.target.value, 10))}
+              disabled={isLoading}
+              placeholder="Tahun Lulus (opsional)"
+              className={inputCls}
+            />
+          </div>
+
+          {/* IPK */}
+          <div className="space-y-1.5">
+            <label htmlFor="ipk" className={fieldLabelCls}>
+              IPK
+            </label>
+            <Input
+              id="ipk"
+              type="number"
+              step="0.01"
+              min={0}
+              max={4}
+              value={form.ipk}
+              onChange={(e) => setField("ipk", e.target.value === "" ? "" : parseFloat(e.target.value))}
+              disabled={isLoading}
+              placeholder="IPK (misal: 3.75)"
+              className={inputCls}
+            />
+          </div>
+
+          {/* Tanggal Lulus */}
+          <div className="space-y-1.5">
+            <label htmlFor="tanggalLulus" className={fieldLabelCls}>
+              Tanggal Lulus
+            </label>
+            <Input
+              id="tanggalLulus"
+              type="date"
+              value={form.tanggalLulus}
+              onChange={(e) => setField("tanggalLulus", e.target.value)}
+              disabled={isLoading}
               className={inputCls}
             />
           </div>
@@ -694,6 +804,21 @@ function TabEdit({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Predikat Cumlaude */}
+          <div className="flex items-center gap-2 py-1.5">
+            <input
+              id="isCumlaude"
+              type="checkbox"
+              checked={form.isCumlaude}
+              onChange={(e) => setField("isCumlaude", e.target.checked)}
+              disabled={isLoading}
+              className="size-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-white/10 dark:bg-white/[0.03]"
+            />
+            <label htmlFor="isCumlaude" className="text-sm font-semibold text-slate-700 dark:text-white/75 select-none cursor-pointer">
+              Predikat Cumlaude
+            </label>
+          </div>
         </div>
       </div>
 
@@ -750,10 +875,15 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
   }, [fetchSettings]);
 
   const [form, setFormState] = useState<EditFormData>({
+    nomorUrut: "",
+    isCumlaude: false,
     nama: "", nim: "", email: "", password: "",
     fakultas: "", prodi: "", angkatan: CURRENT_YEAR,
     status: "AKTIF", sesiWisuda: "", gate: "", kuotaTamu: 2,
     ukuranToga: "",
+    tahunLulus: "",
+    ipk: "",
+    tanggalLulus: "",
   });
 
   useEffect(() => {
@@ -764,10 +894,19 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         .then((res) => {
           if (res.data?.success) {
             setDetailedStudent(res.data.data);
+            const isTemp = res.data.data.email && res.data.data.email.endsWith("@temp-wisuda.id");
             setFormState((prev) => ({
               ...prev,
+              nomorUrut: res.data.data.nomorUrut ?? prev.nomorUrut,
+              isCumlaude: res.data.data.isCumlaude ?? prev.isCumlaude,
               gate: res.data.data.gate ?? prev.gate,
               ukuranToga: res.data.data.ukuranToga ?? prev.ukuranToga,
+              tahunLulus: res.data.data.tahunLulus ?? prev.tahunLulus,
+              ipk: res.data.data.ipk ?? prev.ipk,
+              tanggalLulus: res.data.data.tanggalLulus
+                ? new Date(res.data.data.tanggalLulus).toISOString().split("T")[0]
+                : prev.tanggalLulus,
+              email: isTemp ? "" : (res.data.data.email ?? prev.email),
             }));
           }
         })
@@ -776,9 +915,10 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         });
 
       setFormState({
+        nomorUrut:  student.nomorUrut ?? "",
+        isCumlaude: student.isCumlaude,
         nama:       student.nama,
         nim:        student.nim,
-        email:      student.email,
         password:   "",
         fakultas:   student.fakultas,
         prodi:      student.prodi,
@@ -788,6 +928,12 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         gate:       student.gate ?? "",
         kuotaTamu:  2,
         ukuranToga: student.ukuranToga ?? "",
+        tahunLulus: student.tahunLulus ?? "",
+        ipk:        student.ipk ?? "",
+        tanggalLulus: student.tanggalLulus
+          ? new Date(student.tanggalLulus).toISOString().split("T")[0]
+          : "",
+        email: student.email && student.email.endsWith("@temp-wisuda.id") ? "" : student.email,
       });
       setActiveTab("detail");
     } else {
@@ -806,7 +952,10 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
     if (!form.nama.trim())              { toast.error("Nama lengkap wajib diisi"); return; }
     if (!form.nim.trim())               { toast.error("NIM wajib diisi"); return; }
     if (form.nim.trim().length < 8)     { toast.error("NIM minimal 8 karakter"); return; }
-    if (!form.email.trim())             { toast.error("Email wajib diisi"); return; }
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      toast.error("Format email tidak valid");
+      return;
+    }
     if (!form.fakultas)                 { toast.error("Fakultas wajib dipilih"); return; }
     if (!form.prodi)                    { toast.error("Program studi wajib dipilih"); return; }
     if (form.password && form.password.length < 8) { toast.error("Password minimal 8 karakter"); return; }
@@ -815,9 +964,11 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
     setIsLoading(true);
     try {
       const payload: Record<string, unknown> = {
+        nomorUrut:  form.nomorUrut === "" ? null : form.nomorUrut,
+        isCumlaude: form.isCumlaude,
         nim:        form.nim.trim(),
         nama:       form.nama.trim(),
-        email:      form.email.trim(),
+        email:      form.email.trim() || undefined,
         fakultas:   form.fakultas,
         prodi:      form.prodi,
         angkatan:   form.angkatan,
@@ -825,6 +976,9 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         sesiWisuda: form.sesiWisuda || null,
         gate:       form.gate || null,
         ukuranToga: form.ukuranToga || null,
+        tahunLulus: form.tahunLulus === "" ? null : form.tahunLulus,
+        ipk:        form.ipk === "" ? null : form.ipk,
+        tanggalLulus: form.tanggalLulus || null,
       };
       if (form.password.trim()) payload.password = form.password;
 

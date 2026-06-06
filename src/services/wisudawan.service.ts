@@ -33,6 +33,11 @@ export interface WisudawanRow {
   gate: string | null;
   kehadiranStatus: string | null;
   ukuranToga: string | null;
+  nomorUrut: number | null;
+  isCumlaude: boolean;
+  tahunLulus: number | null;
+  ipk: number | null;
+  tanggalLulus: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -95,7 +100,10 @@ export class WisudawanService {
         },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy: [
+          { nomorUrut: "asc" },
+          { createdAt: "desc" },
+        ],
       }),
       prisma.mahasiswa.count({ where }),
     ]);
@@ -121,6 +129,11 @@ export class WisudawanService {
       gate: m.gate ?? null,
       kehadiranStatus: m.kehadiran[0]?.statusKehadiran ?? null,
       ukuranToga: m.ukuranToga,
+      nomorUrut: m.nomorUrut ?? null,
+      isCumlaude: m.isCumlaude,
+      tahunLulus: m.tahunLulus ?? null,
+      ipk: m.ipk ?? null,
+      tanggalLulus: m.tanggalLulus ?? null,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
     }));
@@ -178,6 +191,11 @@ export class WisudawanService {
       gate: m.gate ?? null,
       kehadiranStatus: m.kehadiran[0]?.statusKehadiran ?? null,
       ukuranToga: m.ukuranToga,
+      nomorUrut: m.nomorUrut ?? null,
+      isCumlaude: m.isCumlaude,
+      tahunLulus: m.tahunLulus ?? null,
+      ipk: m.ipk ?? null,
+      tanggalLulus: m.tanggalLulus ?? null,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
     };
@@ -193,11 +211,15 @@ export class WisudawanService {
     });
     if (existing) throw new Error(`NIM ${input.nim} sudah terdaftar`);
 
+    const emailToUse = input.email && input.email.trim() !== ""
+      ? input.email.trim().toLowerCase()
+      : `${input.nim.trim()}@temp-wisuda.id`;
+
     // Check duplicate email
     const existingEmail = await prisma.user.findUnique({
-      where: { email: input.email },
+      where: { email: emailToUse },
     });
-    if (existingEmail) throw new Error(`Email ${input.email} sudah digunakan`);
+    if (existingEmail) throw new Error(`Email ${emailToUse} sudah digunakan`);
 
     const passwordToHash = input.password && input.password.trim() !== "" ? input.password : input.nim;
     const hashedPassword = await bcrypt.hash(passwordToHash, 12);
@@ -207,7 +229,7 @@ export class WisudawanService {
       const user = await tx.user.create({
         data: {
           name: input.nama,
-          email: input.email,
+          email: emailToUse,
           password: hashedPassword,
           role: "MAHASISWA",
           fakultas: input.fakultas,
@@ -218,7 +240,7 @@ export class WisudawanService {
         data: {
           nim: input.nim,
           nama: input.nama,
-          email: input.email,
+          email: emailToUse,
           fakultas: input.fakultas,
           prodi: input.prodi,
           angkatan: input.angkatan,
@@ -226,6 +248,11 @@ export class WisudawanService {
           status: "AKTIF",
           sesiWisuda: input.sesiWisuda ?? null,
           gate: input.gate ?? null,
+          nomorUrut: input.nomorUrut ?? null,
+          isCumlaude: input.isCumlaude ?? false,
+          tahunLulus: input.tahunLulus ?? null,
+          ipk: input.ipk ?? null,
+          tanggalLulus: input.tanggalLulus ? new Date(input.tanggalLulus) : null,
         },
       });
 
@@ -254,6 +281,11 @@ export class WisudawanService {
       gate: result.mahasiswa.gate ?? null,
       kehadiranStatus: null,
       ukuranToga: result.mahasiswa.ukuranToga ?? null,
+      nomorUrut: result.mahasiswa.nomorUrut ?? null,
+      isCumlaude: result.mahasiswa.isCumlaude,
+      tahunLulus: result.mahasiswa.tahunLulus ?? null,
+      ipk: result.mahasiswa.ipk ?? null,
+      tanggalLulus: result.mahasiswa.tanggalLulus ?? null,
       createdAt: result.mahasiswa.createdAt,
       updatedAt: result.mahasiswa.updatedAt,
     };
@@ -308,6 +340,13 @@ export class WisudawanService {
     if (input.sesiWisuda !== undefined) updateData.sesiWisuda = input.sesiWisuda;
     if (input.gate       !== undefined) updateData.gate       = input.gate;
     if (input.ukuranToga !== undefined) updateData.ukuranToga = input.ukuranToga;
+    if (input.nomorUrut  !== undefined) updateData.nomorUrut  = input.nomorUrut;
+    if (input.isCumlaude !== undefined) updateData.isCumlaude = input.isCumlaude;
+    if (input.tahunLulus !== undefined) updateData.tahunLulus = input.tahunLulus;
+    if (input.ipk        !== undefined) updateData.ipk        = input.ipk;
+    if (input.tanggalLulus !== undefined) {
+      updateData.tanggalLulus = input.tanggalLulus ? new Date(input.tanggalLulus) : null;
+    }
 
     const mahasiswa = await prisma.mahasiswa.update({
       where: { id },
@@ -349,6 +388,11 @@ export class WisudawanService {
       gate: mahasiswa.gate ?? null,
       kehadiranStatus: mahasiswa.kehadiran[0]?.statusKehadiran ?? null,
       ukuranToga: mahasiswa.ukuranToga ?? null,
+      nomorUrut: mahasiswa.nomorUrut ?? null,
+      isCumlaude: mahasiswa.isCumlaude,
+      tahunLulus: mahasiswa.tahunLulus,
+      ipk: mahasiswa.ipk,
+      tanggalLulus: mahasiswa.tanggalLulus,
       createdAt: mahasiswa.createdAt,
       updatedAt: mahasiswa.updatedAt,
     };

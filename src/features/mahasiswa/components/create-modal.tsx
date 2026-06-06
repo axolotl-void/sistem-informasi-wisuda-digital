@@ -54,10 +54,15 @@ export function CreateAccountModal({ open, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
+    nomorUrut: "" as string | number,
+    isCumlaude: false,
     nama: "", nim: "", email: "", password: "", fakultas: "", prodi: "", angkatan: new Date().getFullYear(),
+    tahunLulus: "" as string | number,
+    ipk: "" as string | number,
+    tanggalLulus: "",
   });
 
-  function set(key: string, value: string | number) {
+  function set(key: string, value: string | number | boolean) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: "" }));
   }
@@ -67,8 +72,27 @@ export function CreateAccountModal({ open, onClose }: Props) {
     setErrors({});
     setLoading(true);
     try {
-      await create(form);
-      setForm({ nama: "", nim: "", email: "", password: "", fakultas: "", prodi: "", angkatan: new Date().getFullYear() });
+      await create({
+        ...form,
+        nomorUrut: form.nomorUrut === "" ? null : Number(form.nomorUrut),
+        tahunLulus: form.tahunLulus === "" ? null : Number(form.tahunLulus),
+        ipk: form.ipk === "" ? null : Number(form.ipk),
+        tanggalLulus: form.tanggalLulus || null,
+      });
+      setForm({
+        nomorUrut: "",
+        isCumlaude: false,
+        nama: "",
+        nim: "",
+        email: "",
+        password: "",
+        fakultas: "",
+        prodi: "",
+        angkatan: new Date().getFullYear(),
+        tahunLulus: "",
+        ipk: "",
+        tanggalLulus: "",
+      });
       onClose();
     } catch (err) {
       const axiosErr = err as { response?: { data?: { errors?: { fieldErrors?: Record<string, string[]> } } } };
@@ -140,6 +164,26 @@ export function CreateAccountModal({ open, onClose }: Props) {
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
+                    <label style={labelStyle}>Nomor Urut (Opsional)</label>
+                    <input style={inputStyle} type="number" placeholder="Contoh: 1" value={form.nomorUrut} onChange={(e) => set("nomorUrut", e.target.value === "" ? "" : parseInt(e.target.value, 10))} />
+                    {errors.nomorUrut && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.nomorUrut}</p>}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 18 }}>
+                    <input
+                      id="create-isCumlaude"
+                      type="checkbox"
+                      checked={form.isCumlaude}
+                      onChange={(e) => set("isCumlaude", e.target.checked)}
+                      style={{ width: 16, height: 16, cursor: "pointer" }}
+                    />
+                    <label htmlFor="create-isCumlaude" style={{ fontSize: 12, fontWeight: 500, color: "white", cursor: "pointer" }}>
+                      Predikat Cumlaude
+                    </label>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
                     <label style={labelStyle}>Nama Lengkap</label>
                     <input style={inputStyle} placeholder="Ahmad Pratama" value={form.nama} onChange={(e) => set("nama", e.target.value)} />
                     {errors.nama && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.nama}</p>}
@@ -180,6 +224,32 @@ export function CreateAccountModal({ open, onClose }: Props) {
                       {(majors[form.fakultas] ?? []).map((p) => <option key={p} value={p} style={{ background: "#0C1525" }}>{p}</option>)}
                     </select>
                     {errors.prodi && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.prodi}</p>}
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={labelStyle}>Tahun Angkatan</label>
+                    <input style={inputStyle} type="number" placeholder={String(new Date().getFullYear())} value={form.angkatan} onChange={(e) => set("angkatan", e.target.value === "" ? "" : parseInt(e.target.value, 10))} />
+                    {errors.angkatan && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.angkatan}</p>}
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Tahun Lulus (Opsional)</label>
+                    <input style={inputStyle} type="number" placeholder="Contoh: 2027" value={form.tahunLulus} onChange={(e) => set("tahunLulus", e.target.value === "" ? "" : parseInt(e.target.value, 10))} />
+                    {errors.tahunLulus && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.tahunLulus}</p>}
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={labelStyle}>IPK (Opsional)</label>
+                    <input style={inputStyle} type="number" step="0.01" min={0} max={4} placeholder="Contoh: 3.75" value={form.ipk} onChange={(e) => set("ipk", e.target.value === "" ? "" : parseFloat(e.target.value))} />
+                    {errors.ipk && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.ipk}</p>}
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Tanggal Lulus (Opsional)</label>
+                    <input style={{ ...inputStyle, padding: "0 8px" }} type="date" value={form.tanggalLulus} onChange={(e) => set("tanggalLulus", e.target.value)} />
+                    {errors.tanggalLulus && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.tanggalLulus}</p>}
                   </div>
                 </div>
 

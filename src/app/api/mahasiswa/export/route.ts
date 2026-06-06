@@ -17,8 +17,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const rows = await prisma.mahasiswa.findMany({
-      orderBy: { createdAt: "asc" },
+      orderBy: [
+        { nomorUrut: "asc" },
+        { createdAt: "asc" },
+      ],
       select: {
+        nomorUrut: true,
+        isCumlaude: true,
         nim:      true,
         nama:     true,
         email:    true,
@@ -26,6 +31,9 @@ export async function GET(request: NextRequest) {
         prodi:    true,
         angkatan: true,
         status:   true,
+        tahunLulus: true,
+        ipk:      true,
+        tanggalLulus: true,
         createdAt: true,
       },
     });
@@ -39,13 +47,16 @@ export async function GET(request: NextRequest) {
     };
 
     const data = rows.map((m, i) => ({
-      No:                  i + 1,
+      No:                  m.nomorUrut ?? (i + 1),
       NIM:                 m.nim,
-      Nama:                m.nama,
+      Nama:                m.nama + (m.isCumlaude ? " (Cumlaude)" : ""),
       Email:               m.email,
       Fakultas:            m.fakultas,
       "Program Studi":     m.prodi,
       Angkatan:            m.angkatan,
+      "Tahun Lulus":       m.tahunLulus ?? "",
+      IPK:                 m.ipk ?? "",
+      "Tanggal Lulus":     m.tanggalLulus ? new Date(m.tanggalLulus).toLocaleDateString("id-ID") : "",
       "Status Verifikasi": STATUS_LABEL[m.status] ?? m.status,
       "Tanggal Daftar":    new Date(m.createdAt).toLocaleDateString("id-ID"),
     }));

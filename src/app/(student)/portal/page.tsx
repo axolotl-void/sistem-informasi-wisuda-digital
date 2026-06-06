@@ -627,11 +627,12 @@ export default function ProfilPage() {
       .then((result) => {
         if (result.data) {
           setData(result.data);
+          const isTempEmail = result.data.email && result.data.email.endsWith("@temp-wisuda.id");
           setForm({
             fakultas: result.data.fakultas ?? "",
             prodi: result.data.prodi ?? "",
             ukuranToga: result.data.ukuranToga ?? "",
-            email: result.data.email ?? "",
+            email: isTempEmail ? "" : (result.data.email ?? ""),
             password: "",
           });
         }

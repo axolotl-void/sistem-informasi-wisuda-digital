@@ -8,15 +8,41 @@ import { apiSuccess, apiError } from "@/lib/utils";
 // --- Schema validasi per-baris ------------------------------------------------
 
 const rowSchema = z.object({
+  nomorUrut: z.coerce.number().int().min(1, "Nomor urut tidak valid").optional().nullable(),
+  isCumlaude: z.boolean().optional().nullable(),
   nim:      z.string().min(1, "NIM wajib diisi").max(20),
   nama:     z.string().min(2, "Nama minimal 2 karakter").max(100),
-  email:    z.string().email("Format email tidak valid"),
+  email:    z.string().email("Format email tidak valid").optional().or(z.literal("")).nullable(),
   fakultas: z.string().min(2, "Fakultas wajib diisi"),
   prodi:    z.string().min(2, "Prodi wajib diisi"),
   angkatan: z.coerce.number().int().min(2000, "Angkatan tidak valid").max(2100, "Angkatan tidak valid"),
+  tahunLulus: z.coerce.number().int().min(1900, "Tahun lulus tidak valid").max(2100, "Tahun lulus tidak valid").optional().nullable(),
+  ipk:      z.coerce.number().min(0, "IPK tidak boleh negatif").max(4, "IPK maksimal 4").optional().nullable(),
+  tanggalLulus: z.string().optional().nullable(),
 });
 
 type ImportRow = z.infer<typeof rowSchema>;
+
+function parseDateString(dateStr: string): Date | null {
+  if (!dateStr || dateStr.trim() === "") return null;
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime())) {
+    return parsed;
+  }
+  const parts = dateStr.split(/[-/]/);
+  if (parts.length === 3) {
+    const d = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const y = parseInt(parts[2], 10);
+    if (y > 1000 && m >= 0 && m < 12 && d > 0 && d <= 31) {
+      const customDate = new Date(y, m, d);
+      if (!isNaN(customDate.getTime())) {
+        return customDate;
+      }
+    }
+  }
+  return null;
+}
 
 /**
  * POST /api/mahasiswa/import
@@ -33,6 +59,9 @@ export async function POST(request: NextRequest) {
   if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
     return forbiddenResponse();
   }
+
+  const sp = request.nextUrl.searchParams;
+  const isCumlaudeImport = sp.get("cumlaude") === "true";
 
   try {
     const body = await request.json();
@@ -54,7 +83,10 @@ export async function POST(request: NextRequest) {
         valid.push(result.data);
       } else {
         const msg = result.error.issues.map((issue) => issue.message).join(", ");
-        validationErrors.push(`Baris ${i + 2}: ${msg}`); // +2 = header di baris 1
+        const rawRow = body[i] as Record<string, unknown> | undefined;
+        const nimStr = rawRow?.nim ? `NIM ${rawRow.nim}` : "NIM kosong";
+        const namaStr = rawRow?.nama ? `(${rawRow.nama})` : "(Nama kosong)";
+        validationErrors.push(`Baris ${i + 2}: ${nimStr} ${namaStr} - ${msg}`); // +2 = header di baris 1
       }
     }
 
@@ -73,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     for (const row of valid) {
       const nim = row.nim.trim();
-      const email = row.email.trim().toLowerCase();
+      const email = row.email && row.email.trim() ? row.email.trim().toLowerCase() : `${nim}@temp-wisuda.id`;
 
       let isDuplicate = false;
       if (seenNimsInFile.has(nim)) {
@@ -81,7 +113,7 @@ export async function POST(request: NextRequest) {
         isDuplicate = true;
       }
       if (seenEmailsInFile.has(email)) {
-        skippedLogs.push(`Email Duplikat dalam file Excel: Email ${row.email} (${row.nama})`);
+        skippedLogs.push(`Email Duplikat dalam file Excel: Email ${email} (${row.nama})`);
         isDuplicate = true;
       }
 
@@ -100,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // -- 3. Cek duplikat terhadap database (batch query) -------------------
     const incomingNims   = uniqueIncoming.map((r) => r.nim);
-    const incomingEmails = uniqueIncoming.map((r) => r.email);
+    const incomingEmails = uniqueIncoming.map((r) => r.email as string);
 
     const [existingByNim, existingByEmail] = await Promise.all([
       prisma.mahasiswa.findMany({
@@ -121,13 +153,13 @@ export async function POST(request: NextRequest) {
 
     for (const row of uniqueIncoming) {
       const nim = row.nim;
-      const email = row.email;
+      const email = row.email as string;
 
       if (existingNims.has(nim)) {
         skippedLogs.push(`NIM sudah terdaftar di database: NIM ${nim} (${row.nama})`);
         skippedDuplicateDB++;
       } else if (existingEmails.has(email)) {
-        skippedLogs.push(`Email sudah terdaftar di database: Email ${row.email} (${row.nama})`);
+        skippedLogs.push(`Email sudah terdaftar di database: Email ${email} (${row.nama})`);
         skippedDuplicateDB++;
       } else {
         toInsert.push(row);
@@ -158,7 +190,7 @@ export async function POST(request: NextRequest) {
               const user = await tx.user.create({
                 data: {
                   name:     row.nama,
-                  email:    row.email,
+                  email:    row.email as string,
                   password: row.hashedPassword,
                   role:     "MAHASISWA",
                   fakultas: row.fakultas,
@@ -167,14 +199,19 @@ export async function POST(request: NextRequest) {
 
               await tx.mahasiswa.create({
                 data: {
+                  nomorUrut: row.nomorUrut ?? null,
+                  isCumlaude: isCumlaudeImport || row.isCumlaude || false,
                   nim:      row.nim,
                   nama:     row.nama,
-                  email:    row.email,
+                  email:    row.email as string,
                   fakultas: row.fakultas,
                   prodi:    row.prodi,
                   angkatan: row.angkatan,
                   status:   "AKTIF",
                   userId:   user.id,
+                  tahunLulus: row.tahunLulus ?? null,
+                  ipk:      row.ipk ?? null,
+                  tanggalLulus: row.tanggalLulus ? parseDateString(row.tanggalLulus) : null,
                 },
               });
             });

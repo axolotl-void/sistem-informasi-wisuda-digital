@@ -10,7 +10,6 @@ import { useSocket } from "@/hooks/use-socket";
 export function QrPanel() {
   const { status, lastResult, isConnected } = useScannerStore();
 
-  // Pastikan dashboard juga join room untuk menerima event scan/stats
   useSocket("admin");
 
   const state: "idle" | "valid" | "invalid" = useMemo(() => {
@@ -26,7 +25,6 @@ export function QrPanel() {
 
   useEffect(() => {
     if (!lastResult) return;
-    // Bisa ditambahkan efek suara di sini (mis. Audio API) jika dibutuhkan.
   }, [lastResult]);
 
   return (

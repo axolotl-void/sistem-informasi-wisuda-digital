@@ -81,6 +81,11 @@ model Mahasiswa {
   gate       String?
   foto       String?
   ukuranToga String?
+  nomorUrut  Int?
+  isCumlaude Boolean @default(false)
+  tahunLulus   Int?
+  ipk          Float?
+  tanggalLulus DateTime?
 
   // Request & Approve tamu
   requestedTamu    Int                  @default(0)

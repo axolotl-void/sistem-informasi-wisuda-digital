@@ -5,22 +5,27 @@ import * as XLSX from "xlsx";
 import { Upload, Download, Loader2, FileSpreadsheet, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
+import axios from "axios";
 import { cn } from "@/lib/utils";
 import { glassBtnGhost, LiquidGlassCard } from "@/components/ui/liquid-glass";
 
 // --- Types --------------------------------------------------------------------
 
 /** Kolom wajib yang harus ada di file Excel */
-const REQUIRED_COLUMNS = ["NIM", "Nama", "Email", "Fakultas", "Prodi", "Angkatan"] as const;
+const REQUIRED_COLUMNS = ["No", "NIM", "Nama", "Fakultas", "Prodi", "Angkatan"] as const;
 type RequiredColumn = (typeof REQUIRED_COLUMNS)[number];
 
 interface ExcelRow {
+  No:       string | number;
   NIM:      string | number;
   Nama:     string;
-  Email:    string;
+  Email?:   string;
   Fakultas: string;
   Prodi:    string;
   Angkatan: string | number;
+  "Tahun Lulus"?: string | number;
+  "IPK"?:         string | number;
+  "Tanggal Lulus"?: string;
   [key: string]: unknown;
 }
 
@@ -39,21 +44,21 @@ interface ImportExportButtonsProps {
 
 // --- Template download helper -------------------------------------------------
 
-function downloadTemplate() {
+function downloadTemplate(isCumlaude = false) {
   const ws = XLSX.utils.aoa_to_sheet([
-    ["NIM", "Nama", "Email", "Fakultas", "Prodi", "Angkatan"],
-    ["23210001", "Contoh Mahasiswa", "contoh@email.com", "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)", "S1 Pendidikan Matematika", 2023],
+    ["No", "NIM", "Nama", "Email", "Fakultas", "Prodi", "Angkatan", "Tahun Lulus", "IPK", "Tanggal Lulus"],
+    [1, "23210001", isCumlaude ? "Contoh Mahasiswa Cumlaude" : "Contoh Mahasiswa", "contoh@email.com", "Fakultas Keguruan dan Ilmu Pendidikan (FKIP)", "S1 Pendidikan Matematika", 2023, 2027, 3.85, "2027-06-07"],
   ]);
 
   // Set lebar kolom
   ws["!cols"] = [
-    { wch: 14 }, { wch: 30 }, { wch: 30 },
-    { wch: 28 }, { wch: 24 }, { wch: 10 },
+    { wch: 6 }, { wch: 14 }, { wch: 30 }, { wch: 30 },
+    { wch: 28 }, { wch: 24 }, { wch: 10 }, { wch: 12 }, { wch: 8 }, { wch: 15 },
   ];
 
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Template");
-  XLSX.writeFile(wb, "Template_Import_Wisudawan.xlsx");
+  XLSX.utils.book_append_sheet(wb, ws, isCumlaude ? "Template Cumlaude" : "Template");
+  XLSX.writeFile(wb, isCumlaude ? "Template_Import_Wisudawan_Cumlaude.xlsx" : "Template_Import_Wisudawan.xlsx");
 }
 
 // --- Problems Dialog Component ------------------------------------------------
@@ -128,6 +133,7 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [importMode, setImportMode] = useState<"regular" | "cumlaude">("regular");
 
   const [problems, setProblems] = useState<string[]>([]);
   const [showProblemsDialog, setShowProblemsDialog] = useState(false);
@@ -159,6 +165,12 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
   // -- IMPORT ------------------------------------------------------------------
 
   function handleImportClick() {
+    setImportMode("regular");
+    fileInputRef.current?.click();
+  }
+
+  function handleImportCumlaudeClick() {
+    setImportMode("cumlaude");
     fileInputRef.current?.click();
   }
 
@@ -211,12 +223,20 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
         }
 
         return {
+          nomorUrut: normalized["no"] ? parseInt(normalized["no"], 10) : null,
           nim:      normalized["nim"]      ?? "",
           nama:     normalized["nama"]     ?? "",
           email:    normalized["email"]    ?? "",
           fakultas: normalized["fakultas"] ?? "",
           prodi:    normalized["prodi"]    ?? "",
           angkatan: parseInt(normalized["angkatan"] ?? "0", 10),
+          tahunLulus: normalized["tahun lulus"] && !isNaN(parseInt(normalized["tahun lulus"], 10))
+            ? parseInt(normalized["tahun lulus"], 10)
+            : null,
+          ipk: normalized["ipk"] && !isNaN(parseFloat(normalized["ipk"].replace(",", ".")))
+            ? parseFloat(normalized["ipk"].replace(",", "."))
+            : null,
+          tanggalLulus: normalized["tanggal lulus"] || null,
         };
       }).filter((r) => r.nim && r.nama); // buang baris kosong
 
@@ -228,7 +248,7 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
 
       // 4. Kirim ke API
       const res = await api.post<{ data: ImportResult; message: string }>(
-        "/api/mahasiswa/import",
+        `/api/mahasiswa/import${importMode === "cumlaude" ? "?cumlaude=true" : ""}`,
         payload
       );
 
@@ -245,8 +265,14 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
         duration: 5000,
       });
 
+      // Gabungkan logs gagal insert dan logs error validasi
+      const allProblems = [
+        ...(result.skippedLogs ?? []),
+        ...(result.validationErrors ?? []),
+      ];
+      saveProblems(allProblems);
+
       if (result.skippedLogs && result.skippedLogs.length > 0) {
-        saveProblems(result.skippedLogs);
         toast.error(`${result.skippedLogs.length} baris dilewati/gagal`, {
           description: (
             <div className="max-h-40 overflow-y-auto text-xs space-y-1 mt-1.5 pr-2 font-mono scrollbar-thin scrollbar-thumb-white/10 text-rose-200">
@@ -257,8 +283,6 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
           ),
           duration: 10000,
         });
-      } else {
-        saveProblems([]);
       }
 
       if (result.validationErrors && result.validationErrors.length > 0) {
@@ -274,8 +298,26 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
 
       onImportSuccess?.();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Gagal mengimport file";
-      toast.error(message, { id: toastId, duration: 6000 });
+      let validationErrors: string[] = [];
+      let errMsg = "Gagal mengimport file";
+
+      if (axios.isAxiosError(err) && err.response?.data) {
+        const resData = err.response.data as { message?: string; errors?: { errors?: string[] } };
+        errMsg = resData.message || errMsg;
+        if (resData.errors?.errors && Array.isArray(resData.errors.errors)) {
+          validationErrors = resData.errors.errors;
+        }
+      } else if (err instanceof Error) {
+        errMsg = err.message;
+      }
+
+      if (validationErrors.length > 0) {
+        saveProblems(validationErrors);
+      } else {
+        saveProblems([]);
+      }
+
+      toast.error(errMsg, { id: toastId, duration: 6000 });
     } finally {
       setIsImporting(false);
     }
@@ -378,26 +420,62 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
         className={btnGhost}
         title="Import data dari file Excel (.xlsx)"
       >
-        {isImporting ? (
+        {isImporting && importMode === "regular" ? (
           <Loader2 className="size-3 animate-spin" />
         ) : (
           <Upload className="size-3" />
         )}
         <span className="hidden sm:inline">
-          {isImporting ? "Mengimport…" : "Import Excel"}
+          {isImporting && importMode === "regular" ? "Mengimport…" : "Import Excel"}
         </span>
       </button>
 
       {/* Template download button */}
       <button
         type="button"
-        onClick={downloadTemplate}
+        onClick={() => downloadTemplate(false)}
         disabled={isImporting || isExporting}
         className={btnGhost}
         title="Download template Excel untuk import"
       >
         <FileSpreadsheet className="size-3" />
         <span className="hidden sm:inline">Template</span>
+      </button>
+
+      {/* Import Cumlaude button */}
+      <button
+        type="button"
+        onClick={handleImportCumlaudeClick}
+        disabled={isImporting || isExporting}
+        className={cn(
+          btnGhost,
+          "border-amber-400/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:border-amber-500/30 dark:bg-amber-500/10 hover:bg-amber-500/20"
+        )}
+        title="Import data wisudawan Cumlaude dari file Excel (.xlsx)"
+      >
+        {isImporting && importMode === "cumlaude" ? (
+          <Loader2 className="size-3 animate-spin" />
+        ) : (
+          <Upload className="size-3 text-amber-500" />
+        )}
+        <span className="hidden sm:inline">
+          {isImporting && importMode === "cumlaude" ? "Mengimport…" : "Import Cumlaude"}
+        </span>
+      </button>
+
+      {/* Template Cumlaude download button */}
+      <button
+        type="button"
+        onClick={() => downloadTemplate(true)}
+        disabled={isImporting || isExporting}
+        className={cn(
+          btnGhost,
+          "border-amber-400/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:border-amber-500/30 dark:bg-amber-500/10 hover:bg-amber-500/20"
+        )}
+        title="Download template Excel untuk import wisudawan Cumlaude"
+      >
+        <FileSpreadsheet className="size-3 text-amber-500" />
+        <span className="hidden sm:inline">Template Cumlaude</span>
       </button>
 
       {/* Export button */}

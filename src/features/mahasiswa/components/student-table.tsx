@@ -11,6 +11,7 @@ import {
 import { AnimatedList } from "@/components/ui/animated-list";
 
 const TABLE_HEADERS = [
+  "No",
   "Nama",
   "NIM",
   "Fakultas",
@@ -21,9 +22,8 @@ const TABLE_HEADERS = [
   "Aksi",
 ] as const;
 
-/** Kolom selaras dengan table-fixed sebelumnya */
-const ROW_GRID =
-  "grid w-full grid-cols-[22%_9%_16%_16%_10%_11%_8%_8%]";
+const ROW_GRID = "grid w-full";
+const GRID_STYLE = { gridTemplateColumns: "5% 20% 9% 14% 14% 10% 11% 9% 8%" };
 
 const statusConfig: Record<
   string,
@@ -66,7 +66,21 @@ const statusConfig: Record<
   },
 };
 
-function StatusPill({ status }: { status: string }) {
+function StatusPill({ status, email }: { status: string; email: string | null }) {
+  if (email && email.endsWith("@temp-wisuda.id")) {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+          "border-orange-400/30 bg-orange-500/15 text-orange-800",
+          "dark:border-orange-500/25 dark:bg-orange-500/12 dark:text-orange-300",
+        )}
+      >
+        <span className={cn("size-1.5 rounded-full bg-orange-500")} />
+        Belum Lengkap
+      </span>
+    );
+  }
   const c = statusConfig[status] ?? statusConfig.AKTIF;
   return (
     <span
@@ -140,8 +154,12 @@ function StudentRow({
         "border-b border-white/40 last:border-0",
         "hover:bg-white/40 dark:border-white/[0.05] dark:hover:bg-white/[0.04]",
       )}
+      style={GRID_STYLE}
       onClick={() => onEdit?.(s)}
     >
+      <div className="flex items-center px-3 py-3 font-mono text-[11px] text-slate-500 dark:text-white/45 font-medium">
+        {s.nomorUrut ?? "-"}
+      </div>
       <div className="flex items-center gap-2.5 px-3 py-3">
         <div className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-blue-400/30 bg-gradient-to-br from-blue-400/25 to-blue-600/10 text-[10px] font-bold text-blue-800 dark:border-blue-500/25 dark:text-blue-300">
           {s.nama
@@ -152,11 +170,18 @@ function StudentRow({
             .toUpperCase()}
         </div>
         <div className="min-w-0">
-          <p className="truncate font-medium text-slate-800 dark:text-white/85">
-            {s.nama}
-          </p>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <p className="truncate font-medium text-slate-800 dark:text-white/85">
+              {s.nama}
+            </p>
+            {s.isCumlaude && (
+              <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-amber-400/35 bg-amber-500/12 px-1.5 py-0.2 text-[9px] font-bold text-amber-700 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300">
+                ✨ Cumlaude
+              </span>
+            )}
+          </div>
           <p className="truncate text-[10px] text-slate-500 dark:text-white/35">
-            {s.email}
+            {s.email && !s.email.endsWith("@temp-wisuda.id") ? s.email : "-"}
           </p>
         </div>
       </div>
@@ -182,7 +207,7 @@ function StudentRow({
         </span>
       </div>
       <div className="flex items-center px-3 py-3">
-        <StatusPill status={s.status} />
+        <StatusPill status={s.status} email={s.email} />
       </div>
       <div className="flex items-center px-3 py-3">
         {s.hasUndangan ? (
@@ -258,6 +283,7 @@ export function StudentTable({
         ROW_GRID,
         "border-b border-white/60 bg-white/90 backdrop-blur-sm dark:border-white/[0.08] dark:bg-[#0f1a2e]/98",
       )}
+      style={GRID_STYLE}
     >
       {TABLE_HEADERS.map((h) => (
         <div
