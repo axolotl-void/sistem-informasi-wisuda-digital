@@ -31,6 +31,7 @@ interface ExcelRow {
 
 interface ImportResult {
   created:          number;
+  updated?:         number;
   skipped:          number;
   skippedDuplicate: number;
   skippedError:     number;
@@ -257,6 +258,7 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
       // 5. Tampilkan hasil
       const parts: string[] = [];
       if (result.created > 0)          parts.push(`${result.created} ditambahkan`);
+      if (result.updated && result.updated > 0) parts.push(`${result.updated} diupdate`);
       if (result.skippedDuplicate > 0) parts.push(`${result.skippedDuplicate} duplikat dilewati`);
       if (result.skippedError > 0)     parts.push(`${result.skippedError} gagal`);
 

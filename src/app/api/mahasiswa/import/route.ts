@@ -25,10 +25,49 @@ type ImportRow = z.infer<typeof rowSchema>;
 
 function parseDateString(dateStr: string): Date | null {
   if (!dateStr || dateStr.trim() === "") return null;
-  const parsed = new Date(dateStr);
+  
+  // Normalisasi nama bulan bahasa Indonesia ke bahasa Inggris
+  let normalized = dateStr.trim().toLowerCase();
+  const indonesianMonths: Record<string, string> = {
+    januari: "january",
+    februari: "february",
+    maret: "march",
+    april: "april",
+    mei: "may",
+    juni: "june",
+    juli: "july",
+    agustus: "august",
+    september: "september",
+    oktober: "october",
+    november: "november",
+    desember: "december",
+    // Singkatan
+    jan: "january",
+    feb: "february",
+    mar: "march",
+    apr: "april",
+    jun: "june",
+    jul: "july",
+    agu: "august",
+    sep: "september",
+    okt: "october",
+    nov: "november",
+    des: "december"
+  };
+
+  for (const [idMonth, enMonth] of Object.entries(indonesianMonths)) {
+    if (normalized.includes(idMonth)) {
+      normalized = normalized.replace(idMonth, enMonth);
+      break;
+    }
+  }
+
+  const parsed = new Date(normalized);
   if (!isNaN(parsed.getTime())) {
     return parsed;
   }
+
+  // Fallback ke pemisah / atau -
   const parts = dateStr.split(/[-/]/);
   if (parts.length === 3) {
     const d = parseInt(parts[0], 10);
@@ -149,6 +188,7 @@ export async function POST(request: NextRequest) {
     const existingEmails = new Set(existingByEmail.map((u) => u.email.toLowerCase()));
 
     const toInsert: ImportRow[] = [];
+    const toUpdate: ImportRow[] = [];
     let skippedDuplicateDB = 0;
 
     for (const row of uniqueIncoming) {
@@ -156,8 +196,12 @@ export async function POST(request: NextRequest) {
       const email = row.email as string;
 
       if (existingNims.has(nim)) {
-        skippedLogs.push(`NIM sudah terdaftar di database: NIM ${nim} (${row.nama})`);
-        skippedDuplicateDB++;
+        if (isCumlaudeImport) {
+          toUpdate.push(row);
+        } else {
+          skippedLogs.push(`NIM sudah terdaftar di database: NIM ${nim} (${row.nama})`);
+          skippedDuplicateDB++;
+        }
       } else if (existingEmails.has(email)) {
         skippedLogs.push(`Email sudah terdaftar di database: Email ${email} (${row.nama})`);
         skippedDuplicateDB++;
@@ -176,53 +220,85 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    // -- 5. Insert ke database secara batch (chunked concurrency) --------------
-    let created = 0;
+    // -- 5. Jalankan update/pemadanan data mahasiswa jika cumlaude -------------
+    let updated = 0;
     let skippedError = 0;
     const chunkSize = 50;
 
-    for (let i = 0; i < toInsertWithHash.length; i += chunkSize) {
-      const chunk = toInsertWithHash.slice(i, i + chunkSize);
-      await Promise.all(
-        chunk.map(async (row) => {
-          try {
-            await prisma.$transaction(async (tx) => {
-              const user = await tx.user.create({
+    if (toUpdate.length > 0) {
+      for (let i = 0; i < toUpdate.length; i += chunkSize) {
+        const chunk = toUpdate.slice(i, i + chunkSize);
+        await Promise.all(
+          chunk.map(async (row) => {
+            try {
+              // Pemadanan data: Update status isCumlaude, IPK, tahunLulus, dan tanggalLulus
+              await prisma.mahasiswa.update({
+                where: { nim: row.nim },
                 data: {
-                  name:     row.nama,
-                  email:    row.email as string,
-                  password: row.hashedPassword,
-                  role:     "MAHASISWA",
-                  fakultas: row.fakultas,
+                  isCumlaude: true, // Otomatis diset true karena ini import khusus cumlaude
+                  tahunLulus: row.tahunLulus !== undefined && row.tahunLulus !== null ? row.tahunLulus : undefined,
+                  ipk: row.ipk !== undefined && row.ipk !== null ? row.ipk : undefined,
+                  tanggalLulus: row.tanggalLulus ? parseDateString(row.tanggalLulus) : undefined,
                 },
               });
+              updated++;
+            } catch (err) {
+              const errMsg = err instanceof Error ? err.message : "Error tidak diketahui";
+              skippedLogs.push(`Gagal memproses/pemadanan NIM ${row.nim} (${row.nama}): ${errMsg}`);
+              skippedError++;
+            }
+          })
+        );
+      }
+    }
 
-              await tx.mahasiswa.create({
-                data: {
-                  nomorUrut: row.nomorUrut ?? null,
-                  isCumlaude: isCumlaudeImport || row.isCumlaude || false,
-                  nim:      row.nim,
-                  nama:     row.nama,
-                  email:    row.email as string,
-                  fakultas: row.fakultas,
-                  prodi:    row.prodi,
-                  angkatan: row.angkatan,
-                  status:   "AKTIF",
-                  userId:   user.id,
-                  tahunLulus: row.tahunLulus ?? null,
-                  ipk:      row.ipk ?? null,
-                  tanggalLulus: row.tanggalLulus ? parseDateString(row.tanggalLulus) : null,
-                },
+    // -- 6. Insert data baru ke database secara batch (chunked concurrency) --------------
+    let created = 0;
+
+    if (toInsertWithHash.length > 0) {
+      for (let i = 0; i < toInsertWithHash.length; i += chunkSize) {
+        const chunk = toInsertWithHash.slice(i, i + chunkSize);
+        await Promise.all(
+          chunk.map(async (row) => {
+            try {
+              await prisma.$transaction(async (tx) => {
+                const user = await tx.user.create({
+                  data: {
+                    name:     row.nama,
+                    email:    row.email as string,
+                    password: row.hashedPassword,
+                    role:     "MAHASISWA",
+                    fakultas: row.fakultas,
+                  },
+                });
+
+                await tx.mahasiswa.create({
+                  data: {
+                    nomorUrut: row.nomorUrut ?? null,
+                    isCumlaude: isCumlaudeImport || row.isCumlaude || false,
+                    nim:      row.nim,
+                    nama:     row.nama,
+                    email:    row.email as string,
+                    fakultas: row.fakultas,
+                    prodi:    row.prodi,
+                    angkatan: row.angkatan,
+                    status:   "AKTIF",
+                    userId:   user.id,
+                    tahunLulus: row.tahunLulus ?? null,
+                    ipk:      row.ipk ?? null,
+                    tanggalLulus: row.tanggalLulus ? parseDateString(row.tanggalLulus) : null,
+                  },
+                });
               });
-            });
-            created++;
-          } catch (err) {
-            const errMsg = err instanceof Error ? err.message : "Error tidak diketahui";
-            skippedLogs.push(`Gagal memproses NIM ${row.nim} (${row.nama}): ${errMsg}`);
-            skippedError++;
-          }
-        })
-      );
+              created++;
+            } catch (err) {
+              const errMsg = err instanceof Error ? err.message : "Error tidak diketahui";
+              skippedLogs.push(`Gagal memproses NIM ${row.nim} (${row.nama}): ${errMsg}`);
+              skippedError++;
+            }
+          })
+        );
+      }
     }
 
     const totalSkipped = skippedDuplicateFile + skippedDuplicateDB + skippedError;
@@ -230,13 +306,14 @@ export async function POST(request: NextRequest) {
     return apiSuccess(
       {
         created,
+        updated,
         skipped:          totalSkipped,
         skippedDuplicate: skippedDuplicateFile + skippedDuplicateDB,
         skippedError,
         skippedLogs:      skippedLogs.length > 0 ? skippedLogs : undefined,
         validationErrors: validationErrors.length > 0 ? validationErrors : undefined,
       },
-      `Import selesai: ${created} ditambahkan, ${totalSkipped} dilewati`
+      `Import selesai: ${created} ditambahkan, ${updated} diupdate, ${totalSkipped} dilewati`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Gagal import data";
