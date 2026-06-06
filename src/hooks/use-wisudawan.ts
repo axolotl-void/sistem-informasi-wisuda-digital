@@ -97,6 +97,15 @@ export function useWisudawan() {
     return res.data.data as { kode: string; qrToken: string };
   }, []);
 
+  const bulkVerify = useCallback(
+    async (filters: { fakultas?: string; prodi?: string }) => {
+      const res = await api.post(`${BASE}/bulk-verify`, filters);
+      toast.success(res.data.message || "Verifikasi massal berhasil");
+      return res.data.data;
+    },
+    []
+  );
+
   return {
     data,
     total,
@@ -110,5 +119,6 @@ export function useWisudawan() {
     resetPassword,
     verify,
     generateInvitation,
+    bulkVerify,
   };
 }

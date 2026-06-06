@@ -6,7 +6,7 @@ import { AUTH_COOKIE_NAME } from "@/lib/auth";
 import { InMemoryRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
 const loginSchema = z.object({
-  email: z.string().email("Format email tidak valid"),
+  email: z.string().min(1, "Email atau NIM tidak boleh kosong"),
   password: z.string().min(6, "Password minimal 6 karakter"),
 });
 
@@ -30,10 +30,11 @@ export async function POST(request: NextRequest) {
       return apiError("Validasi gagal", 422, parsed.error.flatten());
     }
 
-    email = parsed.data.email.toLowerCase().trim();
+    const rawId = parsed.data.email.trim();
+    email = rawId.includes("@") ? rawId.toLowerCase() : rawId;
     const failedKey = `lockout:login:email:${email}`;
 
-    // 2. Email Lockout: Maksimal 5 kali gagal login per email dalam 15 menit (mencegah brute-force akun)
+    // 2. Email Lockout: Maksimal 5 kali gagal login per email/NIM dalam 15 menit (mencegah brute-force akun)
     const lockoutCheck = InMemoryRateLimiter.isBlocked(failedKey, 5);
     if (lockoutCheck.blocked) {
       const remainingMinutes = Math.ceil((lockoutCheck.resetTime - Date.now()) / 1000 / 60);

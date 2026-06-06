@@ -228,8 +228,8 @@ export function StudentDrawer({ student, onClose, onDeleteClick, onResetClick }:
                   </div>
                 </div>
 
-                {/* Verification — only for AKTIF */}
-                {student.status === "AKTIF" && (
+                {/* Verification — only for AKTIF or REVISI */}
+                {(student.status === "AKTIF" || student.status === "REVISI") && (
                   <div>
                     <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)", marginBottom: 8 }}>
                       Verifikasi Profil

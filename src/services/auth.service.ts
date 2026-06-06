@@ -5,22 +5,34 @@ import type { LoginCredentials, AuthResponse, User } from "@/types/auth.type";
 
 export class AuthService {
   /**
-   * Login dengan email dan password
+   * Login dengan email/NIM dan password
    */
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const { email, password } = credentials;
+    const { email: identifier, password } = credentials;
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const isEmail = identifier.includes("@");
+    let user;
+
+    if (isEmail) {
+      user = await prisma.user.findUnique({
+        where: { email: identifier.toLowerCase().trim() },
+      });
+    } else {
+      // Cari mahasiswa berdasarkan NIM, lalu dapatkan akun user-nya
+      const mahasiswa = await prisma.mahasiswa.findUnique({
+        where: { nim: identifier.trim() },
+        include: { user: true },
+      });
+      user = mahasiswa?.user;
+    }
 
     if (!user) {
-      throw new Error("Email atau password salah");
+      throw new Error(isEmail ? "Email atau password salah" : "NIM atau password salah");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new Error("Email atau password salah");
+      throw new Error(isEmail ? "Email atau password salah" : "NIM atau password salah");
     }
 
     const token = signToken({

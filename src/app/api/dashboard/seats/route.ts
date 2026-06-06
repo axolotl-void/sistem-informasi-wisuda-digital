@@ -10,7 +10,7 @@ import { apiSuccess, apiError } from "@/lib/utils";
 export async function GET(request: NextRequest) {
   const payload = await getTokenFromRequest(request);
   if (!payload) return unauthorizedResponse();
-  if (!["SUPER_ADMIN", "ADMIN_FAKULTAS"].includes(payload.role)) {
+  if (!["SUPER_ADMIN", "ADMIN_FAKULTAS", "PETUGAS_SCAN"].includes(payload.role)) {
     return forbiddenResponse();
   }
 

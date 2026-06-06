@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import * as XLSX from "xlsx";
-import { Upload, Download, Loader2, FileSpreadsheet } from "lucide-react";
+import { Upload, Download, Loader2, FileSpreadsheet, AlertCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/axios";
 import { cn } from "@/lib/utils";
-import { glassBtnGhost } from "@/components/ui/liquid-glass";
+import { glassBtnGhost, LiquidGlassCard } from "@/components/ui/liquid-glass";
 
 // --- Types --------------------------------------------------------------------
 
@@ -29,6 +29,7 @@ interface ImportResult {
   skipped:          number;
   skippedDuplicate: number;
   skippedError:     number;
+  skippedLogs?:     string[];
   validationErrors?: string[];
 }
 
@@ -55,12 +56,105 @@ function downloadTemplate() {
   XLSX.writeFile(wb, "Template_Import_Wisudawan.xlsx");
 }
 
+// --- Problems Dialog Component ------------------------------------------------
+
+function ProblemsDialog({
+  open,
+  problems,
+  onClose,
+  onClear,
+}: {
+  open: boolean;
+  problems: string[];
+  onClose: () => void;
+  onClear: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <LiquidGlassCard hover={false} className="relative z-10 w-full max-w-lg p-6">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10">
+          <AlertTriangle className="size-5 text-red-500 dark:text-red-400" />
+        </div>
+
+        <h2 className="text-base font-bold text-slate-900 dark:text-white/90">
+          Detail Masalah Impor Excel
+        </h2>
+        <p className="mt-1.5 text-xs text-slate-500 dark:text-white/45">
+          Berikut adalah rincian data yang dilewati atau gagal diimpor pada proses impor terakhir:
+        </p>
+
+        <div className="mt-4 max-h-52 overflow-y-auto space-y-2 pr-1 font-mono text-[10.5px] leading-relaxed text-slate-700 dark:text-rose-200/90 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-white/10">
+          {problems.map((prob, idx) => (
+            <div
+              key={idx}
+              className="p-2.5 rounded-xl border border-red-500/10 bg-red-500/5 flex items-start gap-2"
+            >
+              <span className="text-red-600 dark:text-red-400/70 font-bold select-none">{idx + 1}.</span>
+              <span className="break-all">{prob}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
+            onClick={onClear}
+            className={cn(glassBtnGhost, "h-10 flex-1 justify-center text-xs font-semibold")}
+          >
+            Bersihkan Pengingat
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className={cn(glassBtnGhost, "h-10 flex-1 justify-center text-xs font-semibold border-red-400/35 bg-red-500/10 text-red-700 hover:bg-red-500/15 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/18")}
+          >
+            Tutup
+          </button>
+        </div>
+      </LiquidGlassCard>
+    </div>
+  );
+}
+
 // --- Main Component -----------------------------------------------------------
 
 export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+
+  const [problems, setProblems] = useState<string[]>([]);
+  const [showProblemsDialog, setShowProblemsDialog] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("import_skipped_logs");
+      if (stored) {
+        setProblems(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error("Failed to load import logs", e);
+    }
+  }, []);
+
+  const saveProblems = (logs: string[]) => {
+    setProblems(logs);
+    try {
+      if (logs.length > 0) {
+        localStorage.setItem("import_skipped_logs", JSON.stringify(logs));
+      } else {
+        localStorage.removeItem("import_skipped_logs");
+      }
+    } catch (e) {
+      console.error("Failed to save import logs", e);
+    }
+  };
 
   // -- IMPORT ------------------------------------------------------------------
 
@@ -151,6 +245,22 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
         duration: 5000,
       });
 
+      if (result.skippedLogs && result.skippedLogs.length > 0) {
+        saveProblems(result.skippedLogs);
+        toast.error(`${result.skippedLogs.length} baris dilewati/gagal`, {
+          description: (
+            <div className="max-h-40 overflow-y-auto text-xs space-y-1 mt-1.5 pr-2 font-mono scrollbar-thin scrollbar-thumb-white/10 text-rose-200">
+              {result.skippedLogs.map((log, index) => (
+                <div key={index} className="border-b border-white/5 pb-1 last:border-0">{log}</div>
+              ))}
+            </div>
+          ),
+          duration: 10000,
+        });
+      } else {
+        saveProblems([]);
+      }
+
       if (result.validationErrors && result.validationErrors.length > 0) {
         toast.warning(`${result.validationErrors.length} baris memiliki error validasi`, {
           description:
@@ -228,6 +338,12 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
     "h-9 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
   );
 
+  const handleClearProblems = () => {
+    saveProblems([]);
+    setShowProblemsDialog(false);
+    toast.success("Pengingat masalah dibersihkan");
+  };
+
   return (
     <>
       {/* Hidden file input */}
@@ -240,6 +356,19 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
         onChange={handleFileChange}
         aria-label="Pilih file Excel untuk diimport"
       />
+
+      {/* Masalah button */}
+      {problems.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowProblemsDialog(true)}
+          className="h-9 px-3 rounded-lg border border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400 dark:border-red-500/30 dark:bg-red-500/10 hover:bg-red-500/20 text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 animate-pulse"
+          title={`Ada ${problems.length} masalah dari impor terakhir`}
+        >
+          <AlertCircle className="size-3.5" />
+          <span>Masalah ({problems.length})</span>
+        </button>
+      )}
 
       {/* Import button */}
       <button
@@ -288,6 +417,14 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
           {isExporting ? "Mengekspor…" : "Export Excel"}
         </span>
       </button>
+
+      {/* Dialog Detail Masalah */}
+      <ProblemsDialog
+        open={showProblemsDialog}
+        problems={problems}
+        onClose={() => setShowProblemsDialog(false)}
+        onClear={handleClearProblems}
+      />
     </>
   );
 }

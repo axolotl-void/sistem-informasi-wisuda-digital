@@ -80,8 +80,68 @@ function DeleteAllDialog({
   );
 }
 
+function BulkVerifyDialog({
+  open,
+  onConfirm,
+  onCancel,
+  count,
+  isVerifying,
+}: {
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+  count: number;
+  isVerifying: boolean;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/55"
+        onClick={!isVerifying ? onCancel : undefined}
+      />
+      <LiquidGlassCard hover={false} className="relative z-10 w-full max-w-md p-6">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-500/10 dark:border-emerald-500/25 dark:bg-emerald-500/10">
+          <Sparkles className="size-5 text-emerald-600 dark:text-emerald-400" />
+        </div>
+
+        <h2 className="text-base font-bold text-slate-900 dark:text-white/90">
+          Verifikasi Massal Akun Wisudawan?
+        </h2>
+        <p className="mt-2 text-[0.82rem] leading-relaxed text-slate-600 dark:text-white/45 font-semibold">
+          Anda akan memverifikasi (menyetujui) sebanyak{" "}
+          <span className="font-bold text-emerald-600 dark:text-emerald-400">{count} akun wisudawan</span> yang saat ini berstatus <span className="font-extrabold text-blue-600 dark:text-blue-400">Aktif</span> sesuai filter yang dipilih.
+        </p>
+        <p className="mt-2 text-[0.78rem] leading-relaxed text-slate-500 dark:text-white/30">
+          Mahasiswa yang sudah berstatus **Ditolak** atau **Revisi** sebelumnya tidak akan ikut berubah statusnya.
+        </p>
+
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isVerifying}
+            className={cn(glassBtnGhost, "h-10 flex-1 justify-center disabled:opacity-40")}
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isVerifying}
+            className={cn(glassBtnPrimary, "h-10 flex-1 justify-center font-bold disabled:opacity-60")}
+          >
+            {isVerifying ? "Memproses..." : "Ya, Setujui Semua"}
+          </button>
+        </div>
+      </LiquidGlassCard>
+    </div>
+  );
+}
+
 export default function MahasiswaPage() {
-  const { data, total, isLoading, fetchAll, removeAll } = useWisudawan();
+  const { data, total, isLoading, fetchAll, removeAll, bulkVerify } = useWisudawan();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -95,6 +155,8 @@ export default function MahasiswaPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [showBulkVerifyDialog, setShowBulkVerifyDialog] = useState(false);
+  const [isBulkVerifying, setIsBulkVerifying] = useState(false);
 
   const activeCardLabel = customFilter || (
     !search && !statusFilter && !fakultasFilter && !prodiFilter ? "Total Wisudawan" : null
@@ -161,6 +223,24 @@ export default function MahasiswaPage() {
       500,
     );
   }, [fetchAll, search, statusFilter, fakultasFilter, prodiFilter]);
+
+  const handleBulkVerifyConfirm = useCallback(async () => {
+    setIsBulkVerifying(true);
+    try {
+      await bulkVerify({
+        fakultas: fakultasFilter || undefined,
+        prodi: prodiFilter || undefined,
+      });
+      setShowBulkVerifyDialog(false);
+      load();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Gagal memverifikasi massal";
+      toast.error(message);
+    } finally {
+      setIsBulkVerifying(false);
+    }
+  }, [bulkVerify, fakultasFilter, prodiFilter, load]);
 
   useEffect(() => {
     load();
@@ -259,6 +339,14 @@ export default function MahasiswaPage() {
             setCustomFilter(null);
           }}
           onCreateClick={() => setCreateOpen(true)}
+          onBulkVerifyClick={() => {
+            const activeCount = filteredData.filter((s) => s.status === "AKTIF").length;
+            if (activeCount === 0) {
+              toast.info("Tidak ada akun berstatus Aktif untuk diverifikasi");
+              return;
+            }
+            setShowBulkVerifyDialog(true);
+          }}
         />
 
         <StudentTable
@@ -310,6 +398,14 @@ export default function MahasiswaPage() {
           onConfirm={handleDeleteAllConfirm}
           onCancel={() => setShowDeleteAllDialog(false)}
           isDeleting={isDeletingAll}
+        />
+
+        <BulkVerifyDialog
+          open={showBulkVerifyDialog}
+          count={filteredData.filter((s) => s.status === "AKTIF").length}
+          onConfirm={handleBulkVerifyConfirm}
+          onCancel={() => setShowBulkVerifyDialog(false)}
+          isVerifying={isBulkVerifying}
         />
       </div>
     </div>

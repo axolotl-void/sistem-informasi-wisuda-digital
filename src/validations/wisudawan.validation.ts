@@ -17,8 +17,13 @@ export const createWisudawanSchema = z.object({
   email: z.string().email("Format email tidak valid"),
   password: z
     .string()
-    .min(8, "Password minimal 8 karakter")
-    .max(64, "Password maksimal 64 karakter"),
+    .max(64, "Password maksimal 64 karakter")
+    .optional()
+    .or(z.literal(""))
+    .transform((val) => (val === "" ? undefined : val))
+    .refine((val) => !val || val.length >= 8, {
+      message: "Password minimal 8 karakter",
+    }),
   fakultas: z
     .string()
     .min(2, "Fakultas wajib diisi")
@@ -34,6 +39,7 @@ export const createWisudawanSchema = z.object({
     .max(2100, "Tahun angkatan tidak valid"),
   sesiWisuda: z.string().optional().nullable(),
   gate: z.string().optional().nullable(),
+  ukuranToga: z.enum(["XS", "S", "M", "L", "XL", "XXL", "XXXL"]).optional().nullable(),
 });
 
 export type CreateWisudawanInput = z.infer<typeof createWisudawanSchema>;
@@ -70,6 +76,7 @@ export const updateWisudawanSchema = z.object({
   foto: z.string().url().optional().nullable(),
   sesiWisuda: z.string().optional().nullable(),
   gate: z.string().optional().nullable(),
+  ukuranToga: z.enum(["XS", "S", "M", "L", "XL", "XXL", "XXXL"]).optional().nullable(),
 });
 
 export type UpdateWisudawanInput = z.infer<typeof updateWisudawanSchema>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, CheckCircle2 } from "lucide-react";
 import {
   LiquidGlassCard,
   glassBtnPrimary,
@@ -18,12 +18,14 @@ interface ToolbarProps {
   prodiFilter: string;
   onProdiFilterChange: (v: string) => void;
   onCreateClick: () => void;
+  onBulkVerifyClick: () => void;
 }
 
 const statusOptions = [
   { value: "", label: "Semua Status" },
   { value: "AKTIF", label: "Aktif" },
   { value: "LULUS", label: "Terverifikasi" },
+  { value: "REVISI", label: "Revisi" },
   { value: "CUTI", label: "Cuti" },
   { value: "DROPOUT", label: "Ditolak" },
 ];
@@ -65,6 +67,7 @@ export function AccountToolbar({
   prodiFilter,
   onProdiFilterChange,
   onCreateClick,
+  onBulkVerifyClick,
 }: ToolbarProps) {
   const selectCls = cn(glassInput, "h-9 cursor-pointer px-3 text-[11px] font-medium");
 
@@ -135,6 +138,14 @@ export function AccountToolbar({
               </option>
             ))}
           </select>
+
+          <button
+            type="button"
+            onClick={onBulkVerifyClick}
+            className={cn(glassBtnPrimary, "h-9 text-[11px] font-bold px-3.5 flex items-center gap-1.5")}
+          >
+            <CheckCircle2 className="size-3.5" /> Verifikasi Massal
+          </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

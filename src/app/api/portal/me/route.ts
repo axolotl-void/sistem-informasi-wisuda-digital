@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { getTokenFromRequest, unauthorizedResponse, forbiddenResponse } from "@/lib/auth";
 import { apiSuccess, apiError } from "@/lib/utils";
@@ -16,6 +17,11 @@ export async function GET(request: NextRequest) {
     const mahasiswa = await prisma.mahasiswa.findFirst({
       where: { userId: payload.sub },
       include: {
+        user: {
+          select: {
+            password: true,
+          },
+        },
         undangan: {
           take: 1,
           orderBy: { createdAt: "desc" },
@@ -40,6 +46,10 @@ export async function GET(request: NextRequest) {
 
     if (!mahasiswa) return apiError("Data mahasiswa tidak ditemukan", 404);
 
+    const isDefaultPassword = mahasiswa.user?.password
+      ? bcrypt.compareSync(mahasiswa.nim, mahasiswa.user.password)
+      : false;
+
     return apiSuccess({
       id: mahasiswa.id,
       nim: mahasiswa.nim,
@@ -53,6 +63,7 @@ export async function GET(request: NextRequest) {
       gate: mahasiswa.gate,
       foto: mahasiswa.foto,
       ukuranToga: mahasiswa.ukuranToga,
+      isDefaultPassword,
       undangan: mahasiswa.undangan[0] ?? null,
       kehadiran: mahasiswa.kehadiran[0] ?? null,
     });

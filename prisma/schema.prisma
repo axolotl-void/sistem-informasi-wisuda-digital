@@ -25,6 +25,7 @@ enum StatusMahasiswa {
   LULUS
   CUTI
   DROPOUT
+  REVISI
 }
 
 enum StatusUndangan {

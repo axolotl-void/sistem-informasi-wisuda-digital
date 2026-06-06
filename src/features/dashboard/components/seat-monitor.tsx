@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
    RefreshCw, Crown, HelpCircle, 
@@ -165,7 +165,7 @@ const statusConfig: Record<SeatStatus, {
 // --- Component ----------------------------------------------------------------
 
 export function SeatMonitor() {
-  const [seats, setSeats] = useState<SeatData[]>([]);
+  const [invitations, setInvitations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSeat, setSelectedSeat] = useState<SeatData | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -288,6 +288,23 @@ export function SeatMonitor() {
     return seats;
   }, [blocksConfig]);
 
+  // Derive seats from invitations & map function
+  const seats = useMemo(() => {
+    return mapInvitationsToSeats(invitations);
+  }, [invitations, mapInvitationsToSeats]);
+
+  // Ref to track latest seats stably for real-time WebSocket effects
+  const seatsRef = useRef<SeatData[]>([]);
+  useEffect(() => {
+    seatsRef.current = seats;
+  }, [seats]);
+
+  // Find updated selected seat details in real-time
+  const activeSelectedSeat = useMemo(() => {
+    if (!selectedSeat) return null;
+    return seats.find((s) => s.id === selectedSeat.id) || selectedSeat;
+  }, [selectedSeat, seats]);
+
   // Listen perubahan konfigurasi blok dari localStorage (saat admin simpan di Pengaturan)
   useEffect(() => {
     function handleStorageChange(e: StorageEvent) {
@@ -307,15 +324,14 @@ export function SeatMonitor() {
       const res = await fetch("/api/dashboard/seats");
       const data = await res.json();
       if (data.success && data.data) {
-        const processed = mapInvitationsToSeats(data.data);
-        setSeats(processed);
+        setInvitations(data.data);
       }
     } catch (err) {
       console.error("Gagal mengambil data kursi:", err);
     } finally {
       setLoading(false);
     }
-  }, [mapInvitationsToSeats]);
+  }, []);
 
   useEffect(() => {
     fetchSeats();
@@ -325,50 +341,39 @@ export function SeatMonitor() {
   useEffect(() => {
     if (lastResult && lastResult.success && lastResult.mahasiswa) {
       const student = lastResult.mahasiswa;
-      const scanTime = lastResult.kehadiran
-        ? new Date(lastResult.kehadiran.waktuScan).toLocaleTimeString("id-ID", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : new Date().toLocaleTimeString("id-ID", {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
+      const matchedSeat = seatsRef.current.find(
+        (s) => s.student && s.student.mahasiswaId === student.id
+      );
 
-      setSeats((prevSeats) => {
-        let updated = false;
-        const newSeats = prevSeats.map((seat) => {
-          if (seat.student && seat.student.mahasiswaId === student.id) {
-            updated = true;
+      if (matchedSeat && matchedSeat.student) {
+        setRecentArrival({
+          name: student.nama,
+          nim: student.nim,
+          blockName: matchedSeat.blockName,
+          seatCode: matchedSeat.seatCode,
+        });
+        setTimeout(() => setRecentArrival(null), 6000);
+      }
+
+      setInvitations((prevInvs) => {
+        return prevInvs.map((inv) => {
+          if (inv.mahasiswa && inv.mahasiswa.id === student.id) {
             return {
-              ...seat,
-              status: seat.row === 0 ? ("vip" as const) : ("checked-in" as const),
-              student: {
-                ...seat.student,
-                scanTime,
-                gate: lastResult.kehadiran?.catatan || "Gate Masuk",
+              ...inv,
+              kehadiran: lastResult.kehadiran || {
+                id: "realtime-update-id",
+                statusKehadiran: "HADIR",
+                waktuScan: new Date().toISOString(),
+                catatan: "Gate Masuk",
+                undanganId: inv.id,
+                mahasiswaId: student.id,
+                petugasId: "",
+                createdAt: new Date().toISOString(),
               },
             };
           }
-          return seat;
+          return inv;
         });
-
-        if (updated) {
-          const matchedSeat = newSeats.find(
-            (s) => s.student?.mahasiswaId === student.id
-          );
-          if (matchedSeat) {
-            setRecentArrival({
-              name: student.nama,
-              nim: student.nim,
-              blockName: matchedSeat.blockName,
-              seatCode: matchedSeat.seatCode,
-            });
-            setTimeout(() => setRecentArrival(null), 6000);
-            return newSeats;
-          }
-        }
-        return prevSeats;
       });
     }
   }, [lastResult]);
@@ -674,7 +679,7 @@ export function SeatMonitor() {
       </div>
 
       {/* Seat Detail Modal */}
-      <SeatModal seat={selectedSeat} onClose={() => setSelectedSeat(null)} />
+      <SeatModal seat={activeSelectedSeat} onClose={() => setSelectedSeat(null)} />
     </LiquidGlassCard>
   );
 }

@@ -158,8 +158,8 @@ export function CreateAccountModal({ open, onClose }: Props) {
                     {errors.email && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.email}</p>}
                   </div>
                   <div>
-                    <label style={labelStyle}>Password</label>
-                    <input style={inputStyle} type="password" placeholder="Min. 8 karakter" value={form.password} onChange={(e) => set("password", e.target.value)} />
+                    <label style={labelStyle}>Password (Opsional)</label>
+                    <input style={inputStyle} type="password" placeholder="Default: NIM wisudawan" value={form.password} onChange={(e) => set("password", e.target.value)} />
                     {errors.password && <p style={{ marginTop: 4, fontSize: 10, color: "rgba(248,113,113,0.8)" }}>{errors.password}</p>}
                   </div>
                 </div>

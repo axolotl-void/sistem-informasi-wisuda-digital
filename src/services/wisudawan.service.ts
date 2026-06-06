@@ -32,6 +32,7 @@ export interface WisudawanRow {
   sesiWisuda: string | null;
   gate: string | null;
   kehadiranStatus: string | null;
+  ukuranToga: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -119,6 +120,7 @@ export class WisudawanService {
       sesiWisuda: m.sesiWisuda ?? null,
       gate: m.gate ?? null,
       kehadiranStatus: m.kehadiran[0]?.statusKehadiran ?? null,
+      ukuranToga: m.ukuranToga,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
     }));
@@ -175,6 +177,7 @@ export class WisudawanService {
       sesiWisuda: m.sesiWisuda ?? null,
       gate: m.gate ?? null,
       kehadiranStatus: m.kehadiran[0]?.statusKehadiran ?? null,
+      ukuranToga: m.ukuranToga,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
     };
@@ -196,7 +199,8 @@ export class WisudawanService {
     });
     if (existingEmail) throw new Error(`Email ${input.email} sudah digunakan`);
 
-    const hashedPassword = await bcrypt.hash(input.password, 12);
+    const passwordToHash = input.password && input.password.trim() !== "" ? input.password : input.nim;
+    const hashedPassword = await bcrypt.hash(passwordToHash, 12);
 
     // Create user + mahasiswa in transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -249,6 +253,7 @@ export class WisudawanService {
       sesiWisuda: result.mahasiswa.sesiWisuda ?? null,
       gate: result.mahasiswa.gate ?? null,
       kehadiranStatus: null,
+      ukuranToga: result.mahasiswa.ukuranToga ?? null,
       createdAt: result.mahasiswa.createdAt,
       updatedAt: result.mahasiswa.updatedAt,
     };
@@ -300,9 +305,9 @@ export class WisudawanService {
     if (input.angkatan !== undefined) updateData.angkatan = input.angkatan;
     if (input.status   !== undefined) updateData.status   = input.status;
     if (input.foto     !== undefined) updateData.foto     = input.foto;
-    // sesiWisuda disimpan langsung di tabel mahasiswa
     if (input.sesiWisuda !== undefined) updateData.sesiWisuda = input.sesiWisuda;
     if (input.gate       !== undefined) updateData.gate       = input.gate;
+    if (input.ukuranToga !== undefined) updateData.ukuranToga = input.ukuranToga;
 
     const mahasiswa = await prisma.mahasiswa.update({
       where: { id },
@@ -343,6 +348,7 @@ export class WisudawanService {
       sesiWisuda: mahasiswa.sesiWisuda ?? null,
       gate: mahasiswa.gate ?? null,
       kehadiranStatus: mahasiswa.kehadiran[0]?.statusKehadiran ?? null,
+      ukuranToga: mahasiswa.ukuranToga ?? null,
       createdAt: mahasiswa.createdAt,
       updatedAt: mahasiswa.updatedAt,
     };
@@ -394,7 +400,7 @@ export class WisudawanService {
     const statusMap: Record<string, StatusMahasiswa> = {
       approve: "LULUS",
       reject: "DROPOUT",
-      revision: "AKTIF",
+      revision: "REVISI",
     };
     const newStatus = statusMap[input.action] ?? "AKTIF";
 
@@ -404,6 +410,26 @@ export class WisudawanService {
     });
 
     return { status: newStatus };
+  }
+
+  /**
+   * Bulk verify (approve) all wisudawan with status AKTIF
+   */
+  static async bulkVerify(filters: { fakultas?: string; prodi?: string }): Promise<number> {
+    const where: any = {
+      status: "AKTIF",
+    };
+    if (filters.fakultas) where.fakultas = filters.fakultas;
+    if (filters.prodi) where.prodi = filters.prodi;
+
+    const result = await prisma.mahasiswa.updateMany({
+      where,
+      data: {
+        status: "LULUS",
+      },
+    });
+
+    return result.count;
   }
 
   /**

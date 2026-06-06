@@ -81,7 +81,7 @@ export default function LoginPage() {
     const passwordVal = String(fd.get("password") ?? password);
 
     if (!emailVal || !passwordVal) {
-      setError("Email dan password wajib diisi");
+      setError("Email/NIM dan password wajib diisi");
       return;
     }
 
@@ -226,18 +226,17 @@ export default function LoginPage() {
               htmlFor="login-email"
               className="block text-xs font-medium text-slate-700 sm:text-sm dark:text-zinc-300"
             >
-              Email
+              Email / NIM
             </label>
             <div className="group relative">
               <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 transition-colors duration-300 group-focus-within:text-blue-500 sm:left-3.5 sm:size-[17px] dark:text-zinc-500 dark:group-focus-within:text-orange-400" />
               <input
                 id="login-email"
                 name="email"
-                type="email"
-                inputMode="email"
+                type="text"
                 autoCapitalize="none"
                 autoCorrect="off"
-                placeholder="nama@kampus.ac.id"
+                placeholder="nama@kampus.ac.id atau NIM"
                 autoComplete="username"
                 enterKeyHint="next"
                 value={email}

@@ -46,6 +46,12 @@ const statusConfig: Record<
     light: "border-emerald-400/30 bg-emerald-500/15 text-emerald-800",
     dark: "dark:border-emerald-500/25 dark:bg-emerald-500/12 dark:text-emerald-300",
   },
+  REVISI: {
+    label: "Revisi",
+    dot: "bg-amber-500",
+    light: "border-amber-400/30 bg-amber-500/15 text-amber-800",
+    dark: "dark:border-amber-500/25 dark:bg-amber-500/12 dark:text-amber-300",
+  },
   CUTI: {
     label: "Cuti",
     dot: "bg-amber-500",

@@ -5,7 +5,7 @@ import {
   User, CreditCard, Building2, BookOpen, Users as UsersIcon,
   Mail, Lock, Eye, EyeOff, Loader2, Save,
   CheckCircle2, XCircle, RotateCcw, GraduationCap,
-  ShieldCheck, CalendarDays, Pencil, Ticket, DoorOpen,
+  ShieldCheck, CalendarDays, Pencil, Ticket, DoorOpen, Shirt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -50,6 +50,7 @@ interface EditFormData {
   sesiWisuda: string;
   gate: string;
   kuotaTamu: number;
+  ukuranToga: string;
 }
 
 // --- Constants ----------------------------------------------------------------
@@ -127,6 +128,17 @@ const STATUS_CFG: Record<string, {
       "border-emerald-400/40 bg-emerald-500/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] dark:border-emerald-500/30 dark:bg-emerald-500/15",
     badge:
       "border-emerald-400/35 bg-emerald-500/15 text-emerald-800 dark:border-emerald-500/25 dark:bg-emerald-500/12 dark:text-emerald-300",
+  },
+  REVISI: {
+    label: "Revisi",
+    dot: "bg-amber-500",
+    text: "text-amber-800 dark:text-amber-300",
+    banner:
+      "border-amber-400/35 bg-amber-500/12 backdrop-blur-xl dark:border-amber-500/25 dark:bg-amber-500/10",
+    iconBox:
+      "border-amber-400/40 bg-amber-500/20 dark:border-amber-500/30 dark:bg-amber-500/15",
+    badge:
+      "border-amber-400/30 bg-amber-500/15 text-amber-800 dark:border-amber-500/25 dark:bg-amber-500/12 dark:text-amber-300",
   },
   CUTI: {
     label: "Cuti",
@@ -308,6 +320,17 @@ function TabDetail({
             </div>
           ) : (
             <p className="text-sm font-semibold text-slate-400 dark:text-white/35">Belum Ditentukan</p>
+          )}
+        </div>
+        <div className={detailFieldCls}>
+          <p className={detailLabelCls}>Ukuran Toga</p>
+          {student.ukuranToga ? (
+            <div className="flex items-center gap-2">
+              <Shirt className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+              <p className={detailValueCls}>{student.ukuranToga}</p>
+            </div>
+          ) : (
+            <p className="text-sm font-semibold text-slate-400 dark:text-white/35">Belum Memilih</p>
           )}
         </div>
       </div>
@@ -642,6 +665,35 @@ function TabEdit({
             />
             <p className="mt-1 text-xs text-slate-500 dark:text-white/35">Maks. 5 orang</p>
           </div>
+
+          {/* Ukuran Toga */}
+          <div className="space-y-1.5">
+            <label htmlFor="toga-trigger" className={fieldLabelCls}>
+              Ukuran Toga
+            </label>
+            <Select
+              value={form.ukuranToga || "BELUM_MEMILIH"}
+              onValueChange={(v) => setField("ukuranToga", v === "BELUM_MEMILIH" ? "" : v)}
+              disabled={isLoading}
+            >
+              <SelectTrigger
+                id="toga-trigger"
+                className={cn(selectTriggerCls, "h-auto [&>span]:text-slate-900 dark:[&>span]:text-white/90")}
+              >
+                <SelectValue placeholder="Pilih ukuran toga…" />
+              </SelectTrigger>
+              <SelectContent className={selectContentCls}>
+                <SelectItem value="BELUM_MEMILIH" className="cursor-pointer text-sm dark:focus:bg-white/10">
+                  Belum Memilih
+                </SelectItem>
+                {["XS", "S", "M", "L", "XL", "XXL", "XXXL"].map((size) => (
+                  <SelectItem key={size} value={size} className="cursor-pointer text-sm dark:focus:bg-white/10">
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -701,6 +753,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
     nama: "", nim: "", email: "", password: "",
     fakultas: "", prodi: "", angkatan: CURRENT_YEAR,
     status: "AKTIF", sesiWisuda: "", gate: "", kuotaTamu: 2,
+    ukuranToga: "",
   });
 
   useEffect(() => {
@@ -711,9 +764,11 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         .then((res) => {
           if (res.data?.success) {
             setDetailedStudent(res.data.data);
-            if (res.data.data.gate) {
-              setFormState((prev) => ({ ...prev, gate: res.data.data.gate }));
-            }
+            setFormState((prev) => ({
+              ...prev,
+              gate: res.data.data.gate ?? prev.gate,
+              ukuranToga: res.data.data.ukuranToga ?? prev.ukuranToga,
+            }));
           }
         })
         .catch((err) => {
@@ -732,6 +787,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         sesiWisuda: student.sesiWisuda ?? "",
         gate:       student.gate ?? "",
         kuotaTamu:  2,
+        ukuranToga: student.ukuranToga ?? "",
       });
       setActiveTab("detail");
     } else {
@@ -768,6 +824,7 @@ export function EditModal({ student, open, onClose, onSuccess, onUpdated }: Edit
         status:     form.status,
         sesiWisuda: form.sesiWisuda || null,
         gate:       form.gate || null,
+        ukuranToga: form.ukuranToga || null,
       };
       if (form.password.trim()) payload.password = form.password;
 

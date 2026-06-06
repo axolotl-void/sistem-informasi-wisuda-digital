@@ -37,6 +37,19 @@ import {
   Calendar,
 } from "lucide-react";
 
+function buildRowsLayout(totalSeats: number): number[] {
+  if (totalSeats <= 0) return [];
+  const seatsPerRow = Math.min(10, Math.max(5, Math.round(totalSeats / Math.ceil(totalSeats / 8))));
+  const rows: number[] = [];
+  let remaining = totalSeats;
+  while (remaining > 0) {
+    const count = Math.min(seatsPerRow, remaining);
+    rows.push(count);
+    remaining -= count;
+  }
+  return rows;
+}
+
 export default function ScanPage() {
   const [activeTab, setActiveTab] = useState<"kehadiran" | "scanner" | "profil">("scanner");
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,6 +68,27 @@ export default function ScanPage() {
 
     async function loadSeats() {
       try {
+        // 1. Fetch block capacities from server
+        const configRes = await fetch("/api/pengaturan/blok-kursi");
+        const configData = await configRes.json();
+        let capacities = { kuning: 39, biru: 52, ungu: 52, hijau: 39 };
+        if (configData.success && configData.data) {
+          capacities = {
+            kuning: configData.data.kuning,
+            biru: configData.data.biru,
+            ungu: configData.data.ungu,
+            hijau: configData.data.hijau,
+          };
+        }
+
+        const BLOCKS_CONFIG = [
+          { id: "yellow", name: "Blok Kuning", rowsLayout: buildRowsLayout(capacities.kuning) },
+          { id: "cyan",   name: "Blok Biru",   rowsLayout: buildRowsLayout(capacities.biru) },
+          { id: "purple", name: "Blok Ungu",   rowsLayout: buildRowsLayout(capacities.ungu) },
+          { id: "green",  name: "Blok Hijau",  rowsLayout: buildRowsLayout(capacities.hijau) },
+        ];
+
+        // 2. Fetch seats data
         const res = await fetch("/api/dashboard/seats");
         const data = await res.json();
         if (data.success && data.data) {
@@ -75,12 +109,6 @@ export default function ScanPage() {
             }
           });
 
-          const BLOCKS_CONFIG = [
-            { id: "yellow", name: "Blok Kuning", rowsLayout: [5, 6, 6, 7, 7, 8] },
-            { id: "cyan",   name: "Blok Biru",   rowsLayout: [7, 7, 7, 7, 8, 8, 8] },
-            { id: "purple", name: "Blok Ungu",   rowsLayout: [7, 7, 7, 7, 8, 8, 8] },
-            { id: "green",  name: "Blok Hijau",  rowsLayout: [5, 6, 6, 7, 7, 8] },
-          ];
           const numSeats = seatRequests.length;
           const blockCapacities = BLOCKS_CONFIG.map((b) =>
             b.rowsLayout.reduce((sum, cols) => sum + cols, 0)
@@ -93,7 +121,7 @@ export default function ScanPage() {
             const count =
               idx === BLOCKS_CONFIG.length - 1
                 ? numSeats - allocated
-                : Math.round((cap / totalCapacity) * numSeats);
+                : Math.round((cap / Math.max(totalCapacity, 1)) * numSeats);
             const groupInvs = seatRequests.slice(allocated, allocated + count);
             allocated += count;
             let seatIndex = 0;

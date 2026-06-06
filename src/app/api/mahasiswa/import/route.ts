@@ -64,79 +64,139 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // -- 2. Cek duplikat NIM & Email sekaligus (batch query) -------------------
-    const incomingNims   = valid.map((r) => r.nim);
-    const incomingEmails = valid.map((r) => r.email);
+    // -- 2. Filter duplikat di dalam file Excel itu sendiri (internal deduplication) --
+    const uniqueIncoming: ImportRow[] = [];
+    const seenNimsInFile = new Set<string>();
+    const seenEmailsInFile = new Set<string>();
+    const skippedLogs: string[] = [];
+    let skippedDuplicateFile = 0;
+
+    for (const row of valid) {
+      const nim = row.nim.trim();
+      const email = row.email.trim().toLowerCase();
+
+      let isDuplicate = false;
+      if (seenNimsInFile.has(nim)) {
+        skippedLogs.push(`NIM Duplikat dalam file Excel: NIM ${nim} (${row.nama})`);
+        isDuplicate = true;
+      }
+      if (seenEmailsInFile.has(email)) {
+        skippedLogs.push(`Email Duplikat dalam file Excel: Email ${row.email} (${row.nama})`);
+        isDuplicate = true;
+      }
+
+      if (isDuplicate) {
+        skippedDuplicateFile++;
+      } else {
+        seenNimsInFile.add(nim);
+        seenEmailsInFile.add(email);
+        uniqueIncoming.push({
+          ...row,
+          nim,
+          email,
+        });
+      }
+    }
+
+    // -- 3. Cek duplikat terhadap database (batch query) -------------------
+    const incomingNims   = uniqueIncoming.map((r) => r.nim);
+    const incomingEmails = uniqueIncoming.map((r) => r.email);
 
     const [existingByNim, existingByEmail] = await Promise.all([
       prisma.mahasiswa.findMany({
         where: { nim: { in: incomingNims } },
-        select: { nim: true },
+        select: { nim: true, nama: true },
       }),
       prisma.user.findMany({
         where: { email: { in: incomingEmails } },
-        select: { email: true },
+        select: { email: true, name: true },
       }),
     ]);
 
     const existingNims   = new Set(existingByNim.map((m) => m.nim));
-    const existingEmails = new Set(existingByEmail.map((u) => u.email));
+    const existingEmails = new Set(existingByEmail.map((u) => u.email.toLowerCase()));
 
-    const toInsert = valid.filter(
-      (r) => !existingNims.has(r.nim) && !existingEmails.has(r.email)
-    );
-    const skippedDuplicate = valid.length - toInsert.length;
+    const toInsert: ImportRow[] = [];
+    let skippedDuplicateDB = 0;
 
-    // -- 3. Insert ke database -------------------------------------------------
-    let created = 0;
-    let skippedError = 0;
+    for (const row of uniqueIncoming) {
+      const nim = row.nim;
+      const email = row.email;
 
-    // Password placeholder — admin wajib reset via fitur Reset Password
-    // Hash statis agar tidak perlu bcrypt per-row (lebih cepat untuk bulk)
-    const placeholderHash = await bcrypt.hash("ChangeMe123!", 10);
-
-    for (const row of toInsert) {
-      try {
-        await prisma.$transaction(async (tx) => {
-          const user = await tx.user.create({
-            data: {
-              name:     row.nama,
-              email:    row.email,
-              password: placeholderHash,
-              role:     "MAHASISWA",
-              fakultas: row.fakultas,
-            },
-          });
-
-          await tx.mahasiswa.create({
-            data: {
-              nim:      row.nim,
-              nama:     row.nama,
-              email:    row.email,
-              fakultas: row.fakultas,
-              prodi:    row.prodi,
-              angkatan: row.angkatan,
-              status:   "AKTIF",
-              userId:   user.id,
-            },
-          });
-        });
-
-        created++;
-      } catch {
-        // Race condition atau constraint lain — skip baris ini
-        skippedError++;
+      if (existingNims.has(nim)) {
+        skippedLogs.push(`NIM sudah terdaftar di database: NIM ${nim} (${row.nama})`);
+        skippedDuplicateDB++;
+      } else if (existingEmails.has(email)) {
+        skippedLogs.push(`Email sudah terdaftar di database: Email ${row.email} (${row.nama})`);
+        skippedDuplicateDB++;
+      } else {
+        toInsert.push(row);
       }
     }
 
-    const totalSkipped = skippedDuplicate + skippedError;
+    // -- 4. Hashing password secara cepat (rounds = 6) -------------------------
+    // Gunakan salt rounds 6 karena default password adalah NIM yang sementara dan akan diubah mahasiswa.
+    // Ini menghemat waktu proses hashing CPU-bound dari ~50 detik menjadi ~1.5 detik untuk 700 akun.
+    const toInsertWithHash = await Promise.all(
+      toInsert.map(async (row) => {
+        const hashedPassword = await bcrypt.hash(row.nim, 6);
+        return { ...row, hashedPassword };
+      })
+    );
+
+    // -- 5. Insert ke database secara batch (chunked concurrency) --------------
+    let created = 0;
+    let skippedError = 0;
+    const chunkSize = 50;
+
+    for (let i = 0; i < toInsertWithHash.length; i += chunkSize) {
+      const chunk = toInsertWithHash.slice(i, i + chunkSize);
+      await Promise.all(
+        chunk.map(async (row) => {
+          try {
+            await prisma.$transaction(async (tx) => {
+              const user = await tx.user.create({
+                data: {
+                  name:     row.nama,
+                  email:    row.email,
+                  password: row.hashedPassword,
+                  role:     "MAHASISWA",
+                  fakultas: row.fakultas,
+                },
+              });
+
+              await tx.mahasiswa.create({
+                data: {
+                  nim:      row.nim,
+                  nama:     row.nama,
+                  email:    row.email,
+                  fakultas: row.fakultas,
+                  prodi:    row.prodi,
+                  angkatan: row.angkatan,
+                  status:   "AKTIF",
+                  userId:   user.id,
+                },
+              });
+            });
+            created++;
+          } catch (err) {
+            const errMsg = err instanceof Error ? err.message : "Error tidak diketahui";
+            skippedLogs.push(`Gagal memproses NIM ${row.nim} (${row.nama}): ${errMsg}`);
+            skippedError++;
+          }
+        })
+      );
+    }
+
+    const totalSkipped = skippedDuplicateFile + skippedDuplicateDB + skippedError;
 
     return apiSuccess(
       {
         created,
         skipped:          totalSkipped,
-        skippedDuplicate,
+        skippedDuplicate: skippedDuplicateFile + skippedDuplicateDB,
         skippedError,
+        skippedLogs:      skippedLogs.length > 0 ? skippedLogs : undefined,
         validationErrors: validationErrors.length > 0 ? validationErrors : undefined,
       },
       `Import selesai: ${created} ditambahkan, ${totalSkipped} dilewati`

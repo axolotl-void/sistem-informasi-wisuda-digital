@@ -28,6 +28,7 @@ interface MahasiswaData {
   sesiWisuda: string | null;
   foto: string | null;
   ukuranToga: string | null;
+  isDefaultPassword?: boolean;
   undangan: {
     id: string;
     kode: string;
@@ -741,7 +742,14 @@ export default function ProfilPage() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Gagal menyimpan");
-      setData((prev) => prev ? { ...prev, fakultas: form.fakultas, prodi: form.prodi, ukuranToga: form.ukuranToga, email: form.email } : prev);
+      setData((prev) => prev ? {
+        ...prev,
+        fakultas: form.fakultas,
+        prodi: form.prodi,
+        ukuranToga: form.ukuranToga,
+        email: form.email,
+        ...(form.password ? { isDefaultPassword: false } : {}),
+      } : prev);
       setForm((f) => ({ ...f, password: "" }));
       toast.success("Profil berhasil disimpan", {
         description: "Perubahan data Anda telah tersimpan.",
@@ -770,6 +778,63 @@ export default function ProfilPage() {
 
   return (
     <div className="space-y-5 pb-4">
+      {/* -- Warning Default Password Banner ------------------------------------ */}
+      {data?.isDefaultPassword && (
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-rose-500/5 to-amber-500/10 dark:from-amber-500/15 dark:via-rose-500/10 dark:to-amber-500/15 p-5 shadow-lg backdrop-blur-xl"
+        >
+          {/* Top orange glow reflection */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+          
+          <div className="flex items-start gap-4">
+            {/* Lock icon with pulse animation */}
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 shadow-lg shadow-amber-500/5 dark:shadow-amber-500/15 animate-pulse">
+              <Lock className="size-5" />
+            </div>
+            
+            <div className="flex-1 space-y-1">
+              <h4 className="text-sm font-black text-amber-800 dark:text-amber-300 leading-tight">
+                Keamanan Akun: Harap Ubah Kata Sandi Default Anda
+              </h4>
+              <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
+                Anda saat ini masuk menggunakan kata sandi bawaan (**NIM**). Untuk menjaga keamanan akun dan privasi data kelulusan Anda, mohon segera ganti dengan kata sandi baru yang aman pada kolom **Kredensial** di bawah.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* -- Warning Revision Status Banner ------------------------------------ */}
+      {data?.status === "REVISI" && (
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-amber-600/5 to-amber-500/10 dark:from-amber-500/15 dark:via-amber-600/10 dark:to-amber-500/15 p-5 shadow-lg backdrop-blur-xl"
+        >
+          {/* Top orange glow reflection */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+          
+          <div className="flex items-start gap-4">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 shadow-lg animate-pulse">
+              <AlertCircle className="size-5" />
+            </div>
+            
+            <div className="flex-1 space-y-1">
+              <h4 className="text-sm font-black text-amber-800 dark:text-amber-300 leading-tight">
+                Verifikasi Profil: Permintaan Revisi Data
+              </h4>
+              <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed">
+                Profil wisudawan Anda saat ini dikembalikan oleh Admin untuk dilakukan perbaikan. Silakan periksa kembali foto profil, data program studi, atau ukuran toga Anda, lalu perbarui data Anda di bawah.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* -- Hero Header -------------------------------------------------------- */}
       <SectionCard delay={0} className="p-5 overflow-hidden relative">
         {/* Ambient glow */}
