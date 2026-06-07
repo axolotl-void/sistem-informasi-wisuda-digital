@@ -435,6 +435,7 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
       {/* Template download button */}
       <button
         type="button"
+        id="template-download-btn"
         onClick={() => downloadTemplate(false)}
         disabled={isImporting || isExporting}
         className={btnGhost}

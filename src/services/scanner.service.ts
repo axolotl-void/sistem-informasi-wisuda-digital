@@ -17,6 +17,57 @@ export class ScannerService {
     });
 
     if (!undangan) {
+      // Cari di undangan dosen
+      const undanganDosen = await prisma.undanganDosen.findFirst({
+        where: { qrToken },
+      });
+
+      if (undanganDosen) {
+        if (undanganDosen.statusHadir) {
+          const result: ScanResult = {
+            success: false,
+            message: "Undangan dosen sudah digunakan sebelumnya",
+            mahasiswa: {
+              nama: undanganDosen.nama,
+              nim: undanganDosen.kode,
+              fakultas: undanganDosen.jabatan,
+              prodi: "Dosen / Civitas",
+            } as any,
+          };
+          emitScanResult(result);
+          return result;
+        }
+
+        // Catat kehadiran dosen
+        await prisma.undanganDosen.update({
+          where: { id: undanganDosen.id },
+          data: {
+            statusHadir: true,
+            waktuScan: new Date(),
+            petugasId,
+          },
+        });
+
+        const result: ScanResult = {
+          success: true,
+          message: `Selamat datang, ${undanganDosen.nama}!`,
+          mahasiswa: {
+            nama: undanganDosen.nama,
+            nim: undanganDosen.kode,
+            fakultas: undanganDosen.jabatan,
+            prodi: "Dosen / Civitas",
+            status: "LULUS",
+          } as any,
+        };
+
+        emitScanResult(result);
+
+        const stats = await KehadiranService.getStats();
+        emitStatsUpdate(stats as unknown as Record<string, unknown>);
+
+        return result;
+      }
+
       const result: ScanResult = {
         success: false,
         message: "QR Code tidak valid atau tidak ditemukan",

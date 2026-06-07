@@ -6,7 +6,7 @@ import { useTransition } from "react";
 import {
   LayoutDashboard, Users, Mail, Armchair, ScanLine,
   ClipboardList, BarChart3, Settings, ChevronRight,
-  Loader2, ShieldCheck,
+  Loader2, ShieldCheck, MailCheck,
 } from "lucide-react";
 import { ROUTES } from "@/utils/constants";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ export function AdminSidebar() {
     { label: "Dashboard", href: ROUTES.ADMIN.DASHBOARD, icon: LayoutDashboard },
     { label: "Akun Wisudawan", href: ROUTES.ADMIN.MAHASISWA, icon: Users },
     { label: "Undangan Digital", href: ROUTES.ADMIN.UNDANGAN, icon: Mail },
+    { label: "Undangan Dosen", href: ROUTES.ADMIN.UNDANGAN_DOSEN, icon: MailCheck },
     { label: "Seat Monitoring", href: ROUTES.ADMIN.SEAT_MONITORING, icon: Armchair },
     { label: "Scanner Gate", href: ROUTES.SCANNER.SCAN, icon: ScanLine },
     { label: "Kehadiran", href: ROUTES.ADMIN.KEHADIRAN, icon: ClipboardList },

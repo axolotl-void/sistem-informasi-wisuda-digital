@@ -9,6 +9,7 @@ export const ROUTES = {
     AKUN: "/akun",
     MAHASISWA: "/mahasiswa",
     UNDANGAN: "/undangan",
+    UNDANGAN_DOSEN: "/undangan-dosen",
     KEHADIRAN: "/kehadiran",
     SEAT_MONITORING: "/seat-monitoring",
     LAPORAN: "/laporan",

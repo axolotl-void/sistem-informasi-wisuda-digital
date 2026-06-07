@@ -166,3 +166,23 @@ model KonfigurasiSistem {
 
   @@map("konfigurasi_sistem")
 }
+
+model UndanganDosen {
+  id          String    @id @default(cuid())
+  kode        String    @unique // Contoh: DSN-2026-0001
+  nidn        String?   // Opsional
+  nama        String    // Nama Lengkap beserta Gelar
+  jabatan     String    // Contoh: Rektor, Dekan FKIP, Dosen Pembimbing
+  email       String?   // Opsional
+  noWa        String?   // Nomor WhatsApp (Opsional)
+  qrToken     String    @unique // Token acak untuk QR Code
+  statusHadir Boolean   @default(false)
+  waktuScan   DateTime? // Waktu dosen scan masuk gate
+  petugasId   String?   // Petugas yang men-scan gate (opsional)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([qrToken])
+  @@map("undangan_dosen")
+}

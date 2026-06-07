@@ -2,11 +2,12 @@
 
 import { cn } from "@/lib/utils";
 import type { WisudawanRow } from "@/services/wisudawan.service";
-import { Upload, Pencil, Trash2 } from "lucide-react";
+import { Upload, Pencil, Trash2, GraduationCap, FileSpreadsheet, UserCheck, Sparkles, ArrowRight } from "lucide-react";
 import {
   GlassChip,
   LiquidGlassCard,
   glassBtnPrimary,
+  glassBtnGhost,
 } from "@/components/ui/liquid-glass";
 import { AnimatedList } from "@/components/ui/animated-list";
 
@@ -114,25 +115,91 @@ function TableSkeleton() {
   );
 }
 
+const WISUDAWAN_STEPS = [
+  { icon: FileSpreadsheet, label: "Unduh Template", desc: "Download template Excel resmi" },
+  { icon: Upload, label: "Import Data", desc: "Unggah file Excel yang sudah diisi" },
+  { icon: UserCheck, label: "Verifikasi", desc: "Verifikasi data profil wisudawan" },
+];
+
 function EmptyState() {
   return (
-    <LiquidGlassCard hover={false} className="flex flex-col items-center py-16 text-center">
-      <GlassChip className="mb-4 flex size-14 items-center justify-center p-0">
-        <span className="text-2xl">🎓</span>
-      </GlassChip>
-      <p className="text-sm font-semibold text-slate-700 dark:text-white/70">
-        Belum ada data wisudawan
-      </p>
-      <p className="mt-1 text-xs text-slate-500 dark:text-white/35">
-        Import data mahasiswa untuk memulai
-      </p>
-      <button
-        type="button"
-        onClick={() => document.getElementById("import-excel-file-input")?.click()}
-        className={cn(glassBtnPrimary, "mt-5 h-9 gap-2 px-4")}
-      >
-        <Upload className="size-3.5" /> Import Excel
-      </button>
+    <LiquidGlassCard hover={false} className="relative overflow-hidden p-0">
+      {/* Decorative background elements */}
+      <div className="pointer-events-none absolute inset-0">
+        {/* Gradient orbs */}
+        <div className="absolute -top-20 -right-20 size-64 rounded-full bg-blue-500/[0.06] blur-3xl dark:bg-blue-500/[0.08]" />
+        <div className="absolute -bottom-16 -left-16 size-48 rounded-full bg-indigo-500/[0.05] blur-3xl dark:bg-indigo-500/[0.07]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-72 rounded-full bg-purple-500/[0.03] blur-3xl dark:bg-purple-500/[0.04]" />
+
+        {/* Floating graduation cap grid */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.04]">
+          <div className="grid grid-cols-8 gap-6 -rotate-12 scale-125">
+            {Array.from({ length: 24 }).map((_, i) => (
+              <GraduationCap key={i} className="size-8 text-blue-500" />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 flex flex-col items-center px-6 py-14 sm:py-20">
+        {/* Animated icon */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 blur-xl animate-pulse" />
+          <div className="relative flex size-20 items-center justify-center rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 shadow-[0_8px_32px_rgba(59,130,246,0.15)] backdrop-blur-sm dark:border-blue-400/15 dark:shadow-[0_8px_32px_rgba(59,130,246,0.12)]">
+            <GraduationCap className="size-9 text-blue-500 dark:text-blue-400" />
+          </div>
+          {/* Sparkle accents */}
+          <Sparkles className="absolute -top-2 -right-2 size-5 text-amber-400/70 animate-bounce" style={{ animationDuration: "2.5s" }} />
+          <Sparkles className="absolute -bottom-1 -left-3 size-4 text-blue-400/50 animate-bounce" style={{ animationDuration: "3s", animationDelay: "0.5s" }} />
+        </div>
+
+        {/* Title */}
+        <h3 className="text-lg font-extrabold tracking-tight text-slate-800 dark:text-white/90">
+          Belum ada data wisudawan
+        </h3>
+        <p className="mt-2 max-w-sm text-center text-[13px] leading-relaxed text-slate-500 dark:text-white/40">
+          Mulai dengan mengunduh template Excel, isi data mahasiswa, lalu import file untuk membuat akun wisudawan secara otomatis.
+        </p>
+
+        {/* Step guide */}
+        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
+          {WISUDAWAN_STEPS.map((step, i) => (
+            <div key={step.label} className="flex items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-2.5 rounded-xl border border-white/60 bg-white/70 px-3.5 py-2.5 shadow-sm backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.04]">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/15">
+                  <step.icon className="size-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-slate-800 dark:text-white/80 leading-tight">{step.label}</p>
+                  <p className="text-[9px] text-slate-400 dark:text-white/30 font-medium">{step.desc}</p>
+                </div>
+              </div>
+              {i < WISUDAWAN_STEPS.length - 1 && (
+                <ArrowRight className="hidden size-4 text-slate-300 dark:text-white/15 sm:block" />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Action buttons */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => document.getElementById("import-excel-file-input")?.click()}
+            className={cn(glassBtnPrimary, "h-10 gap-2 px-5 text-[12px] font-bold shadow-[0_4px_20px_rgba(59,130,246,0.25)] hover:shadow-[0_6px_28px_rgba(59,130,246,0.35)] transition-all hover:scale-[1.02] active:scale-[0.98]")}
+          >
+            <Upload className="size-4" /> Import Excel
+          </button>
+          <button
+            type="button"
+            onClick={() => document.getElementById("template-download-btn")?.click()}
+            className={cn(glassBtnGhost, "h-10 gap-2 px-5 text-[12px] font-bold hover:scale-[1.02] active:scale-[0.98] transition-all")}
+          >
+            <FileSpreadsheet className="size-4" /> Unduh Template
+          </button>
+        </div>
+      </div>
     </LiquidGlassCard>
   );
 }
