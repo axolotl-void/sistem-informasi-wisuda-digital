@@ -191,8 +191,8 @@ export default function MahasiswaPage() {
 
   const filteredData = data.filter((s) => {
     if (!customFilter) return true;
-    if (customFilter === "Belum Login") {
-      return s.status === "AKTIF" && (!s.email || s.email.endsWith("@temp-wisuda.id")) && !s.hasUndangan && !s.kehadiranStatus;
+    if (customFilter === "Total Cumlaude") {
+      return s.isCumlaude;
     }
     if (customFilter === "Profile Belum Lengkap") {
       return s.status === "AKTIF" && (!s.email || s.email.endsWith("@temp-wisuda.id")) && !s.hasUndangan;

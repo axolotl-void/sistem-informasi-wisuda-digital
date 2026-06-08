@@ -131,7 +131,8 @@ function ProblemsDialog({
 // --- Main Component -----------------------------------------------------------
 
 export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const regularFileInputRef = useRef<HTMLInputElement>(null);
+  const cumlaudeFileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [importMode, setImportMode] = useState<"regular" | "cumlaude">("regular");
@@ -166,22 +167,21 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
   // -- IMPORT ------------------------------------------------------------------
 
   function handleImportClick() {
-    setImportMode("regular");
-    fileInputRef.current?.click();
+    regularFileInputRef.current?.click();
   }
 
   function handleImportCumlaudeClick() {
-    setImportMode("cumlaude");
-    fileInputRef.current?.click();
+    cumlaudeFileInputRef.current?.click();
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, mode: "regular" | "cumlaude") {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Reset input agar file yang sama bisa dipilih ulang
     e.target.value = "";
 
+    setImportMode(mode);
     setIsImporting(true);
     const toastId = toast.loading("Membaca file Excel…");
 
@@ -249,7 +249,7 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
 
       // 4. Kirim ke API
       const res = await api.post<{ data: ImportResult; message: string }>(
-        `/api/mahasiswa/import${importMode === "cumlaude" ? "?cumlaude=true" : ""}`,
+        `/api/mahasiswa/import${mode === "cumlaude" ? "?cumlaude=true" : ""}`,
         payload
       );
 
@@ -390,15 +390,22 @@ export function ImportExportButtons({ onImportSuccess }: ImportExportButtonsProp
 
   return (
     <>
-      {/* Hidden file input */}
+      {/* Hidden file inputs */}
       <input
-        ref={fileInputRef}
-        id="import-excel-file-input"
+        ref={regularFileInputRef}
         type="file"
         accept=".xlsx,.xls"
         className="hidden"
-        onChange={handleFileChange}
+        onChange={(e) => handleFileChange(e, "regular")}
         aria-label="Pilih file Excel untuk diimport"
+      />
+      <input
+        ref={cumlaudeFileInputRef}
+        type="file"
+        accept=".xlsx,.xls"
+        className="hidden"
+        onChange={(e) => handleFileChange(e, "cumlaude")}
+        aria-label="Pilih file Excel untuk diimport cumlaude"
       />
 
       {/* Masalah button */}

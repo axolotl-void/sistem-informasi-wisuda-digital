@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Users,
-  UserX,
+  Award,
   FileWarning,
   Clock,
   ShieldCheck,
@@ -33,15 +33,13 @@ const cards: CardConfig[] = [
     compute: (d) => d.length,
   },
   {
-    label: "Belum Login",
-    icon: UserX,
-    accent: "text-slate-600 dark:text-zinc-300",
+    label: "Total Cumlaude",
+    icon: Award,
+    accent: "text-amber-700 dark:text-amber-300",
     iconBg:
-      "bg-gradient-to-br from-slate-400/25 to-slate-600/10 border border-slate-400/35 dark:from-zinc-500/15 dark:to-zinc-600/5 dark:border-zinc-500/20",
-    activeClass: "border-slate-500/80 dark:border-zinc-400/80 shadow-[0_0_15px_rgba(148,163,184,0.15)] bg-slate-500/[0.04] dark:bg-zinc-400/[0.04]",
-    compute: (d) =>
-      d.filter((s) => s.status === "AKTIF" && (!s.email || s.email.endsWith("@temp-wisuda.id")) && !s.hasUndangan && !s.kehadiranStatus)
-        .length,
+      "bg-gradient-to-br from-amber-400/35 to-amber-600/10 border border-amber-400/40 dark:from-amber-500/20 dark:to-amber-600/5 dark:border-amber-500/25",
+    activeClass: "border-amber-500/80 dark:border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.15)] bg-amber-500/[0.04] dark:bg-amber-400/[0.04]",
+    compute: (d) => d.filter((s) => s.isCumlaude).length,
   },
   {
     label: "Profile Belum Lengkap",

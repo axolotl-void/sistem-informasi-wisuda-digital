@@ -220,6 +220,36 @@ export async function POST(request: NextRequest) {
       })
     );
 
+    // -- 4.5. Reset status cumlaude untuk mahasiswa di fakultas terkait jika ini import cumlaude
+    if (isCumlaudeImport) {
+      const uniqueFaculties = Array.from(
+        new Set(
+          uniqueIncoming
+            .map((r) => r.fakultas?.trim())
+            .filter(Boolean)
+        )
+      );
+
+      const resetWhere: Record<string, any> = {};
+      if (payload.role === "ADMIN_FAKULTAS") {
+        // Ambil fakultas dari database karena tidak disimpan di JWT payload
+        const user = await prisma.user.findUnique({
+          where: { id: payload.sub },
+          select: { fakultas: true },
+        });
+        if (user?.fakultas) {
+          resetWhere.fakultas = user.fakultas;
+        }
+      } else if (uniqueFaculties.length > 0) {
+        resetWhere.fakultas = { in: uniqueFaculties };
+      }
+
+      await prisma.mahasiswa.updateMany({
+        where: resetWhere,
+        data: { isCumlaude: false },
+      });
+    }
+
     // -- 5. Jalankan update/pemadanan data mahasiswa jika cumlaude -------------
     let updated = 0;
     let skippedError = 0;
