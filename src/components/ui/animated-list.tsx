@@ -62,6 +62,40 @@ export function AnimatedListItem({
   );
 }
 
+interface StaticListItemProps {
+  children: ReactNode;
+  index: number;
+  className?: string;
+  onMouseEnter?: () => void;
+  onClick?: () => void;
+  animate?: boolean;
+}
+
+export function StaticListItem({
+  children,
+  index,
+  className,
+  onMouseEnter,
+  onClick,
+  animate = true,
+}: StaticListItemProps) {
+  return (
+    <div
+      data-index={index}
+      data-animate-on-scroll={animate ? "" : undefined}
+      onMouseEnter={onMouseEnter}
+      onClick={onClick}
+      className={cn(
+        className,
+        onClick && "cursor-pointer",
+        animate && "opacity-0"
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 export interface AnimatedListProps {
   items: ReactNode[];
   onItemSelect?: (index: number) => void;
@@ -79,6 +113,7 @@ export interface AnimatedListProps {
   once?: boolean;
   header?: ReactNode;
   itemKeys?: string[];
+  disableAnimation?: boolean;
 }
 
 export function AnimatedList({
@@ -97,12 +132,50 @@ export function AnimatedList({
   once = true,
   header,
   itemKeys,
+  disableAnimation = false,
 }: AnimatedListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState(initialSelectedIndex);
   const [keyboardNav, setKeyboardNav] = useState(false);
   const [topGradientOpacity, setTopGradientOpacity] = useState(0);
   const [bottomGradientOpacity, setBottomGradientOpacity] = useState(0);
+
+  const useAnimated = items.length <= 50 && !disableAnimation;
+
+  useEffect(() => {
+    const container = listRef.current;
+    if (!container || useAnimated || disableAnimation) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            const idxAttr = el.getAttribute("data-index");
+            const idx = idxAttr ? parseInt(idxAttr, 10) : 0;
+            
+            // Stagger animation delay based on index in the list chunk
+            const delay = (idx % 15) * 0.035; 
+            el.style.animationDelay = `${delay}s`;
+            el.classList.add("animate-row-reveal");
+            observer.unobserve(el);
+          }
+        });
+      },
+      {
+        root: container,
+        rootMargin: "0px 0px 80px 0px", // Trigger slightly before entering to look smooth
+        threshold: 0.01,
+      }
+    );
+
+    const targets = container.querySelectorAll("[data-animate-on-scroll]");
+    targets.forEach((target) => observer.observe(target));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [items.length, useAnimated, disableAnimation]);
 
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target as HTMLDivElement;
@@ -188,6 +261,21 @@ export function AnimatedList({
 
   return (
     <div className={cn("relative w-full", className)}>
+      <style>{`
+        @keyframes fadeInUpRow {
+          from {
+            opacity: 0;
+            transform: translateY(16px) scale(0.96);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .animate-row-reveal {
+          animation: fadeInUpRow 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
       <div
         ref={listRef}
         className={cn(
@@ -206,30 +294,43 @@ export function AnimatedList({
         {header ? (
           <div className="sticky top-0 z-10">{header}</div>
         ) : null}
-        {items.map((item, index) => (
-          <AnimatedListItem
-            key={itemKeys?.[index] ?? index}
-            index={index}
-            scrollRoot={listRef}
-            inViewAmount={inViewAmount}
-            delay={itemEnterDelay}
-            once={once}
-            onMouseEnter={
-              onItemSelect != null ? () => handleItemMouseEnter(index) : undefined
-            }
-            onClick={
-              onItemSelect != null ? () => handleItemClick(index) : undefined
-            }
-            className={cn(
-              onItemSelect != null &&
-                selectedIndex === index &&
-                "rounded-xl ring-1 ring-blue-400/25 dark:ring-blue-500/20",
-              itemClassName,
-            )}
-          >
-            {item}
-          </AnimatedListItem>
-        ))}
+        {items.map((item, index) => {
+          const isSelected = onItemSelect != null && selectedIndex === index;
+          const commonProps = {
+            index,
+            onMouseEnter: onItemSelect != null ? () => handleItemMouseEnter(index) : undefined,
+            onClick: onItemSelect != null ? () => handleItemClick(index) : undefined,
+            className: cn(
+              isSelected && "rounded-xl ring-1 ring-blue-400/25 dark:ring-blue-500/20",
+              itemClassName
+            ),
+          };
+
+          if (useAnimated) {
+            return (
+              <AnimatedListItem
+                key={itemKeys?.[index] ?? index}
+                scrollRoot={listRef}
+                inViewAmount={inViewAmount}
+                delay={itemEnterDelay}
+                once={once}
+                {...commonProps}
+              >
+                {item}
+              </AnimatedListItem>
+            );
+          }
+
+          return (
+            <StaticListItem
+              key={itemKeys?.[index] ?? index}
+              animate={!disableAnimation}
+              {...commonProps}
+            >
+              {item}
+            </StaticListItem>
+          );
+        })}
       </div>
       {showGradients && (
         <>

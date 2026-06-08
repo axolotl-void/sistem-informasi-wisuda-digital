@@ -1,6 +1,5 @@
 import { requireRole } from "@/lib/auth";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
-import { AdminHeader } from "@/components/layout/admin-header";
+import { AdminLayoutShell } from "@/components/layout/admin-layout-shell";
 
 export default async function AdminLayout({
   children,
@@ -10,17 +9,8 @@ export default async function AdminLayout({
   await requireRole(["SUPER_ADMIN", "ADMIN_FAKULTAS", "PETUGAS_SCAN"]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#e4ecf8] dark:bg-[#07111F]">
-      {/* Floating glass sidebar */}
-      <AdminSidebar />
-
-      {/* Main content area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <AdminHeader />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {children}
-        </main>
-      </div>
-    </div>
+    <AdminLayoutShell>
+      {children}
+    </AdminLayoutShell>
   );
 }

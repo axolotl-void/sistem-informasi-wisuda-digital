@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import {
@@ -8,6 +7,7 @@ import {
   ClipboardList, BarChart3, Settings, ChevronRight,
   Loader2, ShieldCheck, MailCheck,
 } from "lucide-react";
+import { motion, LayoutGroup } from "framer-motion";
 import { ROUTES } from "@/utils/constants";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth.store";
@@ -86,34 +86,51 @@ export function AdminSidebar() {
       {/* Divider */}
       <div className="mx-5 h-px bg-slate-200 dark:bg-white/[0.06]" />
 
-      {/* Navigation */}
-      <nav style={{ flex: 1, padding: "16px 12px", display: "flex", flexDirection: "column", gap: 2 }} aria-label="Admin navigation">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          const isHashLink = item.href.startsWith("#");
-          const isNavigating = isPending && !isActive && !isHashLink;
+      {/* Navigation with LayoutGroup for shared layout animations */}
+      <LayoutGroup>
+        <nav style={{ flex: 1, padding: "16px 12px", display: "flex", flexDirection: "column", gap: 2 }} aria-label="Admin navigation">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isHashLink = item.href.startsWith("#");
+            const isNavigating = isPending && !isActive && !isHashLink;
 
-          return (
-            <button
-              key={item.href}
-              type="button"
-              onClick={() => handleNav(item.href)}
-              className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 w-full text-left border border-transparent",
-                isActive
-                  ? "bg-blue-50 dark:bg-blue-500/12 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-transparent shadow-sm dark:shadow-none"
-                  : "text-slate-500 dark:text-white/40 hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:text-slate-800 dark:hover:text-white/70"
-              )}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <item.icon className="size-[17px] shrink-0" />
-              <span className="flex-1">{item.label}</span>
-              {isActive && <ChevronRight className="size-3 opacity-50" />}
-              {isNavigating && <Loader2 className="size-3 animate-spin opacity-40" />}
-            </button>
-          );
-        })}
-      </nav>
+            return (
+              <button
+                key={item.href}
+                type="button"
+                onClick={() => handleNav(item.href)}
+                className={cn(
+                  "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium w-full text-left border border-transparent cursor-pointer",
+                  "transition-colors duration-150",
+                  isActive
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-500 dark:text-white/40 hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:text-slate-800 dark:hover:text-white/70"
+                )}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {/* Sliding active indicator — seperti Pengaturan */}
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebarActiveIndicator"
+                    className="absolute inset-0 rounded-xl bg-blue-50 border border-blue-100 shadow-sm dark:bg-blue-500/[0.08] dark:border-blue-500/20 dark:shadow-[0_0_12px_rgba(59,130,246,0.06)]"
+                    transition={{
+                      type: "spring",
+                      stiffness: 380,
+                      damping: 32,
+                    }}
+                    style={{ willChange: "transform" }}
+                  />
+                )}
+
+                <item.icon className="relative z-[1] size-[17px] shrink-0" />
+                <span className="relative z-[1] flex-1">{item.label}</span>
+                {isActive && <ChevronRight className="relative z-[1] size-3 opacity-50" />}
+                {isNavigating && <Loader2 className="relative z-[1] size-3 animate-spin opacity-40" />}
+              </button>
+            );
+          })}
+        </nav>
+      </LayoutGroup>
 
       {/* Loading indicator */}
       {isPending && (
