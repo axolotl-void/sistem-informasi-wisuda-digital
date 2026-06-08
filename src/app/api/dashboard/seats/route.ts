@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
             status: true,
             sesiWisuda: true,
             userId: true,
+            isCumlaude: true,
             createdAt: true,
             updatedAt: true,
           },

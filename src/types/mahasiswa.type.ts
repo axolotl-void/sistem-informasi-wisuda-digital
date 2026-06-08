@@ -12,6 +12,7 @@ export interface Mahasiswa {
   sesiWisuda?: string | null;
   foto?: string;
   userId: string;
+  isCumlaude?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
