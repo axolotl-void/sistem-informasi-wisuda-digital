@@ -67,6 +67,7 @@ export function SeatMonitor() {
   }, []);
   const [loading, setLoading] = useState(true);
   const [selectedSeat, setSelectedSeat] = useState<SeatData | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
   const [recentArrival, setRecentArrival] = useState<{
@@ -452,7 +453,7 @@ export function SeatMonitor() {
                   <p>Nama: <b className="text-white">{selectedSeat.student.name}</b></p>
                   <p>NIM/NIDN: <span className="font-mono text-slate-300">{selectedSeat.student.nim}</span></p>
                   <button 
-                    onClick={() => setSelectedSeat(selectedSeat)}
+                    onClick={() => setIsProfileModalOpen(true)}
                     className="w-full mt-3 h-8 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                   >
                     Detail Lengkap Profile
@@ -469,7 +470,10 @@ export function SeatMonitor() {
       </div>
 
       {/* ============ Area Peta Denah (Kanan) ============ */}
-      <div className="w-full lg:w-3/4 bg-slate-50 dark:bg-slate-950 p-4 lg:p-8 overflow-auto relative max-h-[85vh]">
+      <div 
+        onClick={() => setSelectedSeat(null)}
+        className="w-full lg:w-3/4 bg-slate-50 dark:bg-slate-950 p-4 lg:p-8 overflow-auto relative max-h-[85vh]"
+      >
         
         {/* Scan Alert Banner */}
         <AnimatePresence>
@@ -642,11 +646,10 @@ export function SeatMonitor() {
       </div>
 
       {/* Seat Detail Modal Popup */}
-      <SeatModal seat={selectedSeat} onClose={() => setSelectedSeat(null)} />
+      <SeatModal seat={isProfileModalOpen ? selectedSeat : null} onClose={() => setIsProfileModalOpen(false)} />
     </div>
   );
 
-  // ========== Helper: Render single seat button ==========
   function renderSeatItem(seat: SeatData) {
     const isSelected = selectedSeat?.id === seat.id;
     const isHadir = seat.status === "checked-in" || seat.status === "vip";
@@ -656,10 +659,13 @@ export function SeatMonitor() {
     const isSearchMatched = matchedSeatIds.has(seat.id);
 
     return (
-      <div key={seat.id} className="relative group hover:z-50">
+      <div key={seat.id} className="relative hover:z-50">
         <button
           type="button"
-          onClick={() => setSelectedSeat(seat)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedSeat(seat);
+          }}
           className={cn(
             "rounded-sm flex items-center justify-center font-bold tracking-tighter cursor-pointer text-center select-none",
             block.size,
@@ -688,13 +694,12 @@ export function SeatMonitor() {
           )}
         </button>
 
-        {/* Hover Tooltip */}
-        {hasStudent && seat.student && (
+        {/* Selected Seat Tooltip (Click-to-reveal) */}
+        {isSelected && hasStudent && seat.student && (
           <div
             className={cn(
               "absolute -top-[90px] left-1/2 -translate-x-1/2 z-[999] whitespace-nowrap rounded-xl bg-slate-900/95 border border-white/10 p-3 shadow-2xl pointer-events-none text-left backdrop-blur-md",
-              "opacity-0 translate-y-2 scale-95 transition-all duration-150 ease-out",
-              "group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100"
+              "animate-in fade-in zoom-in-95 duration-100 ease-out"
             )}
           >
             <div className="flex items-center gap-2">

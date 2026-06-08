@@ -1,9 +1,7 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useRef } from "react"
 import { Moon, Sun } from "lucide-react"
-import { flushSync } from "react-dom"
-
 import { cn } from "@/lib/utils"
 
 export type TransitionVariant =
@@ -134,24 +132,7 @@ export const AnimatedThemeToggler = ({
   ...props
 }: AnimatedThemeTogglerProps) => {
   const shape = variant ?? "circle"
-  const [isDark, setIsDark] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    const updateTheme = () => {
-      setIsDark(document.documentElement.classList.contains("dark"))
-    }
-
-    updateTheme()
-
-    const observer = new MutationObserver(updateTheme)
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    })
-
-    return () => observer.disconnect()
-  }, [])
 
   const toggleTheme = useCallback(() => {
     const button = buttonRef.current
@@ -177,10 +158,9 @@ export const AnimatedThemeToggler = ({
     )
 
     const applyTheme = () => {
-      const newTheme = !isDark
-      setIsDark(newTheme)
+      // Direct DOM manipulation — instant, no React overhead.
       document.documentElement.classList.toggle("dark")
-      localStorage.setItem("theme", newTheme ? "dark" : "light")
+      localStorage.setItem("theme", document.documentElement.classList.contains("dark") ? "dark" : "light")
     }
 
     if (typeof document.startViewTransition !== "function") {
@@ -203,8 +183,6 @@ export const AnimatedThemeToggler = ({
       "--magicui-theme-toggle-vt-duration",
       `${duration}ms`
     )
-    // Pin the collapsed clip-path via CSS so Firefox does not paint the new
-    // theme unclipped between snapshot and the ready.then() JS animation.
     root.style.setProperty("--magicui-theme-vt-clip-from", clipPath[0])
     const cleanup = () => {
       delete root.dataset.magicuiThemeVt
@@ -212,9 +190,11 @@ export const AnimatedThemeToggler = ({
       root.style.removeProperty("--magicui-theme-vt-clip-from")
     }
 
-    // Some browsers require the native `this` binding for startViewTransition.
+    // No flushSync needed — classList.toggle is already synchronous.
+    // startViewTransition captures the old snapshot, applies DOM change,
+    // then captures the new snapshot and animates between them.
     const transition = (document.startViewTransition as any).call(document, () => {
-      flushSync(applyTheme)
+      applyTheme()
     })
     if (typeof transition?.finished?.finally === "function") {
       transition.finished.finally(cleanup)
@@ -239,7 +219,7 @@ export const AnimatedThemeToggler = ({
         )
       })
     }
-  }, [shape, fromCenter, duration, isDark])
+  }, [shape, fromCenter, duration])
 
   return (
     <button
@@ -249,7 +229,8 @@ export const AnimatedThemeToggler = ({
       className={cn(className)}
       {...props}
     >
-      {isDark ? <Sun /> : <Moon />}
+      <Sun className="hidden dark:block" />
+      <Moon className="block dark:hidden" />
       <span className="sr-only">Toggle theme</span>
     </button>
   )

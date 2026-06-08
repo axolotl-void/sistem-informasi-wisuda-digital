@@ -12,9 +12,9 @@ import {
 import { motion, useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-/** Motion seperti React Bits Animated List */
-const BITS_HIDDEN = { scale: 0.7, opacity: 0 };
-const BITS_VISIBLE = { scale: 1, opacity: 1 };
+/** Motion ringan — translateY + opacity saja, tanpa scale agar GPU tidak berat */
+const BITS_HIDDEN = { y: 12, opacity: 0 };
+const BITS_VISIBLE = { y: 0, opacity: 1 };
 
 interface AnimatedItemProps {
   children: ReactNode;
@@ -88,7 +88,7 @@ export function StaticListItem({
       className={cn(
         className,
         onClick && "cursor-pointer",
-        animate && "opacity-0 scale-[0.7] transition-all duration-200 ease-out"
+        animate && "opacity-0 translate-y-3 transition-[opacity,transform] duration-200 ease-out"
       )}
     >
       {children}
@@ -147,33 +147,42 @@ export function AnimatedList({
     if (!container || useAnimated || disableAnimation) return;
 
     let isInitialBatch = true;
+    // Track revealed items so we don't re-animate (saves GPU work)
+    const revealed = new WeakSet<Element>();
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const el = entry.target as HTMLElement;
-          if (entry.isIntersecting) {
-            if (isInitialBatch) {
-              const idxAttr = el.getAttribute("data-index");
-              const idx = idxAttr ? parseInt(idxAttr, 10) : 0;
-              // Stagger animation delay only on mount for initial visible items
-              const delay = (idx % 12) * 0.035; 
-              el.style.animationDelay = `${delay}s`;
-            } else {
-              el.style.animationDelay = "0s";
-            }
-            el.classList.add("animate-row-reveal");
+          if (!entry.isIntersecting || revealed.has(el)) return;
+
+          revealed.add(el);
+
+          if (isInitialBatch) {
+            const idxAttr = el.getAttribute("data-index");
+            const idx = idxAttr ? parseInt(idxAttr, 10) : 0;
+            const delay = (idx % 12) * 0.035;
+            el.style.animationDelay = `${delay}s`;
           } else {
-            // Remove the animation class when out of view so it can animate in again
-            el.classList.remove("animate-row-reveal");
             el.style.animationDelay = "0s";
           }
+          el.classList.add("animate-row-reveal");
+
+          // Release GPU layer after animation finishes
+          el.addEventListener(
+            "animationend",
+            () => {
+              el.style.willChange = "auto";
+              observer.unobserve(el); // Stop observing — saves CPU
+            },
+            { once: true }
+          );
         });
         isInitialBatch = false;
       },
       {
         root: container,
-        rootMargin: "0px 0px -10px 0px", // Trigger slightly inside bottom edge for visible scroll entrance
+        rootMargin: "0px 0px -10px 0px",
         threshold: 0.01,
       }
     );
@@ -274,15 +283,16 @@ export function AnimatedList({
         @keyframes fadeInUpRow {
           from {
             opacity: 0;
-            transform: scale(0.7);
+            transform: translateY(12px);
           }
           to {
             opacity: 1;
-            transform: scale(1);
+            transform: translateY(0);
           }
         }
         .animate-row-reveal {
-          animation: fadeInUpRow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: fadeInUpRow 0.2s ease-out forwards;
+          will-change: opacity, transform;
         }
       `}</style>
       <div
