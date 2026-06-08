@@ -146,25 +146,34 @@ export function AnimatedList({
     const container = listRef.current;
     if (!container || useAnimated || disableAnimation) return;
 
+    let isInitialBatch = true;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const el = entry.target as HTMLElement;
-            const idxAttr = el.getAttribute("data-index");
-            const idx = idxAttr ? parseInt(idxAttr, 10) : 0;
             
-            // Stagger animation delay based on index in the list chunk
-            const delay = (idx % 15) * 0.035; 
-            el.style.animationDelay = `${delay}s`;
+            if (isInitialBatch) {
+              const idxAttr = el.getAttribute("data-index");
+              const idx = idxAttr ? parseInt(idxAttr, 10) : 0;
+              // Stagger animation delay only on mount for initial visible items
+              const delay = (idx % 12) * 0.035; 
+              el.style.animationDelay = `${delay}s`;
+            } else {
+              // Scrolled items animate immediately as they enter to avoid trailing delay
+              el.style.animationDelay = "0s";
+            }
+            
             el.classList.add("animate-row-reveal");
             observer.unobserve(el);
           }
         });
+        isInitialBatch = false;
       },
       {
         root: container,
-        rootMargin: "0px 0px 80px 0px", // Trigger slightly before entering to look smooth
+        rootMargin: "0px 0px -45px 0px", // Trigger 45px (one row height) inside bottom edge for clear scroll reveal animation
         threshold: 0.01,
       }
     );
@@ -265,7 +274,7 @@ export function AnimatedList({
         @keyframes fadeInUpRow {
           from {
             opacity: 0;
-            transform: translateY(16px) scale(0.96);
+            transform: translateY(32px) scale(0.95);
           }
           to {
             opacity: 1;
@@ -273,7 +282,7 @@ export function AnimatedList({
           }
         }
         .animate-row-reveal {
-          animation: fadeInUpRow 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: fadeInUpRow 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}</style>
       <div
