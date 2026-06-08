@@ -88,7 +88,7 @@ export function StaticListItem({
       className={cn(
         className,
         onClick && "cursor-pointer",
-        animate && "opacity-0"
+        animate && "opacity-0 scale-[0.7] transition-all duration-200 ease-out"
       )}
     >
       {children}
@@ -151,9 +151,8 @@ export function AnimatedList({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const el = entry.target as HTMLElement;
           if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement;
-            
             if (isInitialBatch) {
               const idxAttr = el.getAttribute("data-index");
               const idx = idxAttr ? parseInt(idxAttr, 10) : 0;
@@ -161,19 +160,20 @@ export function AnimatedList({
               const delay = (idx % 12) * 0.035; 
               el.style.animationDelay = `${delay}s`;
             } else {
-              // Scrolled items animate immediately as they enter to avoid trailing delay
               el.style.animationDelay = "0s";
             }
-            
             el.classList.add("animate-row-reveal");
-            observer.unobserve(el);
+          } else {
+            // Remove the animation class when out of view so it can animate in again
+            el.classList.remove("animate-row-reveal");
+            el.style.animationDelay = "0s";
           }
         });
         isInitialBatch = false;
       },
       {
         root: container,
-        rootMargin: "0px 0px -45px 0px", // Trigger 45px (one row height) inside bottom edge for clear scroll reveal animation
+        rootMargin: "0px 0px -10px 0px", // Trigger slightly inside bottom edge for visible scroll entrance
         threshold: 0.01,
       }
     );
@@ -274,15 +274,15 @@ export function AnimatedList({
         @keyframes fadeInUpRow {
           from {
             opacity: 0;
-            transform: translateY(32px) scale(0.95);
+            transform: scale(0.7);
           }
           to {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: scale(1);
           }
         }
         .animate-row-reveal {
-          animation: fadeInUpRow 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: fadeInUpRow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       `}</style>
       <div
