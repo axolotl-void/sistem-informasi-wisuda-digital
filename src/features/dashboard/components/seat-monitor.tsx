@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useDeferredValue, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Sparkles, CheckCircle2,
@@ -57,6 +57,121 @@ const SEAT_BLOCKS: SeatBlock[] = [
   { id: 'block-blk-kanan', capacity: 250, colorClass: 'bg-teal-500 text-white', category: 'Tribun Belakang Kanan', size: 'w-5 h-5 text-[8px]' }
 ];
 
+const SEAT_BLOCKS_MAP = SEAT_BLOCKS.reduce<Record<string, SeatBlock>>((acc, block) => {
+  acc[block.id] = block;
+  return acc;
+}, {});
+
+// --- SeatItem Props and Component (Memoized) ---------------------------------
+interface SeatItemProps {
+  seat: SeatData;
+  isSelected: boolean;
+  isSearchMatched: boolean;
+  onClick: (seat: SeatData) => void;
+  block: SeatBlock;
+}
+
+const SeatItem = memo(
+  ({ seat, isSelected, isSearchMatched, onClick, block }: SeatItemProps) => {
+    const isHadir = seat.status === "checked-in" || seat.status === "vip";
+    const hasStudent = !!seat.student;
+
+    return (
+      <div className="relative hover:z-50">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick(seat);
+          }}
+          className={cn(
+            "rounded-sm flex items-center justify-center font-bold tracking-tighter cursor-pointer text-center select-none",
+            block.size,
+            // Transition via CSS for 60fps performance
+            "transition-all duration-200",
+            // Hover scale
+            "hover:scale-150 hover:shadow-md hover:z-10",
+            seat.status === "empty"
+              ? "bg-slate-200 text-slate-400 dark:bg-white/5 dark:text-white/10 opacity-30 hover:opacity-100"
+              : cn(
+                  block.colorClass,
+                  "opacity-90",
+                  isHadir && "ring-1 ring-emerald-500/80 shadow-sm"
+                ),
+            isSelected && "!bg-emerald-500 !text-white scale-125 shadow-[0_0_0_2px_#047857] z-20",
+            isSearchMatched && "!bg-yellow-400 !text-yellow-900 animate-bounce scale-150 ring-2 ring-yellow-600 z-30"
+          )}
+          aria-label={`Kursi ${seat.blockName} ${seat.seatCode}`}
+        >
+          {seat.seatCode}
+
+          {/* Glowing dot for hadir */}
+          {isHadir && !isSelected && !isSearchMatched && (
+            <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-emerald-400 border border-emerald-950 animate-pulse" />
+          )}
+        </button>
+
+        {/* Selected Seat Tooltip (Click-to-reveal) */}
+        {isSelected && hasStudent && seat.student && (
+          <div
+            className={cn(
+              "absolute -top-[90px] left-1/2 -translate-x-1/2 z-[999] whitespace-nowrap rounded-xl bg-slate-900/95 border border-white/10 p-3 shadow-2xl pointer-events-none text-left backdrop-blur-md",
+              "animate-in fade-in zoom-in-95 duration-100 ease-out"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "size-2 rounded-full shrink-0",
+                  isHadir ? "bg-emerald-400 animate-pulse" : "bg-zinc-500"
+                )}
+              />
+              <p className="text-[11px] font-bold text-white leading-none">
+                {seat.student.name}
+              </p>
+            </div>
+            <p className="text-[9px] text-white/40 mt-1">
+              NIM: {seat.student.nim}
+            </p>
+            <p className="text-[9px] text-white/30">
+              Prodi: {seat.student.prodi}
+            </p>
+
+            <div className="mt-1.5 border-t border-white/[0.06] pt-1 flex items-center justify-between gap-4">
+              <span className="text-[9px] font-bold text-white/45 tracking-wider uppercase">
+                {seat.blockName} {seat.seatCode}
+              </span>
+              <span
+                className={cn(
+                  "text-[9px] font-bold tracking-wide",
+                  isHadir ? "text-emerald-400" : "text-blue-400"
+                )}
+              >
+                {isHadir ? `HADIR · ${seat.student.scanTime}` : "BELUM HADIR"}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.isSelected === nextProps.isSelected &&
+      prevProps.isSearchMatched === nextProps.isSearchMatched &&
+      prevProps.block.id === nextProps.block.id &&
+      prevProps.seat.status === nextProps.seat.status &&
+      prevProps.seat.student?.mahasiswaId === nextProps.seat.student?.mahasiswaId &&
+      prevProps.seat.student?.name === nextProps.seat.student?.name &&
+      prevProps.seat.student?.nim === nextProps.seat.student?.nim &&
+      prevProps.seat.student?.prodi === nextProps.seat.student?.prodi &&
+      prevProps.seat.student?.scanTime === nextProps.seat.student?.scanTime
+    );
+  }
+);
+
+SeatItem.displayName = "SeatItem";
+
 export function SeatMonitor() {
   const [isMounted, setIsMounted] = useState(false);
   const [invitations, setInvitations] = useState<any[]>([]);
@@ -69,6 +184,7 @@ export function SeatMonitor() {
   const [selectedSeat, setSelectedSeat] = useState<SeatData | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   
   const [recentArrival, setRecentArrival] = useState<{
     name: string;
@@ -334,8 +450,8 @@ export function SeatMonitor() {
 
   // -- Search Highlight --
   const matchedSeatIds = useMemo(() => {
-    if (!searchQuery.trim()) return new Set<string>();
-    const query = searchQuery.toLowerCase().trim();
+    if (!deferredSearchQuery.trim()) return new Set<string>();
+    const query = deferredSearchQuery.toLowerCase().trim();
     const ids = new Set<string>();
     Object.values(seatsData).flat().forEach(seat => {
       if (
@@ -347,7 +463,7 @@ export function SeatMonitor() {
       }
     });
     return ids;
-  }, [searchQuery, seatsData]);
+  }, [deferredSearchQuery, seatsData]);
 
   // ======================= RENDER ==========================
 
@@ -526,7 +642,16 @@ export function SeatMonitor() {
             <div className="w-1/6 flex flex-col items-center">
               <div className="text-xs font-semibold text-gray-500 dark:text-white/40 mb-2 uppercase tracking-wide">Tribun Kiri</div>
               <div className="w-full bg-teal-50/50 dark:bg-teal-500/[0.03] p-2 rounded-lg border border-teal-100 dark:border-teal-500/10 flex flex-wrap justify-center content-start gap-[2px] min-h-[300px]">
-                {seatsData['block-tamu-kiri']?.map((seat) => renderSeatItem(seat))}
+                {seatsData['block-tamu-kiri']?.map((seat) => (
+                  <SeatItem
+                    key={seat.id}
+                    seat={seat}
+                    isSelected={selectedSeat?.id === seat.id}
+                    isSearchMatched={matchedSeatIds.has(seat.id)}
+                    onClick={setSelectedSeat}
+                    block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                  />
+                ))}
               </div>
             </div>
 
@@ -538,13 +663,31 @@ export function SeatMonitor() {
                 <div className="w-1/2 flex flex-col items-center">
                   <div className="text-xs font-semibold text-yellow-600 dark:text-yellow-400 mb-2 uppercase tracking-wide">Cumlaude</div>
                   <div className="w-full bg-yellow-50/50 dark:bg-yellow-500/[0.03] p-3 rounded-lg border border-yellow-200 dark:border-yellow-500/10 flex flex-wrap justify-center gap-1">
-                    {seatsData['block-cumlaude']?.map((seat) => renderSeatItem(seat))}
+                    {seatsData['block-cumlaude']?.map((seat) => (
+                      <SeatItem
+                        key={seat.id}
+                        seat={seat}
+                        isSelected={selectedSeat?.id === seat.id}
+                        isSearchMatched={matchedSeatIds.has(seat.id)}
+                        onClick={setSelectedSeat}
+                        block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                      />
+                    ))}
                   </div>
                 </div>
                 <div className="w-1/2 flex flex-col items-center">
                   <div className="text-xs font-semibold text-red-600 dark:text-red-400 mb-2 uppercase tracking-wide">Dosen VIP</div>
                   <div className="w-full bg-red-50/50 dark:bg-red-500/[0.03] p-3 rounded-lg border border-red-200 dark:border-red-500/10 flex flex-wrap justify-center gap-1">
-                    {seatsData['block-vip']?.map((seat) => renderSeatItem(seat))}
+                    {seatsData['block-vip']?.map((seat) => (
+                      <SeatItem
+                        key={seat.id}
+                        seat={seat}
+                        isSelected={selectedSeat?.id === seat.id}
+                        isSearchMatched={matchedSeatIds.has(seat.id)}
+                        onClick={setSelectedSeat}
+                        block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -554,13 +697,31 @@ export function SeatMonitor() {
                 <div className="w-1/2 flex flex-col items-center">
                   <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wide">Wisudawan (Kiri)</div>
                   <div className="w-full bg-blue-50/50 dark:bg-blue-500/[0.03] p-3 rounded-lg border border-blue-200 dark:border-blue-500/10 flex flex-wrap justify-center gap-[3px]">
-                    {seatsData['block-wisudawan-kiri']?.map((seat) => renderSeatItem(seat))}
+                    {seatsData['block-wisudawan-kiri']?.map((seat) => (
+                      <SeatItem
+                        key={seat.id}
+                        seat={seat}
+                        isSelected={selectedSeat?.id === seat.id}
+                        isSearchMatched={matchedSeatIds.has(seat.id)}
+                        onClick={setSelectedSeat}
+                        block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                      />
+                    ))}
                   </div>
                 </div>
                 <div className="w-1/2 flex flex-col items-center">
                   <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wide">Wisudawan (Kanan)</div>
                   <div className="w-full bg-blue-50/50 dark:bg-blue-500/[0.03] p-3 rounded-lg border border-blue-200 dark:border-blue-500/10 flex flex-wrap justify-center gap-[3px]">
-                    {seatsData['block-wisudawan-kanan']?.map((seat) => renderSeatItem(seat))}
+                    {seatsData['block-wisudawan-kanan']?.map((seat) => (
+                      <SeatItem
+                        key={seat.id}
+                        seat={seat}
+                        isSelected={selectedSeat?.id === seat.id}
+                        isSearchMatched={matchedSeatIds.has(seat.id)}
+                        onClick={setSelectedSeat}
+                        block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -571,7 +732,16 @@ export function SeatMonitor() {
             <div className="w-1/6 flex flex-col items-center">
               <div className="text-xs font-semibold text-gray-500 dark:text-white/40 mb-2 uppercase tracking-wide">Tribun Kanan</div>
               <div className="w-full bg-teal-50/50 dark:bg-teal-500/[0.03] p-2 rounded-lg border border-teal-100 dark:border-teal-500/10 flex flex-wrap justify-center content-start gap-[2px] min-h-[300px]">
-                {seatsData['block-tamu-kanan']?.map((seat) => renderSeatItem(seat))}
+                {seatsData['block-tamu-kanan']?.map((seat) => (
+                  <SeatItem
+                    key={seat.id}
+                    seat={seat}
+                    isSelected={selectedSeat?.id === seat.id}
+                    isSearchMatched={matchedSeatIds.has(seat.id)}
+                    onClick={setSelectedSeat}
+                    block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -592,7 +762,16 @@ export function SeatMonitor() {
               </div>
               <div className="text-xs font-semibold text-gray-500 dark:text-white/40 mb-2 uppercase tracking-wide">Tribun Blk. Kiri</div>
               <div className="w-full bg-teal-50/50 dark:bg-teal-500/[0.03] p-3 rounded-lg border border-teal-100 dark:border-teal-500/10 flex flex-wrap justify-center gap-[3px]">
-                {seatsData['block-blk-kiri']?.map((seat) => renderSeatItem(seat))}
+                {seatsData['block-blk-kiri']?.map((seat) => (
+                  <SeatItem
+                    key={seat.id}
+                    seat={seat}
+                    isSelected={selectedSeat?.id === seat.id}
+                    isSearchMatched={matchedSeatIds.has(seat.id)}
+                    onClick={setSelectedSeat}
+                    block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                  />
+                ))}
               </div>
             </div>
 
@@ -615,7 +794,16 @@ export function SeatMonitor() {
               </div>
               <div className="text-xs font-semibold text-gray-500 dark:text-white/40 mb-2 uppercase tracking-wide mt-5">Tribun Blk. Tengah</div>
               <div className="w-full bg-teal-50/50 dark:bg-teal-500/[0.03] p-3 rounded-lg border border-teal-100 dark:border-teal-500/10 flex flex-wrap justify-center gap-[3px]">
-                {seatsData['block-blk-tengah']?.map((seat) => renderSeatItem(seat))}
+                {seatsData['block-blk-tengah']?.map((seat) => (
+                  <SeatItem
+                    key={seat.id}
+                    seat={seat}
+                    isSelected={selectedSeat?.id === seat.id}
+                    isSearchMatched={matchedSeatIds.has(seat.id)}
+                    onClick={setSelectedSeat}
+                    block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                  />
+                ))}
               </div>
             </div>
 
@@ -637,7 +825,16 @@ export function SeatMonitor() {
               </div>
               <div className="text-xs font-semibold text-gray-500 dark:text-white/40 mb-2 uppercase tracking-wide">Tribun Blk. Kanan</div>
               <div className="w-full bg-teal-50/50 dark:bg-teal-500/[0.03] p-3 rounded-lg border border-teal-100 dark:border-teal-500/10 flex flex-wrap justify-center gap-[3px]">
-                {seatsData['block-blk-kanan']?.map((seat) => renderSeatItem(seat))}
+                {seatsData['block-blk-kanan']?.map((seat) => (
+                  <SeatItem
+                    key={seat.id}
+                    seat={seat}
+                    isSelected={selectedSeat?.id === seat.id}
+                    isSearchMatched={matchedSeatIds.has(seat.id)}
+                    onClick={setSelectedSeat}
+                    block={SEAT_BLOCKS_MAP[seat.blockId] || SEAT_BLOCKS[0]}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -650,92 +847,4 @@ export function SeatMonitor() {
     </div>
   );
 
-  function renderSeatItem(seat: SeatData) {
-    const isSelected = selectedSeat?.id === seat.id;
-    const isHadir = seat.status === "checked-in" || seat.status === "vip";
-    const hasStudent = !!seat.student;
-    
-    const block = SEAT_BLOCKS.find(b => b.id === seat.blockId) || SEAT_BLOCKS[0];
-    const isSearchMatched = matchedSeatIds.has(seat.id);
-
-    return (
-      <div key={seat.id} className="relative hover:z-50">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedSeat(seat);
-          }}
-          className={cn(
-            "rounded-sm flex items-center justify-center font-bold tracking-tighter cursor-pointer text-center select-none",
-            block.size,
-            // Transition via CSS for 60fps performance
-            "transition-all duration-200",
-            // Hover scale
-            "hover:scale-150 hover:shadow-md hover:z-10",
-            seat.status === "empty" 
-              ? "bg-slate-200 text-slate-400 dark:bg-white/5 dark:text-white/10 opacity-30 hover:opacity-100"
-              : cn(
-                  block.colorClass,
-                  "opacity-90",
-                  isHadir 
-                    && "ring-1 ring-emerald-500/80 shadow-sm"
-                ),
-            isSelected && "!bg-emerald-500 !text-white scale-125 shadow-[0_0_0_2px_#047857] z-20",
-            isSearchMatched && "!bg-yellow-400 !text-yellow-900 animate-bounce scale-150 ring-2 ring-yellow-600 z-30"
-          )}
-          aria-label={`Kursi ${seat.blockName} ${seat.seatCode}`}
-        >
-          {seat.seatCode}
-
-          {/* Glowing dot for hadir */}
-          {isHadir && !isSelected && !isSearchMatched && (
-            <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-emerald-400 border border-emerald-950 animate-pulse" />
-          )}
-        </button>
-
-        {/* Selected Seat Tooltip (Click-to-reveal) */}
-        {isSelected && hasStudent && seat.student && (
-          <div
-            className={cn(
-              "absolute -top-[90px] left-1/2 -translate-x-1/2 z-[999] whitespace-nowrap rounded-xl bg-slate-900/95 border border-white/10 p-3 shadow-2xl pointer-events-none text-left backdrop-blur-md",
-              "animate-in fade-in zoom-in-95 duration-100 ease-out"
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <span
-                className={cn(
-                  "size-2 rounded-full shrink-0",
-                  isHadir ? "bg-emerald-400 animate-pulse" : "bg-zinc-500"
-                )}
-              />
-              <p className="text-[11px] font-bold text-white leading-none">
-                {seat.student.name}
-              </p>
-            </div>
-            <p className="text-[9px] text-white/40 mt-1">
-              NIM: {seat.student.nim}
-            </p>
-            <p className="text-[9px] text-white/30">
-              Prodi: {seat.student.prodi}
-            </p>
-
-            <div className="mt-1.5 border-t border-white/[0.06] pt-1 flex items-center justify-between gap-4">
-              <span className="text-[9px] font-bold text-white/45 tracking-wider uppercase">
-                {seat.blockName} {seat.seatCode}
-              </span>
-              <span
-                className={cn(
-                  "text-[9px] font-bold tracking-wide",
-                  isHadir ? "text-emerald-400" : "text-blue-400"
-                )}
-              >
-                {isHadir ? `HADIR · ${seat.student.scanTime}` : "BELUM HADIR"}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
 }

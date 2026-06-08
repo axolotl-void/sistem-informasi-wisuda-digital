@@ -114,6 +114,7 @@ export interface AnimatedListProps {
   header?: ReactNode;
   itemKeys?: string[];
   disableAnimation?: boolean;
+  onScrollBottom?: () => void;
 }
 
 export function AnimatedList({
@@ -133,6 +134,7 @@ export function AnimatedList({
   header,
   itemKeys,
   disableAnimation = false,
+  onScrollBottom,
 }: AnimatedListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState(initialSelectedIndex);
@@ -202,6 +204,10 @@ export function AnimatedList({
     setBottomGradientOpacity(
       scrollHeight <= clientHeight ? 0 : Math.min(bottomDistance / 50, 1),
     );
+
+    if (bottomDistance < 100 && onScrollBottom) {
+      onScrollBottom();
+    }
   };
 
   const handleItemMouseEnter = useCallback((index: number) => {

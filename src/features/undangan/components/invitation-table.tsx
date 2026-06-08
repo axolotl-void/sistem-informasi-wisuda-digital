@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useMemo, useEffect } from "react";
+import { memo, useState, useMemo, useEffect, useCallback } from "react";
 import { QrCode, RefreshCw, Download, Trash2 } from "lucide-react";
 import { useUndanganStore } from "../store";
 import { StatusBadge, AttendanceBadge } from "./status-badge";
@@ -347,8 +347,6 @@ const TABLE_HEADERS: { label: string; cls: string }[] = [
   { label: "", cls: "w-28 shrink-0 pr-4" },
 ];
 
-const ITEMS_PER_PAGE = 10;
-
 export function InvitationTable() {
   const {
     invitations,
@@ -359,7 +357,7 @@ export function InvitationTable() {
     filterAttendance,
   } = useUndanganStore();
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(15);
 
   const filtered = useMemo(
     () =>
@@ -391,14 +389,18 @@ export function InvitationTable() {
     [invitations, searchQuery, filterStatus, filterSesi, filterAttendance],
   );
 
-  // Reset page when filter or search changes data length
+  // Reset page size when filter or search changes data length
   useEffect(() => {
-    setCurrentPage(1);
+    setVisibleCount(15);
   }, [filtered.length]);
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedData = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const loadMore = useCallback(() => {
+    if (visibleCount < filtered.length) {
+      setVisibleCount((prev) => Math.min(prev + 15, filtered.length));
+    }
+  }, [visibleCount, filtered.length]);
+
+  const visibleData = filtered.slice(0, visibleCount);
 
   const listKey = [searchQuery, filterStatus, filterSesi, filterAttendance].join(
     "|",
@@ -440,7 +442,7 @@ export function InvitationTable() {
     </div>
   );
 
-  const listItems = paginatedData.map((inv) => <InvitationRow key={inv.id} inv={inv} />);
+  const listItems = visibleData.map((inv) => <InvitationRow key={inv.id} inv={inv} />);
 
   return (
     <LiquidGlassCard
@@ -451,49 +453,29 @@ export function InvitationTable() {
     >
       <div className="overflow-x-auto">
         <AnimatedList
-          key={`${listKey}|page-${currentPage}`}
+          key={listKey}
           items={listItems}
-          itemKeys={paginatedData.map((inv) => inv.id)}
+          itemKeys={visibleData.map((inv) => inv.id)}
           header={tableHeader}
           showGradients
           enableArrowNavigation={false}
           displayScrollbar
-          itemEnterDelay={0.05}
-          inViewAmount={0.35}
+          itemEnterDelay={0.035} // Staggered delays
+          inViewAmount={0.05}
           maxHeight="min(72vh, 680px)"
           itemClassName="!m-0 !rounded-none"
           className="min-w-0"
+          onScrollBottom={loadMore}
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t border-white/50 bg-white/40 px-5 py-4 dark:border-white/[0.06] dark:bg-white/[0.03] gap-4">
-        <div className="text-slate-500 dark:text-white/30 text-[11px] font-semibold">
-          Menampilkan <span className="font-extrabold text-slate-800 dark:text-white">{startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, filtered.length)}</span> dari <span className="font-extrabold text-slate-800 dark:text-white">{filtered.length}</span> undangan
-        </div>
-        
-        {totalPages > 1 && (
-          <div className="flex items-center gap-1 self-end sm:self-auto">
-            <button
-              type="button"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 disabled:opacity-40 text-slate-500 dark:text-white/40 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-[11px] font-bold cursor-pointer"
-            >
-              Sebelumnya
-            </button>
-            <span className="px-3 text-[11px] text-slate-600 dark:text-white/50 font-bold">
-              Halaman {currentPage} dari {totalPages}
-            </span>
-            <button
-              type="button"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 disabled:opacity-40 text-slate-500 dark:text-white/40 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-[11px] font-bold cursor-pointer"
-            >
-              Selanjutnya
-            </button>
-          </div>
-        )}
+      <div className="border-t border-white/50 bg-white/40 px-5 py-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
+        <p className="text-[11px] font-medium text-slate-500 dark:text-white/35">
+          Menampilkan <span className="font-semibold text-slate-700 dark:text-white/55">{Math.min(visibleCount, filtered.length)}</span> dari <span className="font-semibold text-slate-700 dark:text-white/55">{filtered.length}</span> undangan
+          {visibleCount < filtered.length && (
+            <span className="text-slate-400 dark:text-white/20"> · scroll ke bawah untuk melihat lebih banyak</span>
+          )}
+        </p>
       </div>
     </LiquidGlassCard>
   );
