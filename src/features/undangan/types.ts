@@ -46,6 +46,15 @@ export interface Invitation {
   // Guest
   kuotaTamu: number;
   tamuHadir: number;
+  undanganTamu?: {
+    id: string;
+    kode: string;
+    namaTamu: string;
+    hubungan: string | null;
+    statusUndangan: string;
+    statusHadir: boolean;
+    waktuScan?: string | null;
+  }[];
 
   // Meta
   generatedAt?: string;

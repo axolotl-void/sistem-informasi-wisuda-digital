@@ -100,7 +100,7 @@ export default function KehadiranPage() {
               }`}
             />
             <span className="text-[0.7rem] font-bold uppercase tracking-wider">
-              {isLive ? "Sistem Terhubung (Live)" : "Koneksi Terputus"}
+              {isLive ? "Sistem Terhubung (Live)" : ""}
             </span>
           </div>
         </div>

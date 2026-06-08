@@ -94,8 +94,9 @@ model Mahasiswa {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  undangan  Undangan[]
-  kehadiran Kehadiran[]
+  undangan     Undangan[]
+  undanganTamu UndanganTamu[]
+  kehadiran    Kehadiran[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -185,4 +186,30 @@ model UndanganDosen {
 
   @@index([qrToken])
   @@map("undangan_dosen")
+}
+
+// ─── Undangan Tamu (QR terpisah per-tamu) ─────────────────────────────────────
+
+model UndanganTamu {
+  id             String         @id @default(cuid())
+  kode           String         @unique   // TMU-xxxxx
+  namaTamu       String                   // Nama lengkap tamu
+  hubungan       String?                  // Orang Tua, Saudara, Wali, Pasangan, Lainnya
+  qrToken        String?        @unique   // Diisi setelah admin approve
+  qrImageUrl     String?                  // QR data URL, diisi setelah approve
+  statusUndangan StatusUndangan @default(AKTIF)
+  statusHadir    Boolean        @default(false)
+  waktuScan      DateTime?
+  gate           String?
+  petugasId      String?
+
+  mahasiswaId    String
+  mahasiswa      Mahasiswa      @relation(fields: [mahasiswaId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([mahasiswaId])
+  @@index([qrToken])
+  @@map("undangan_tamu")
 }

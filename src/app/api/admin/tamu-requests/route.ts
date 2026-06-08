@@ -5,7 +5,7 @@ import { apiSuccess, apiError } from "@/lib/utils";
 
 /**
  * GET /api/admin/tamu-requests
- * Ambil semua mahasiswa dengan statusPengajuan PENDING
+ * Ambil semua mahasiswa dengan statusPengajuan PENDING, termasuk detail tamu
  */
 export async function GET(request: NextRequest) {
   const payload = await getTokenFromRequest(request);
@@ -30,6 +30,17 @@ export async function GET(request: NextRequest) {
           take: 1,
           orderBy: { createdAt: "desc" },
           select: { id: true, kode: true, statusUndangan: true },
+        },
+        undanganTamu: {
+          orderBy: { createdAt: "asc" },
+          select: {
+            id: true,
+            kode: true,
+            namaTamu: true,
+            hubungan: true,
+            statusUndangan: true,
+            statusHadir: true,
+          },
         },
       },
       orderBy: { updatedAt: "desc" },

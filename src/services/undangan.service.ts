@@ -47,6 +47,17 @@ export class UndanganService {
               status: true,
               sesiWisuda: true,
               foto: true,   // ← include foto
+              undanganTamu: {
+                select: {
+                  id: true,
+                  kode: true,
+                  namaTamu: true,
+                  hubungan: true,
+                  statusUndangan: true,
+                  statusHadir: true,
+                  waktuScan: true,
+                },
+              },
             },
           },
           kehadiran: true,

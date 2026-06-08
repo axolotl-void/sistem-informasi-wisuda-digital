@@ -68,6 +68,69 @@ export class ScannerService {
         return result;
       }
 
+      // Cari di undangan tamu
+      const undanganTamu = await prisma.undanganTamu.findFirst({
+        where: { qrToken },
+        include: { mahasiswa: true },
+      });
+
+      if (undanganTamu) {
+        if (undanganTamu.statusHadir) {
+          const result: ScanResult = {
+            success: false,
+            message: `Undangan tamu "${undanganTamu.namaTamu}" sudah digunakan sebelumnya`,
+            mahasiswa: {
+              nama: `Tamu: ${undanganTamu.namaTamu}`,
+              nim: undanganTamu.kode,
+              fakultas: `Tamu dari ${undanganTamu.mahasiswa.nama}`,
+              prodi: undanganTamu.hubungan || "Tamu",
+            } as any,
+          };
+          emitScanResult(result);
+          return result;
+        }
+
+        if (undanganTamu.statusUndangan === "DIBATALKAN") {
+          const result: ScanResult = {
+            success: false,
+            message: "Undangan tamu telah dibatalkan",
+          };
+          emitScanResult(result);
+          return result;
+        }
+
+        // Catat kehadiran tamu
+        await prisma.undanganTamu.update({
+          where: { id: undanganTamu.id },
+          data: {
+            statusHadir: true,
+            statusUndangan: "DIGUNAKAN",
+            waktuScan: new Date(),
+            gate,
+            petugasId,
+          },
+        });
+
+        const result: ScanResult = {
+          success: true,
+          message: `Selamat datang, ${undanganTamu.namaTamu}! (Tamu dari ${undanganTamu.mahasiswa.nama})`,
+          mahasiswa: {
+            nama: `Tamu: ${undanganTamu.namaTamu}`,
+            nim: undanganTamu.kode,
+            fakultas: `Tamu dari ${undanganTamu.mahasiswa.nama}`,
+            prodi: undanganTamu.hubungan || "Tamu",
+            status: "LULUS",
+          } as any,
+        };
+
+        emitScanResult(result);
+
+        const stats = await KehadiranService.getStats();
+        emitStatsUpdate(stats as unknown as Record<string, unknown>);
+
+        return result;
+      }
+
       const result: ScanResult = {
         success: false,
         message: "QR Code tidak valid atau tidak ditemukan",

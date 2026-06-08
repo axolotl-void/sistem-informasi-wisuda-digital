@@ -7,7 +7,7 @@ import { apiSuccess, apiError } from "@/lib/utils";
 
 const actionSchema = z.object({
   action: z.enum(["approve", "reject"]),
-  // Diperlukan saat approve
+  // Diperlukan saat approve (jika belum punya undangan wisudawan)
   tanggalWisuda: z.string().datetime().optional(),
   tempatWisuda: z.string().min(2).optional(),
 });
@@ -17,7 +17,7 @@ type Params = { params: Promise<{ mahasiswaId: string }> };
 /**
  * PATCH /api/admin/tamu-requests/:mahasiswaId
  * Admin approve atau reject pengajuan tamu.
- * Jika approve → otomatis generate undangan dengan kuotaTamu = requestedTamu
+ * Jika approve → generate QR untuk setiap UndanganTamu milik mahasiswa
  */
 export async function PATCH(request: NextRequest, { params }: Params) {
   const payload = await getTokenFromRequest(request);
@@ -40,6 +40,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
           where: { statusUndangan: "AKTIF" },
           take: 1,
         },
+        undanganTamu: {
+          where: { statusHadir: false },
+          orderBy: { createdAt: "asc" },
+        },
       },
     });
 
@@ -51,70 +55,58 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const { action } = parsed.data;
 
     if (action === "reject") {
-      // Tolak pengajuan — reset ke NONE
-      await prisma.mahasiswa.update({
-        where: { id: mahasiswaId },
-        data: { statusPengajuan: "REJECTED" },
-      });
-      return apiSuccess(null, "Pengajuan tamu ditolak");
-    }
-
-    // -- APPROVE --------------------------------------------------------------
-    // Cek apakah sudah punya undangan aktif
-    if (mahasiswa.undangan.length > 0) {
-      // Sudah punya undangan — update kuotaTamu saja
+      // Tolak pengajuan — set status REJECTED & hapus UndanganTamu
       await prisma.$transaction([
-        prisma.undangan.update({
-          where: { id: mahasiswa.undangan[0].id },
-          data: { kuotaTamu: mahasiswa.requestedTamu },
+        prisma.undanganTamu.deleteMany({
+          where: { mahasiswaId, statusHadir: false },
         }),
         prisma.mahasiswa.update({
           where: { id: mahasiswaId },
-          data: { statusPengajuan: "APPROVED" },
+          data: { statusPengajuan: "REJECTED", requestedTamu: 0 },
         }),
       ]);
+      return apiSuccess(null, "Pengajuan tamu ditolak");
+    }
 
-      return apiSuccess(
-        { undanganId: mahasiswa.undangan[0].id },
-        `Pengajuan disetujui. Kuota tamu diperbarui menjadi ${mahasiswa.requestedTamu} orang`
+    // -- APPROVE ---------------------------------------------------------------
+
+    // 1. Generate QR untuk setiap UndanganTamu
+    const tamuUpdates = [];
+    for (const tamu of mahasiswa.undanganTamu) {
+      const qrToken = generateQrToken(mahasiswaId, tamu.id);
+      const qrImageUrl = await generateQrDataUrl(qrToken);
+
+      tamuUpdates.push(
+        prisma.undanganTamu.update({
+          where: { id: tamu.id },
+          data: { qrToken, qrImageUrl },
+        })
       );
     }
 
-    // Belum punya undangan — generate baru
-    const tanggalWisuda = parsed.data.tanggalWisuda
-      ? new Date(parsed.data.tanggalWisuda)
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // default +30 hari
+    // 2. Update kuotaTamu pada undangan wisudawan jika ada
+    const undanganUpdates = [];
+    if (mahasiswa.undangan.length > 0) {
+      undanganUpdates.push(
+        prisma.undangan.update({
+          where: { id: mahasiswa.undangan[0].id },
+          data: { kuotaTamu: mahasiswa.requestedTamu },
+        })
+      );
+    }
 
-    const tempatWisuda = parsed.data.tempatWisuda ?? "Auditorium Utama";
+    // 3. Update status mahasiswa
+    const mahasiswaUpdate = prisma.mahasiswa.update({
+      where: { id: mahasiswaId },
+      data: { statusPengajuan: "APPROVED" },
+    });
 
-    const kode = `WIS-${Date.now().toString(36).toUpperCase()}`;
-    const undanganId = crypto.randomUUID();
-    const qrToken = generateQrToken(mahasiswaId, undanganId);
-    const qrImageUrl = await generateQrDataUrl(qrToken);
-
-    const [undangan] = await prisma.$transaction([
-      prisma.undangan.create({
-        data: {
-          id: undanganId,
-          kode,
-          mahasiswaId,
-          qrToken,
-          qrImageUrl,
-          statusUndangan: "AKTIF",
-          tanggalWisuda,
-          tempatWisuda,
-          kuotaTamu: mahasiswa.requestedTamu,
-        },
-      }),
-      prisma.mahasiswa.update({
-        where: { id: mahasiswaId },
-        data: { statusPengajuan: "APPROVED" },
-      }),
-    ]);
+    // Execute all in transaction
+    await prisma.$transaction([...tamuUpdates, ...undanganUpdates, mahasiswaUpdate]);
 
     return apiSuccess(
-      { undanganId: undangan.id, kode: undangan.kode },
-      `Pengajuan disetujui. Undangan berhasil digenerate dengan kuota ${mahasiswa.requestedTamu} tamu`
+      { tamuGenerated: mahasiswa.undanganTamu.length },
+      `Pengajuan disetujui. ${mahasiswa.undanganTamu.length} QR tamu berhasil digenerate`
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Gagal memproses pengajuan";

@@ -93,6 +93,13 @@
   box-shadow: none !important;
 }
 
+/* Theme toggle icon visibility.
+   Tailwind v4 dark variant uses :where() (zero specificity), so
+   `dark:block` can't beat `hidden`. These explicit rules have
+   0-2-0 specificity and reliably toggle the Sun/Moon icons. */
+html:not(.dark) .dark-only { display: none; }
+html.dark .light-only { display: none; }
+
 
 :root {
   --background: oklch(1 0 0);

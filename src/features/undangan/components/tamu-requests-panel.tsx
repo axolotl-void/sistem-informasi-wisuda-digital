@@ -23,6 +23,14 @@ interface TamuRequest {
   requestedTamu: number;
   statusPengajuan: "PENDING";
   undangan: { id: string; kode: string; statusUndangan: string } | null;
+  undanganTamu: {
+    id: string;
+    kode: string;
+    namaTamu: string;
+    hubungan: string | null;
+    statusUndangan: string;
+    statusHadir: boolean;
+  }[];
 }
 
 // --- Helpers ------------------------------------------------------------------
@@ -72,67 +80,84 @@ function RequestRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-2xl border p-3.5",
+        "flex flex-col gap-2 rounded-2xl border p-3.5",
         "border-amber-400/35 bg-amber-500/10",
         "dark:border-amber-500/20 dark:bg-amber-500/[0.06]",
       )}
     >
-      {/* Avatar */}
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-blue-100 border border-indigo-200 dark:from-indigo-500/20 dark:to-blue-500/20 dark:border-indigo-500/15 overflow-hidden">
-        {req.foto ? (
-          <img src={req.foto} alt={req.nama} className="size-full object-cover" />
-        ) : (
-          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-300">{initials}</span>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="truncate text-sm font-semibold text-slate-800 dark:text-white/80">{req.nama}</p>
-        <p className="truncate text-[0.65rem] text-slate-500 dark:text-white/30">
-          {req.nim} · {req.sesiWisuda ?? "Sesi belum ditentukan"}
-        </p>
-      </div>
-
-      {/* Jumlah tamu badge */}
-      <div className="flex items-center gap-1.5 rounded-lg bg-amber-100 border border-amber-300 dark:bg-amber-500/10 dark:border-amber-500/20 px-2.5 py-1.5 shrink-0">
-        <Users className="size-3 text-amber-600 dark:text-amber-400/70" />
-        <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{req.requestedTamu}</span>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        {/* ACC */}
-        <button
-          type="button"
-          onClick={handleApprove}
-          disabled={approving || rejecting}
-          title="Setujui & Generate Undangan"
-          className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-emerald-300 bg-emerald-50 text-[0.72rem] font-bold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 dark:hover:border-emerald-500/50"
-        >
-          {approving ? (
-            <Loader2 className="size-3.5 animate-spin" />
+      <div className="flex items-center gap-3">
+        {/* Avatar */}
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-blue-100 border border-indigo-200 dark:from-indigo-500/20 dark:to-blue-500/20 dark:border-indigo-500/15 overflow-hidden">
+          {req.foto ? (
+            <img src={req.foto} alt={req.nama} className="size-full object-cover" />
           ) : (
-            <CheckCircle2 className="size-3.5" />
+            <span className="text-xs font-bold text-indigo-600 dark:text-indigo-300">{initials}</span>
           )}
-          {approving ? "..." : "ACC"}
-        </button>
+        </div>
 
-        {/* Tolak */}
-        <button
-          type="button"
-          onClick={handleReject}
-          disabled={approving || rejecting}
-          title="Tolak pengajuan"
-          className="flex size-8 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 dark:border-red-500/20 dark:bg-red-500/[0.06] dark:text-red-400/60 dark:hover:bg-red-500/15 dark:hover:text-red-400"
-        >
-          {rejecting ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <XCircle className="size-3.5" />
-          )}
-        </button>
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-800 dark:text-white/80">{req.nama}</p>
+          <p className="truncate text-[0.65rem] text-slate-500 dark:text-white/30">
+            {req.nim} · {req.sesiWisuda ?? "Sesi belum ditentukan"}
+          </p>
+        </div>
+
+        {/* Jumlah tamu badge */}
+        <div className="flex items-center gap-1.5 rounded-lg bg-amber-100 border border-amber-300 dark:bg-amber-500/10 dark:border-amber-500/20 px-2.5 py-1.5 shrink-0">
+          <Users className="size-3 text-amber-600 dark:text-amber-400/70" />
+          <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{req.requestedTamu}</span>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* ACC */}
+          <button
+            type="button"
+            onClick={handleApprove}
+            disabled={approving || rejecting}
+            title="Setujui & Generate Undangan"
+            className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-emerald-300 bg-emerald-50 text-[0.72rem] font-bold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20 dark:hover:border-emerald-500/50"
+          >
+            {approving ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <CheckCircle2 className="size-3.5" />
+            )}
+            {approving ? "..." : "ACC"}
+          </button>
+
+          {/* Tolak */}
+          <button
+            type="button"
+            onClick={handleReject}
+            disabled={approving || rejecting}
+            title="Tolak pengajuan"
+            className="flex size-8 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 dark:border-red-500/20 dark:bg-red-500/[0.06] dark:text-red-400/60 dark:hover:bg-red-500/15 dark:hover:text-red-400"
+          >
+            {rejecting ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <XCircle className="size-3.5" />
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Guest List */}
+      {req.undanganTamu && req.undanganTamu.length > 0 && (
+        <div className="mt-1 border-t border-amber-400/20 dark:border-amber-500/10 pt-2 pl-12 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {req.undanganTamu.map((tamu, idx) => (
+            <div key={tamu.id || idx} className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-400 dark:text-white/20 font-bold">{idx + 1}.</span>
+              <div className="text-[11px]">
+                <span className="font-semibold text-slate-700 dark:text-white/70">{tamu.namaTamu}</span>
+                <span className="text-slate-400 dark:text-white/30 text-[10px]"> ({tamu.hubungan})</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

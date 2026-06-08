@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import axios from "axios";
+import { api } from "@/lib/axios";
 import { Download, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ export function UndanganMahasiswaView({ mahasiswaId }: UndanganMahasiswaViewProp
   useEffect(() => {
     const fetchUndangan = async () => {
       try {
-        const res = await axios.get(API_ROUTES.UNDANGAN.BASE, {
+        const res = await api.get(API_ROUTES.UNDANGAN.BASE, {
           params: { mahasiswaId },
         });
         setUndangan(res.data.data?.data?.[0] ?? null);

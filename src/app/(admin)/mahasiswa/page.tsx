@@ -195,13 +195,13 @@ export default function MahasiswaPage() {
       return s.isCumlaude;
     }
     if (customFilter === "Profile Belum Lengkap") {
-      return s.status === "AKTIF" && (!s.email || s.email.endsWith("@temp-wisuda.id")) && !s.hasUndangan;
+      return !s.email || s.email.endsWith("@temp-wisuda.id");
     }
     if (customFilter === "Menunggu Verifikasi") {
       return s.status === "AKTIF" && s.email && !s.email.endsWith("@temp-wisuda.id") && !s.hasUndangan && !s.kehadiranStatus;
     }
     if (customFilter === "Terverifikasi") {
-      return s.status === "LULUS";
+      return s.status === "LULUS" && s.email && !s.email.endsWith("@temp-wisuda.id");
     }
     if (customFilter === "Sudah Hadir") {
       return s.kehadiranStatus === "HADIR";

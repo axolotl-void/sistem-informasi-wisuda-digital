@@ -102,7 +102,8 @@ export const useUndanganStore = create<UndanganState & UndanganActions>((set, ge
           ruangan: "-",
           nomorKursi: "-", // Not in schema yet
           kuotaTamu: item.kuotaTamu || 0,
-          tamuHadir: item.kehadiran ? 1 : 0,
+          tamuHadir: item.mahasiswa?.undanganTamu?.filter((t: any) => t.statusHadir).length || 0,
+          undanganTamu: item.mahasiswa?.undanganTamu || [],
           generatedAt: item.createdAt,
           downloadedAt: item.updatedAt,
           firstScanAt: item.kehadiran?.waktuScan || undefined,

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import { api } from "@/lib/axios";
 import {
   QrCode, Download, Share2, Calendar,
   MapPin, Users, FileText, Copy, Check,
@@ -24,7 +24,7 @@ export default function MahasiswaUndanganPage() {
 
   useEffect(() => {
     if (!user?.id) return;
-    axios.get(API_ROUTES.UNDANGAN.BASE, { params: { mahasiswaId: user.id } })
+    api.get(API_ROUTES.UNDANGAN.BASE, { params: { mahasiswaId: user.id } })
       .then((res) => {
         const inv = res.data.data?.data?.[0] ?? null;
         setUndangan(inv);

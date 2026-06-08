@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { api } from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,8 +23,8 @@ export function MahasiswaDashboardView({ mahasiswaId }: MahasiswaDashboardViewPr
     const fetchData = async () => {
       try {
         const [mRes, uRes] = await Promise.all([
-          axios.get(`${API_ROUTES.MAHASISWA.BASE}/${mahasiswaId}`),
-          axios.get(API_ROUTES.UNDANGAN.BASE, {
+          api.get(`${API_ROUTES.MAHASISWA.BASE}/${mahasiswaId}`),
+          api.get(API_ROUTES.UNDANGAN.BASE, {
             params: { mahasiswaId },
           }),
         ]);

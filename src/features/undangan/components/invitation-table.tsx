@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useMemo } from "react";
+import { memo, useState, useMemo, useEffect } from "react";
 import { QrCode, RefreshCw, Download, Trash2 } from "lucide-react";
 import { useUndanganStore } from "../store";
 import { StatusBadge, AttendanceBadge } from "./status-badge";
@@ -146,8 +146,89 @@ function ActionMenu({ inv }: { inv: Invitation }) {
   );
 }
 
+function TamuDetailsModal({
+  open,
+  mahasiswaNama,
+  tamuList,
+  onClose,
+}: {
+  open: boolean;
+  mahasiswaNama: string;
+  tamuList: any[];
+  onClose: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <LiquidGlassCard hover={false} className="relative z-10 w-full max-w-md p-6 overflow-hidden border border-white/20 dark:border-white/[0.08] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/[0.06] pb-3 mb-4">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white/90">
+              Detail Tamu Undangan
+            </h3>
+            <p className="text-[11px] text-slate-500 dark:text-white/35 mt-0.5">
+              Wisudawan: <span className="font-semibold text-slate-700 dark:text-white/60">{mahasiswaNama}</span>
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex size-7 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] text-slate-400 dark:text-white/30 transition-colors"
+          >
+            <span className="text-sm">✕</span>
+          </button>
+        </div>
+
+        {tamuList.length === 0 ? (
+          <div className="py-8 text-center">
+            <p className="text-xs text-slate-400 dark:text-white/25">Tidak ada data tamu untuk wisudawan ini.</p>
+          </div>
+        ) : (
+          <div className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1">
+            {tamuList.map((tamu, idx) => (
+              <div
+                key={tamu.id || idx}
+                className="rounded-xl border border-slate-100 dark:border-white/[0.05] bg-slate-50/50 dark:bg-white/[0.02] p-3 flex items-center justify-between"
+              >
+                <div>
+                  <p className="text-xs font-semibold text-slate-800 dark:text-white/80">{tamu.namaTamu}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-white/30">{tamu.hubungan} · {tamu.kode}</p>
+                  {tamu.waktuScan && (
+                    <p className="text-[9px] text-slate-400 dark:text-white/20 mt-0.5">
+                      Masuk: {new Date(tamu.waktuScan).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className={`size-1.5 rounded-full ${tamu.statusHadir ? "bg-emerald-500" : "bg-slate-300 dark:bg-white/20"}`} />
+                  <span className={`text-[10px] font-semibold ${tamu.statusHadir ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-white/30"}`}>
+                    {tamu.statusHadir ? "Hadir" : "Belum Hadir"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-5 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className={cn(glassBtnGhost, "h-9 px-4 justify-center font-semibold text-xs")}
+          >
+            Tutup
+          </button>
+        </div>
+      </LiquidGlassCard>
+    </div>
+  );
+}
+
 const InvitationRow = memo(function InvitationRow({ inv }: { inv: Invitation }) {
   const { openDrawer, openPreview } = useUndanganStore();
+  const [showTamuModal, setShowTamuModal] = useState(false);
 
   return (
     <div
@@ -209,7 +290,14 @@ const InvitationRow = memo(function InvitationRow({ inv }: { inv: Invitation }) 
         </span>
       </div>
 
-      <div className="hidden w-16 shrink-0 py-3 pr-4 xl:block">
+      <div 
+        className="hidden w-16 shrink-0 py-3 pr-4 xl:block cursor-pointer hover:underline decoration-dashed decoration-indigo-500 underline-offset-4"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowTamuModal(true);
+        }}
+        title="Klik untuk detail tamu"
+      >
         <div className="flex items-center gap-1.5">
           <span className="text-[0.75rem] font-semibold text-slate-700 dark:text-white/65">
             {inv.tamuHadir}
@@ -235,6 +323,13 @@ const InvitationRow = memo(function InvitationRow({ inv }: { inv: Invitation }) 
       >
         <ActionMenu inv={inv} />
       </div>
+
+      <TamuDetailsModal
+        open={showTamuModal}
+        mahasiswaNama={inv.mahasiswaNama}
+        tamuList={inv.undanganTamu || []}
+        onClose={() => setShowTamuModal(false)}
+      />
     </div>
   );
 });
@@ -252,6 +347,8 @@ const TABLE_HEADERS: { label: string; cls: string }[] = [
   { label: "", cls: "w-28 shrink-0 pr-4" },
 ];
 
+const ITEMS_PER_PAGE = 10;
+
 export function InvitationTable() {
   const {
     invitations,
@@ -261,6 +358,8 @@ export function InvitationTable() {
     filterSesi,
     filterAttendance,
   } = useUndanganStore();
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filtered = useMemo(
     () =>
@@ -291,6 +390,15 @@ export function InvitationTable() {
       }),
     [invitations, searchQuery, filterStatus, filterSesi, filterAttendance],
   );
+
+  // Reset page when filter or search changes data length
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filtered.length]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedData = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const listKey = [searchQuery, filterStatus, filterSesi, filterAttendance].join(
     "|",
@@ -332,7 +440,7 @@ export function InvitationTable() {
     </div>
   );
 
-  const listItems = filtered.map((inv) => <InvitationRow key={inv.id} inv={inv} />);
+  const listItems = paginatedData.map((inv) => <InvitationRow key={inv.id} inv={inv} />);
 
   return (
     <LiquidGlassCard
@@ -343,14 +451,14 @@ export function InvitationTable() {
     >
       <div className="overflow-x-auto">
         <AnimatedList
-          key={listKey}
+          key={`${listKey}|page-${currentPage}`}
           items={listItems}
-          itemKeys={filtered.map((inv) => inv.id)}
+          itemKeys={paginatedData.map((inv) => inv.id)}
           header={tableHeader}
           showGradients
           enableArrowNavigation={false}
           displayScrollbar
-          itemEnterDelay={0.1}
+          itemEnterDelay={0.05}
           inViewAmount={0.35}
           maxHeight="min(72vh, 680px)"
           itemClassName="!m-0 !rounded-none"
@@ -358,14 +466,34 @@ export function InvitationTable() {
         />
       </div>
 
-      <div className="border-t border-white/50 px-4 py-3 dark:border-white/[0.06]">
-        <p className="text-[0.7rem] font-medium text-slate-500 dark:text-white/25">
-          Menampilkan {filtered.length} undangan
-          <span className="text-slate-400 dark:text-white/20">
-            {" "}
-            · scroll untuk melihat semua
-          </span>
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t border-white/50 bg-white/40 px-5 py-4 dark:border-white/[0.06] dark:bg-white/[0.03] gap-4">
+        <div className="text-slate-500 dark:text-white/30 text-[11px] font-semibold">
+          Menampilkan <span className="font-extrabold text-slate-800 dark:text-white">{startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, filtered.length)}</span> dari <span className="font-extrabold text-slate-800 dark:text-white">{filtered.length}</span> undangan
+        </div>
+        
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1 self-end sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 disabled:opacity-40 text-slate-500 dark:text-white/40 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-[11px] font-bold cursor-pointer"
+            >
+              Sebelumnya
+            </button>
+            <span className="px-3 text-[11px] text-slate-600 dark:text-white/50 font-bold">
+              Halaman {currentPage} dari {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 disabled:opacity-40 text-slate-500 dark:text-white/40 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-[11px] font-bold cursor-pointer"
+            >
+              Selanjutnya
+            </button>
+          </div>
+        )}
       </div>
     </LiquidGlassCard>
   );

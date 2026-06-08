@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { WisudawanRow } from "@/services/wisudawan.service";
 import { Upload, Pencil, Trash2, GraduationCap, FileSpreadsheet, UserCheck, Sparkles, ArrowRight } from "lucide-react";
@@ -166,7 +167,19 @@ function EmptyState() {
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
           {WISUDAWAN_STEPS.map((step, i) => (
             <div key={step.label} className="flex items-center gap-3 sm:gap-4">
-              <div className="flex items-center gap-2.5 rounded-xl border border-white/60 bg-white/70 px-3.5 py-2.5 shadow-sm backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.04]">
+              <div
+                onClick={() => {
+                  if (i === 0) {
+                    document.getElementById("template-download-btn")?.click();
+                  } else if (i === 1) {
+                    document.getElementById("import-excel-file-input")?.click();
+                  }
+                }}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-xl border border-white/60 bg-white/70 px-3.5 py-2.5 shadow-sm backdrop-blur-sm dark:border-white/[0.08] dark:bg-white/[0.04]",
+                  i < 2 && "cursor-pointer hover:bg-white/95 dark:hover:bg-white/[0.08] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                )}
+              >
                 <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/15">
                   <step.icon className="size-4 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -333,6 +346,8 @@ interface StudentTableProps {
   onDelete?: (student: WisudawanRow) => void;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export function StudentTable({
   data,
   isLoading,
@@ -341,8 +356,19 @@ export function StudentTable({
   onEdit,
   onDelete,
 }: StudentTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 when filter or search changes the data
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [data.length]);
+
   if (isLoading) return <TableSkeleton />;
   if (data.length === 0 && !isLoading) return <EmptyState />;
+
+  const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedData = data.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const tableHeader = (
     <div
@@ -363,43 +389,57 @@ export function StudentTable({
     </div>
   );
 
-  const listItems = data.map((s) => (
+  const listItems = paginatedData.map((s) => (
     <StudentRow key={s.id} student={s} onEdit={onEdit} onDelete={onDelete} />
   ));
 
   return (
     <LiquidGlassCard noEntrance hover={false} className="overflow-hidden p-0">
-      <AnimatedList
-        key={listKey}
-        items={listItems}
-        itemKeys={data.map((s) => s.id)}
-        header={tableHeader}
-        showGradients
-        enableArrowNavigation={false}
-        displayScrollbar
-        itemEnterDelay={0.1}
-        inViewAmount={0.35}
-        maxHeight="min(72vh, 680px)"
-        itemClassName="!m-0 !rounded-none"
-        className="min-w-0"
-      />
+      <div className="overflow-x-auto">
+        <AnimatedList
+          key={`${listKey}|page-${currentPage}`}
+          items={listItems}
+          itemKeys={paginatedData.map((s) => s.id)}
+          header={tableHeader}
+          showGradients
+          enableArrowNavigation={false}
+          displayScrollbar
+          itemEnterDelay={0.05}
+          inViewAmount={0.35}
+          maxHeight="min(72vh, 680px)"
+          itemClassName="!m-0 !rounded-none"
+          className="min-w-0"
+        />
+      </div>
 
-      <div className="border-t border-white/50 bg-white/40 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
-        <p className="text-[11px] font-medium text-slate-500 dark:text-white/35">
-          Menampilkan{" "}
-          <span className="font-semibold text-slate-700 dark:text-white/55">
-            {data.length}
-          </span>
-          {total > data.length ? (
-            <span> dari {total} wisudawan</span>
-          ) : (
-            <span> wisudawan</span>
-          )}
-          <span className="text-slate-400 dark:text-white/25">
-            {" "}
-            · scroll untuk melihat semua
-          </span>
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t border-white/50 bg-white/40 px-5 py-4 dark:border-white/[0.06] dark:bg-white/[0.03] gap-4">
+        <div className="text-slate-500 dark:text-white/30 text-[11px] font-semibold">
+          Menampilkan <span className="font-extrabold text-slate-800 dark:text-white">{startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, data.length)}</span> dari <span className="font-extrabold text-slate-800 dark:text-white">{data.length}</span> wisudawan
+        </div>
+        
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1 self-end sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 disabled:opacity-40 text-slate-500 dark:text-white/40 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-[11px] font-bold cursor-pointer"
+            >
+              Sebelumnya
+            </button>
+            <span className="px-3 text-[11px] text-slate-600 dark:text-white/50 font-bold">
+              Halaman {currentPage} dari {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 disabled:opacity-40 text-slate-500 dark:text-white/40 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-[11px] font-bold cursor-pointer"
+            >
+              Selanjutnya
+            </button>
+          </div>
+        )}
       </div>
     </LiquidGlassCard>
   );

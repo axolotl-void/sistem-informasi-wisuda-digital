@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect } from "react";
 import { toast } from "sonner";
-import axios from "axios";
+import { api } from "@/lib/axios";
 import { Camera, CameraOff, Loader2, AlertCircle, Scan } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQrScanner } from "@/hooks/use-qr-scanner";
@@ -45,7 +45,7 @@ export function QrScannerView() {
     setStatus("scanning");
     setErrorMessage(null);
     try {
-      const res = await axios.post(API_ROUTES.KEHADIRAN.SCAN, {
+      const res = await api.post(API_ROUTES.KEHADIRAN.SCAN, {
         qrToken: decodedText,
         gate: activeGate || undefined,
       });

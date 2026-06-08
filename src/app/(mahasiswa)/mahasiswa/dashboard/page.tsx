@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import { api } from "@/lib/axios";
 import {
   GraduationCap, QrCode, Calendar, MapPin,
   Users, CheckCircle2, Clock, ArrowRight,
@@ -54,8 +54,8 @@ export default function MahasiswaDashboardPage() {
     const fetch = async () => {
       try {
         const [mRes, uRes] = await Promise.all([
-          axios.get(`${API_ROUTES.MAHASISWA.BASE}/${user.id}`),
-          axios.get(API_ROUTES.UNDANGAN.BASE, { params: { mahasiswaId: user.id } }),
+          api.get(`${API_ROUTES.MAHASISWA.BASE}/${user.id}`),
+          api.get(API_ROUTES.UNDANGAN.BASE, { params: { mahasiswaId: user.id } }),
         ]);
         setMahasiswa(mRes.data.data);
         setUndangan(uRes.data.data?.data?.[0] ?? null);

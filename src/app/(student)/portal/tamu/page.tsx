@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Clock, CheckCircle2, XCircle,
   AlertTriangle, Loader2, Send, X,
-  Ticket, RefreshCw,
+  Ticket, RefreshCw, Plus, Trash2, UserPlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PortalPageHeader } from "../_components/portal-page-header";
@@ -14,6 +14,18 @@ import { fetchWithAuth, getAuthHeaders } from "@/lib/client-auth";
 // --- Types --------------------------------------------------------------------
 
 type StatusPengajuan = "NONE" | "PENDING" | "APPROVED" | "REJECTED";
+
+interface TamuItem {
+  id?: string;
+  kode?: string;
+  namaTamu: string;
+  hubungan: string;
+  qrToken?: string | null;
+  qrImageUrl?: string | null;
+  statusUndangan?: string;
+  statusHadir?: boolean;
+  waktuScan?: string | null;
+}
 
 interface TamuData {
   requestedTamu: number;
@@ -25,7 +37,11 @@ interface TamuData {
     statusUndangan: string;
     kuotaTamu: number;
   } | null;
+  undanganTamu: TamuItem[];
 }
+
+const HUBUNGAN_OPTIONS = ["Orang Tua", "Saudara", "Wali", "Pasangan", "Lainnya"];
+const MAX_TAMU = 3;
 
 // --- Status UI configs --------------------------------------------------------
 
@@ -44,7 +60,7 @@ const STATUS_CFG = {
   APPROVED: {
     icon: CheckCircle2,
     title: "Pengajuan Disetujui!",
-    desc: "Admin telah menyetujui pengajuan tamu Anda. Undangan Anda sudah aktif.",
+    desc: "Admin telah menyetujui pengajuan tamu Anda. QR tamu sudah bisa diakses di menu E-Ticket.",
     color: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-500/[0.05] dark:bg-emerald-500/[0.07]",
     border: "border-emerald-500/20",
@@ -63,12 +79,11 @@ const STATUS_CFG = {
   },
 };
 
-// --- Components ---------------------------------------------------------------
+// --- Status Card Component ----------------------------------------------------
 
-function StatusCard({ status, requestedTamu, undangan }: {
+function StatusCard({ status, tamuList }: {
   status: StatusPengajuan;
-  requestedTamu: number;
-  undangan: TamuData["undangan"];
+  tamuList: TamuItem[];
 }) {
   const cfg = STATUS_CFG[status];
   if (!cfg) return null;
@@ -93,27 +108,111 @@ function StatusCard({ status, requestedTamu, undangan }: {
         </div>
       </div>
 
-      {/* Detail */}
-      {requestedTamu > 0 && (
-        <div className="rounded-xl border border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.03] px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="size-3.5 text-slate-400 dark:text-white/25" />
-            <span className="text-xs text-slate-500 dark:text-white/40">Jumlah tamu diajukan</span>
-          </div>
-          <span className={`text-sm font-bold ${cfg.color}`}>{requestedTamu} orang</span>
+      {/* Daftar tamu yang diajukan */}
+      {tamuList.length > 0 && (
+        <div className="space-y-1.5">
+          {tamuList.map((tamu, i) => (
+            <div
+              key={tamu.id || i}
+              className="rounded-xl border border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.03] px-4 py-2.5 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-7 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/[0.06] text-[0.65rem] font-bold text-slate-500 dark:text-white/30">
+                  {i + 1}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-700 dark:text-white/70">{tamu.namaTamu}</p>
+                  <p className="text-[0.6rem] text-slate-400 dark:text-white/25">{tamu.hubungan}</p>
+                </div>
+              </div>
+              {status === "APPROVED" && (
+                <div className="flex items-center gap-1.5">
+                  <span className={`size-1.5 rounded-full ${tamu.statusHadir ? "bg-emerald-500" : "bg-blue-500 animate-pulse"}`} />
+                  <span className={`text-[0.6rem] font-semibold ${tamu.statusHadir ? "text-emerald-600 dark:text-emerald-400" : "text-blue-600 dark:text-blue-400"}`}>
+                    {tamu.statusHadir ? "Sudah Hadir" : "QR Aktif"}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Undangan info jika sudah approved */}
-      {status === "APPROVED" && undangan && (
-        <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05] px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Ticket className="size-3.5 text-emerald-500/70 dark:text-emerald-400/60" />
-            <span className="text-xs text-slate-500 dark:text-white/40">Kode Undangan</span>
-          </div>
-          <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">{undangan.kode}</span>
+      {/* Redirect ke E-Ticket jika approved */}
+      {status === "APPROVED" && (
+        <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05] px-4 py-3 flex items-center gap-2">
+          <Ticket className="size-3.5 text-emerald-500/70 dark:text-emerald-400/60" />
+          <span className="text-xs text-slate-500 dark:text-white/40">
+            Lihat QR tamu di menu <strong className="text-emerald-600 dark:text-emerald-400">E-Ticket</strong>
+          </span>
         </div>
       )}
+    </motion.div>
+  );
+}
+
+// --- Form Tamu Entry ----------------------------------------------------------
+
+interface TamuFormEntry {
+  nama: string;
+  hubungan: string;
+}
+
+function TamuFormRow({ entry, index, onChange, onRemove, canRemove }: {
+  entry: TamuFormEntry;
+  index: number;
+  onChange: (index: number, field: keyof TamuFormEntry, value: string) => void;
+  onRemove: (index: number) => void;
+  canRemove: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.2 }}
+      className="rounded-xl border border-slate-100 dark:border-white/[0.06] bg-slate-50/30 dark:bg-white/[0.02] p-3.5 space-y-2.5"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex size-6 items-center justify-center rounded-lg bg-indigo-500/10 dark:bg-indigo-500/15 text-[0.6rem] font-black text-indigo-600 dark:text-indigo-400">
+            {index + 1}
+          </div>
+          <span className="text-[0.65rem] font-bold uppercase tracking-wider text-slate-400 dark:text-white/25">
+            Tamu {index + 1}
+          </span>
+        </div>
+        {canRemove && (
+          <button
+            type="button"
+            onClick={() => onRemove(index)}
+            className="flex size-7 items-center justify-center rounded-lg text-red-400 dark:text-red-400/60 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors touch-manipulation"
+            title="Hapus tamu"
+          >
+            <Trash2 className="size-3.5" />
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <input
+          type="text"
+          placeholder="Nama lengkap tamu..."
+          value={entry.nama}
+          onChange={(e) => onChange(index, "nama", e.target.value)}
+          className="w-full h-10 rounded-xl border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.04] px-3 text-sm text-slate-800 dark:text-white/80 placeholder:text-slate-300 dark:placeholder:text-white/15 outline-none focus:border-indigo-500/40 dark:focus:border-indigo-500/40 transition-colors"
+          maxLength={100}
+        />
+        <select
+          value={entry.hubungan}
+          onChange={(e) => onChange(index, "hubungan", e.target.value)}
+          className="w-full h-10 rounded-xl border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-white/[0.04] px-3 text-sm text-slate-700 dark:text-white/70 outline-none focus:border-indigo-500/40 dark:focus:border-indigo-500/40 transition-colors appearance-none cursor-pointer"
+        >
+          {HUBUNGAN_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      </div>
     </motion.div>
   );
 }
@@ -125,7 +224,9 @@ export default function TamuPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
-  const [jumlahTamu, setJumlahTamu] = useState(2);
+  const [formEntries, setFormEntries] = useState<TamuFormEntry[]>([
+    { nama: "", hubungan: "Orang Tua" },
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -138,8 +239,14 @@ export default function TamuPage() {
       const result = await res.json();
       if (result.data) {
         setTamuData(result.data);
-        if (result.data.requestedTamu > 0) {
-          setJumlahTamu(result.data.requestedTamu);
+        // Isi form jika ada data tamu existing (untuk re-submit saat REJECTED)
+        if (result.data.undanganTamu?.length > 0 && result.data.statusPengajuan !== "APPROVED") {
+          setFormEntries(
+            result.data.undanganTamu.map((t: TamuItem) => ({
+              nama: t.namaTamu,
+              hubungan: t.hubungan || "Lainnya",
+            }))
+          );
         }
       }
     } catch {
@@ -149,18 +256,44 @@ export default function TamuPage() {
     }
   }
 
+  function handleEntryChange(index: number, field: keyof TamuFormEntry, value: string) {
+    setFormEntries((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  }
+
+  function handleAddEntry() {
+    if (formEntries.length >= MAX_TAMU) return;
+    setFormEntries((prev) => [...prev, { nama: "", hubungan: "Orang Tua" }]);
+  }
+
+  function handleRemoveEntry(index: number) {
+    if (formEntries.length <= 1) return;
+    setFormEntries((prev) => prev.filter((_, i) => i !== index));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (jumlahTamu < 1 || jumlahTamu > 10) {
-      toast.error("Jumlah tamu harus antara 1–10 orang");
+    // Validate
+    const emptyNames = formEntries.filter((e) => e.nama.trim().length < 2);
+    if (emptyNames.length > 0) {
+      toast.error("Setiap nama tamu harus diisi minimal 2 karakter");
       return;
     }
+
     setIsSubmitting(true);
     try {
       const res = await fetchWithAuth("/api/portal/tamu", {
         method: "POST",
         headers: getAuthHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ jumlahTamu }),
+        body: JSON.stringify({
+          tamu: formEntries.map((e) => ({
+            nama: e.nama.trim(),
+            hubungan: e.hubungan,
+          })),
+        }),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Gagal mengirim pengajuan");
@@ -180,6 +313,7 @@ export default function TamuPage() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Gagal membatalkan");
       toast.success("Pengajuan berhasil dibatalkan");
+      setFormEntries([{ nama: "", hubungan: "Orang Tua" }]);
       await fetchData();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal membatalkan pengajuan");
@@ -229,8 +363,7 @@ export default function TamuPage() {
           <StatusCard
             key={status}
             status={status}
-            requestedTamu={tamuData?.requestedTamu ?? 0}
-            undangan={tamuData?.undangan ?? null}
+            tamuList={tamuData?.undanganTamu ?? []}
           />
         )}
       </AnimatePresence>
@@ -244,54 +377,44 @@ export default function TamuPage() {
           className="rounded-2xl border border-slate-200 bg-white dark:border-white/[0.07] dark:bg-white/[0.03] p-5 space-y-5 shadow-md dark:shadow-xl dark:shadow-black/20"
         >
           <div className="flex items-center gap-2">
-            <Users className="size-3.5 text-indigo-500/70 dark:text-indigo-400/60" />
+            <UserPlus className="size-3.5 text-indigo-500/70 dark:text-indigo-400/60" />
             <p className="text-[0.7rem] font-black uppercase tracking-widest text-slate-400 dark:text-white/25">
-              {isPending ? "Pengajuan Terkirim" : "Form Pengajuan Tamu"}
+              {isPending ? "Daftar Tamu Terkirim" : "Data Tamu Undangan"}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Input jumlah */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-500 dark:text-white/40">
-                Berapa jumlah tamu/keluarga yang ingin diundang?
-              </label>
-              <div className="flex items-center gap-3">
-                {/* Decrement */}
-                <button
-                  type="button"
-                  onClick={() => setJumlahTamu((v) => Math.max(1, v - 1))}
-                  disabled={isFormDisabled || jumlahTamu <= 1}
-                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.08] dark:bg-white/[0.04] text-xl font-bold text-slate-500 dark:text-white/50 transition-all touch-manipulation hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:text-slate-700 dark:hover:text-white/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
-                >
-                  −
-                </button>
-
-                {/* Number display */}
-                <div className={`flex-1 h-14 rounded-2xl border flex items-center justify-center gap-2 ${
-                  isFormDisabled
-                    ? "border-slate-150 bg-slate-50/50 dark:border-white/[0.05] dark:bg-white/[0.02]"
-                    : "border-indigo-500/20 bg-indigo-50/30 dark:border-indigo-500/30 dark:bg-indigo-500/[0.06]"
-                }`}>
-                  <Users className={`size-4 ${isFormDisabled ? "text-slate-300 dark:text-white/20" : "text-indigo-500/70 dark:text-indigo-400/60"}`} />
-                  <span className={`text-2xl font-black tabular-nums ${isFormDisabled ? "text-slate-400 dark:text-white/30" : "text-slate-800 dark:text-white/90"}`}>
-                    {jumlahTamu}
-                  </span>
-                  <span className={`text-xs ${isFormDisabled ? "text-slate-400 dark:text-white/20" : "text-slate-500 dark:text-white/40"}`}>orang</span>
-                </div>
-
-                {/* Increment */}
-                <button
-                  type="button"
-                  onClick={() => setJumlahTamu((v) => Math.min(10, v + 1))}
-                  disabled={isFormDisabled || jumlahTamu >= 10}
-                  className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.08] dark:bg-white/[0.04] text-xl font-bold text-slate-500 dark:text-white/50 transition-all touch-manipulation hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:text-slate-700 dark:hover:text-white/80 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
-                >
-                  +
-                </button>
-              </div>
-              <p className="text-[0.65rem] text-slate-400 dark:text-white/20">Maksimal 10 orang tamu</p>
+            {/* Form entries */}
+            <div className="space-y-3">
+              <AnimatePresence mode="popLayout">
+                {formEntries.map((entry, index) => (
+                  <TamuFormRow
+                    key={index}
+                    entry={entry}
+                    index={index}
+                    onChange={handleEntryChange}
+                    onRemove={handleRemoveEntry}
+                    canRemove={!isFormDisabled && formEntries.length > 1}
+                  />
+                ))}
+              </AnimatePresence>
             </div>
+
+            {/* Add button */}
+            {!isFormDisabled && formEntries.length < MAX_TAMU && (
+              <button
+                type="button"
+                onClick={handleAddEntry}
+                className="flex w-full items-center justify-center gap-2 h-11 rounded-xl border-2 border-dashed border-slate-200 dark:border-white/[0.08] text-xs font-semibold text-slate-400 dark:text-white/25 hover:border-indigo-500/30 hover:text-indigo-500 dark:hover:border-indigo-500/30 dark:hover:text-indigo-400 transition-colors touch-manipulation"
+              >
+                <Plus className="size-3.5" />
+                Tambah Tamu ({formEntries.length}/{MAX_TAMU})
+              </button>
+            )}
+
+            <p className="text-[0.65rem] text-slate-400 dark:text-white/20">
+              Maksimal {MAX_TAMU} orang tamu per wisudawan
+            </p>
 
             {/* Sesi info */}
             {tamuData?.sesiWisuda && (
@@ -344,7 +467,7 @@ export default function TamuPage() {
       >
         <AlertTriangle className="size-4 text-slate-400 dark:text-white/15 shrink-0 mt-0.5" />
         <p className="text-[0.68rem] text-slate-500 dark:text-white/22 leading-relaxed">
-          Pengajuan tamu akan ditinjau oleh admin. Setelah disetujui, undangan digital Anda akan otomatis digenerate dengan kuota tamu sesuai pengajuan.
+          Pengajuan tamu akan ditinjau oleh admin. Setelah disetujui, QR undangan untuk masing-masing tamu akan otomatis digenerate dan bisa diakses di menu E-Ticket.
         </p>
       </motion.div>
     </div>

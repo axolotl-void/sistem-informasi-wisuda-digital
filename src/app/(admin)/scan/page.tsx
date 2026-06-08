@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect } from "react";
 import { toast } from "sonner";
-import axios from "axios";
+import { api } from "@/lib/axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Wifi, WifiOff, ScanLine, Users, Sparkles, BookOpen,
@@ -50,7 +50,7 @@ export default function ScanPage() {
     setLocalLoading(true);
     setStatus("scanning");
     try {
-      const res = await axios.post(API_ROUTES.KEHADIRAN.SCAN, { qrToken: decodedText });
+      const res = await api.post(API_ROUTES.KEHADIRAN.SCAN, { qrToken: decodedText });
       const data = res.data.data;
       setScanResult(data);
       playBeep(data.success);

@@ -48,7 +48,7 @@ const cards: CardConfig[] = [
     iconBg:
       "bg-gradient-to-br from-orange-400/35 to-orange-600/10 border border-orange-400/40 dark:from-orange-500/20 dark:to-orange-600/5 dark:border-orange-500/25",
     activeClass: "border-orange-500/80 dark:border-orange-400/80 shadow-[0_0_15px_rgba(249,115,22,0.15)] bg-orange-500/[0.04] dark:bg-orange-400/[0.04]",
-    compute: (d) => d.filter((s) => s.status === "AKTIF" && (!s.email || s.email.endsWith("@temp-wisuda.id")) && !s.hasUndangan).length,
+    compute: (d) => d.filter((s) => !s.email || s.email.endsWith("@temp-wisuda.id")).length,
   },
   {
     label: "Menunggu Verifikasi",
@@ -68,7 +68,7 @@ const cards: CardConfig[] = [
     iconBg:
       "bg-gradient-to-br from-sky-400/35 to-sky-600/10 border border-sky-400/40 dark:from-sky-500/20 dark:to-sky-600/5 dark:border-sky-500/25",
     activeClass: "border-sky-500/80 dark:border-sky-400/80 shadow-[0_0_15px_rgba(14,165,233,0.15)] bg-sky-500/[0.04] dark:bg-sky-400/[0.04]",
-    compute: (d) => d.filter((s) => s.status === "LULUS").length,
+    compute: (d) => d.filter((s) => s.status === "LULUS" && s.email && !s.email.endsWith("@temp-wisuda.id")).length,
   },
   {
     label: "Sudah Hadir",

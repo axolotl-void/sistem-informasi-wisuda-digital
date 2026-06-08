@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import {
   Ticket, Download, Share2, Copy, Check,
   MapPin, Clock, Users, Loader2,
-  CalendarDays, DoorOpen, Info, QrCode,
+  CalendarDays, DoorOpen, Info, QrCode, UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
@@ -34,6 +34,18 @@ interface MahasiswaData {
   sesiWisuda: string | null;
   gate: string | null;
   undangan: UndanganData | null;
+}
+
+interface TamuQr {
+  id: string;
+  kode: string;
+  namaTamu: string;
+  hubungan: string | null;
+  qrToken: string | null;
+  qrImageUrl: string | null;
+  statusUndangan: string;
+  statusHadir: boolean;
+  waktuScan: string | null;
 }
 
 // --- Helpers ------------------------------------------------------------------
@@ -221,6 +233,50 @@ function TicketCard({ mahasiswa, undangan, qrDataUrl }: {
   );
 }
 
+// --- Guest Ticket Card --------------------------------------------------------
+
+function GuestTicketCard({ tamu, qrUrl }: { tamu: TamuQr; qrUrl: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-gradient-to-b dark:from-[#0d1829]/80 dark:to-[#080f1e]/80 shadow-md dark:shadow-xl">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
+
+      <div className="px-4 py-4 space-y-3">
+        {/* Guest info */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-violet-500/10 dark:bg-violet-500/15">
+              <UserCheck className="size-4 text-violet-500 dark:text-violet-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-800 dark:text-white/85">{tamu.namaTamu}</p>
+              <p className="text-[0.6rem] text-slate-400 dark:text-white/25">{tamu.hubungan || "Tamu"} · {tamu.kode}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className={`size-1.5 rounded-full ${tamu.statusHadir ? "bg-emerald-500" : "bg-violet-500 animate-pulse"}`} />
+            <span className={`text-[0.6rem] font-bold ${tamu.statusHadir ? "text-emerald-600 dark:text-emerald-400" : "text-violet-600 dark:text-violet-400"}`}>
+              {tamu.statusHadir ? "Sudah Hadir" : "QR Aktif"}
+            </span>
+          </div>
+        </div>
+
+        {/* Mini QR */}
+        {qrUrl && (
+          <div className="flex justify-center">
+            <div className="rounded-xl bg-white p-2.5 border border-slate-100 dark:border-transparent shadow-md">
+              <img src={qrUrl} alt={`QR ${tamu.namaTamu}`} width={140} height={140} className="block" />
+            </div>
+          </div>
+        )}
+
+        <p className="text-center text-[0.6rem] text-slate-400 dark:text-white/20">
+          Tunjukkan QR ini kepada petugas di pintu masuk
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // --- Empty State --------------------------------------------------------------
 
 function NoTicket() {
@@ -249,14 +305,16 @@ export default function TiketPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [tamuList, setTamuList] = useState<TamuQr[]>([]);
+  const [tamuQrUrls, setTamuQrUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    // Fetch mahasiswa data + undangan wisudawan
     fetchWithAuth("/api/portal/me")
       .then((r) => r.json())
       .then((result) => {
         if (result.data) {
           setMahasiswa(result.data);
-          // Generate QR dari token REAL di database
           const qrToken = result.data.undangan?.qrToken;
           if (qrToken) {
             QRCode.toDataURL(qrToken, {
@@ -272,6 +330,32 @@ export default function TiketPage() {
       })
       .catch(() => toast.error("Gagal memuat E-Ticket"))
       .finally(() => setIsLoading(false));
+
+    // Fetch tamu QR data
+    fetchWithAuth("/api/portal/tamu")
+      .then((r) => r.json())
+      .then(async (result) => {
+        if (result.data?.undanganTamu) {
+          const tamu: TamuQr[] = result.data.undanganTamu;
+          setTamuList(tamu);
+          // Generate QR URLs for each guest
+          const urls: Record<string, string> = {};
+          for (const t of tamu) {
+            if (t.qrToken) {
+              try {
+                urls[t.id] = await QRCode.toDataURL(t.qrToken, {
+                  width: 200,
+                  margin: 2,
+                  errorCorrectionLevel: "H",
+                  color: { dark: "#1e293b", light: "#ffffff" },
+                });
+              } catch { /* ignore */ }
+            }
+          }
+          setTamuQrUrls(urls);
+        }
+      })
+      .catch(() => { /* silent — tamu is optional */ });
   }, []);
 
   const undangan = mahasiswa?.undangan ?? null;
@@ -426,10 +510,38 @@ export default function TiketPage() {
         </motion.div>
       )}
 
+      {/* Guest QR Section */}
+      {tamuList.length > 0 && tamuList.some((t) => t.qrToken) && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-3"
+        >
+          <div className="flex items-center gap-2">
+            <Users className="size-4 text-violet-500/70 dark:text-violet-400/60" />
+            <p className="text-[0.7rem] font-black uppercase tracking-widest text-slate-400 dark:text-white/25">
+              QR Undangan Tamu ({tamuList.filter(t => t.qrToken).length})
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {tamuList
+              .filter((t) => t.qrToken)
+              .map((tamu) => (
+                <GuestTicketCard
+                  key={tamu.id}
+                  tamu={tamu}
+                  qrUrl={tamuQrUrls[tamu.id] || ""}
+                />
+              ))}
+          </div>
+        </motion.div>
+      )}
+
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.25 }}
         className="text-center text-[0.68rem] text-slate-400 dark:text-white/20 leading-relaxed"
       >
         Simpan atau screenshot E-Ticket ini. Tunjukkan QR Code kepada petugas saat memasuki venue wisuda.
